@@ -14,169 +14,13 @@
 //#include <filesystem>
 
 namespace co{
-	
-	/*M: Computation mode (local, cluster etc.)
-	E: EvaluationClass (e.g. BiogasEvaluation)
-	T: Float type (EFLoat64 etc)
-	Note: I think E and T could be coupled as E contained information about T
-	*/
-	template<ConfigComputation M, class E, class T>
-	class ComputationMode{
-		public:
-		const ConfigComputation config_computation;
-		const ConfigOutput config_output; //determines, if f will be invoked through cmd or function pointers directly
-		
-		std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& input, std::string message="");
-	};
-	
-	
-	template<class E, class T>
-	class ComputationMode<ConfigComputation::Local,E,T>{
-		
-	private: 
-	const ConfigComputation config_computation;
-	const ConfigOutput config_output; //determines, if f will be invoked through cmd or function pointers directly
-	const int thread_count;
-	const std::string table_directory;
-	E* evaluation_class; //Pointer back to the evaluationclass (e.g. BiogasEvaluation)
-	size_t iter=0; //current iteration of the evaluations
-	std::string evaluation_path; //path where the evaluations will be stored (if evaluations are written to file)
-	
-
-	public:
-	
-	ComputationMode(E* e, ConfigOutput _config_output, int _thread_count, std::string _table_directory):evaluation_class(e),config_computation(ConfigComputation::Local),config_output(_config_output),table_directory(_table_directory), thread_count(_thread_count){
-		std::cout<<"Pointer address inside at creation:"<<evaluation_class<<"\n";
-		if (thread_count<=0){
-			std::cerr<<"ComputationMode error: Threadcount less than zero"; //TODO Assert statement
-			std::cin.get();
-		}
-		
-		//Create timestring consisting of the current time
-
-		auto t = std::time(nullptr);
-		auto tm = *std::localtime(&t);
-
-		std::ostringstream oss;
-		oss << std::put_time(&tm, "%d-%m-%Y_%Hh-%Mm-%Ss");
-
-		//initialize evaluation path
-		evaluation_path=table_directory+"/evaluations/"+oss.str();
-		
-	}
-	
-	std::string get_current_evaluation_path() const{
-		return evaluation_path;
-	}
-	
-	size_t get_current_iteration() const{
-		return iter;
-	}
-	
-	//Evaluate the problem with the given input
-	std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& input,std::string message=""){
-		std::vector<std::vector<T>> res;
-		
-		switch(config_computation){
 			
-			/*Choosing this options means:
-			*Parameters are written to file
-			*Evaluation will take place via an evaluate.lua file.*/
-
-			case ConfigOutput::File:
-			{
-				std::cout<<"Bin in  eval::ConfigComputation File!\n";
-				res= schedule_and_eval_file(input,message);
-				break;
-			}
-			
-		}
-		
-		std::cout<<"done evaluation\n";
-		return res;
-	}
-	
-	/*Schedulees processes and evaluates them according to OS process methods
-	Evaluations are stored in the same order as the input files, i.e. input[i] corresponds to eval[i]
-	*/
-	std::vector<std::vector<T>> schedule_and_eval_file(const std::vector<EVarManager<T>>& input,std::string& message){
-			
-				
-
-
-		
-		//Scheduling the processes
-		size_t n=input.size(); //number of needed evaluations
-		auto start=input.begin();
-		auto end=input.end();
-		size_t id=0;
-		
-	//	OSEvaluator os(thread_count,evaluation_path);//Create Processes
-		std::vector<std::thread> t(n);//Create the threads
-		std::vector<size_t> evals_per_thread(n);
-		std::string folder_path=evaluation_path+"/iteration_"+std::to_string(iter)+"/";
-		std::string shell_command="ugshell -ex "+table_directory+"/evaluate.lua";
-		std::cout<<"Shell command: "<<shell_command<<"\n";
-		if (n<thread_count){
-			for (auto& x: input){
-				t[id]=std::thread(evaluate_os<T>,folder_path,shell_command, start+id,1,id,iter,message);
-				evals_per_thread[id]=1;
-				//os.eval<T>(folder_path+std::to_string(id),start+id,1,id,iter);
-				id++;
-			}
-		}
-		else{
-			size_t m=n/thread_count;
-			size_t rem=n%thread_count;
-			size_t id=0;
-			
-			for (size_t j=0;j<thread_count;j++){
-				//os.eval<T>(folder_path+std::to_string(id),start+j*m,m,id,iter,message);
-				id++;
-			}
-			
-			if (rem != 0){
-				//os.eval<T>(folder_path+std::to_string(id),end-rem,rem,id,iter,message);
-			}
-			
-		}
-		
-		//Wait for all threads to finish
-		//std::cout<<"Waiting on join\n";
-		for (auto& x:t){
-			x.join();
-		}
-		std::cout<<"Wir fangen an\n";
-		//Parse results;
-		std::vector<std::vector<T>> result(n);
-		std::vector<int> rows(n);
-		
-		//std::cout<<"Pointer address inside:"<<evaluation_class<<"\n";
-		//std::cout<<"Size targettimes inside:"<<(*evaluation_class).target_times.size()<<"\n";
-
-		int ids=0;
-		for (int i=0;i<id;i++){
-				for (int j=0;j<evals_per_thread[i];j++){
-					std::string data_path=folder_path+"id_"+std::to_string(i)+"/eval_"+std::to_string(j)+"/";
-					(*evaluation_class).parse(data_path,result[ids]);	
-					ids++;
-				}
-		}	
-		
-		iter++;
-		return result;
-		
-	}
-	
-	
-	
-	};
-	
-		
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #include <iomanip>
 #include <ctime>//optional. Could be removed if we change the way time  values are attained
 #include <sstream>//
+
+extern bool spawn_process_and_wait_to_join(std::string _command, std::string _working_directory); //forward declare function
 
 /*Creates subdirectories. Horrible and inefficient function, should be replaced by filesystem::create_directories in C++17*/
 void create_directories(const std::string& s, int start){
@@ -188,7 +32,6 @@ void create_directories(const std::string& s, int start){
 		}
 	}
 }
-
 
 template<class T>
 void evaluate_os(const std::string& folder_path, const std::string& command, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, size_t id, size_t iter, std::string& message){
@@ -325,6 +168,167 @@ class OSEvaluator{
 
 
 #endif	
+	
+	template<class T>
+void evaluate_os2(const std::string& folder_path,const std::string& command,typename std::vector<EVarManager<T>>::const_iterator start,size_t n,size_t id,size_t iter, std::string& message);
+	// size_t id, size_t iter, std::string& message
+	/*M: Computation mode (local, cluster etc.)
+	E: EvaluationClass (e.g. BiogasEvaluation)
+	T: Float type (EFLoat64 etc)
+	Note: I think E and T could be coupled as E contained information about T
+	*/
+	template<ConfigComputation M, class E, class T>
+	class ComputationMode{
+		public:
+		const ConfigComputation config_computation;
+		const ConfigOutput config_output; //determines, if f will be invoked through cmd or function pointers directly
+		
+		std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& input, std::string message="");
+	};
+	
+	
+	template<class E, class T>
+	class ComputationMode<ConfigComputation::Local,E,T>{
+		
+	private: 
+	const ConfigComputation config_computation;
+	const ConfigOutput config_output; //determines, if f will be invoked through cmd or function pointers directly
+	const int thread_count;
+	const std::string table_directory;
+	E* evaluation_class; //Pointer back to the evaluationclass (e.g. BiogasEvaluation)
+	size_t iter=0; //current iteration of the evaluations
+	std::string evaluation_path; //path where the evaluations will be stored (if evaluations are written to file)
+	
 
+	public:
+	
+	ComputationMode(E* e, ConfigOutput _config_output, int _thread_count, std::string _table_directory):evaluation_class(e),config_computation(ConfigComputation::Local),config_output(_config_output),table_directory(_table_directory), thread_count(_thread_count){
+		std::cout<<"Pointer address inside at creation:"<<evaluation_class<<"\n";
+		if (thread_count<=0){
+			std::cerr<<"ComputationMode error: Threadcount less than zero"; //TODO Assert statement
+			std::cin.get();
+		}
+		
+		//Create timestring consisting of the current time
+
+		auto t = std::time(nullptr);
+		auto tm = *std::localtime(&t);
+
+		std::ostringstream oss;
+		oss << std::put_time(&tm, "%d-%m-%Y_%Hh-%Mm-%Ss");
+
+		//initialize evaluation path
+		evaluation_path=table_directory+"/evaluations/"+oss.str();
+		
+	}
+	
+	std::string get_current_evaluation_path() const{
+		return evaluation_path;
+	}
+	
+	size_t get_current_iteration() const{
+		return iter;
+	}
+	
+	//Evaluate the problem with the given input
+	std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& input,std::string message=""){
+		std::vector<std::vector<T>> res;
+		
+		switch(config_output){
+			
+			/*Choosing this options means:
+			*Parameters are written to file
+			*Evaluation will take place via an evaluate.lua file.*/
+
+			case ConfigOutput::File:
+			{
+				std::cout<<"Bin in  eval::ConfigComputation File!\n";
+				res= schedule_and_eval_file(input,message);
+				break;
+			}
+			
+		}
+		
+		std::cout<<"done evaluation\n";
+		return res;
+	}
+	
+	
+	
+	/*Schedulees processes and evaluates them according to OS process methods
+	Evaluations are stored in the same order as the input files, i.e. input[i] corresponds to eval[i]
+	*/
+	std::vector<std::vector<T>> schedule_and_eval_file(const std::vector<EVarManager<T>>& input,std::string& message){
+			
+				
+
+
+		
+		//Scheduling the processes
+		size_t n=input.size(); //number of needed evaluations
+		auto start=input.begin();
+		auto end=input.end();
+		size_t id=0;
+		
+	//	OSEvaluator os(thread_count,evaluation_path);//Create Processes
+		std::vector<std::thread> t(n);//Create the threads
+		std::vector<size_t> evals_per_thread(n);
+		std::string folder_path=evaluation_path+"/iteration_"+std::to_string(iter)+"/";
+		std::string shell_command="ugshell -ex "+table_directory+"/evaluate.lua";
+		std::cout<<"Shell command: "<<shell_command<<"\n";
+		if (n<thread_count){
+			for (auto& x: input){
+				t[id]=std::thread(evaluate_os<T>,folder_path,shell_command, start+id,1,id,iter,std::ref(message));
+				evals_per_thread[id]=1;
+				//os.eval<T>(folder_path+std::to_string(id),start+id,1,id,iter);
+				id++;
+			}
+		}
+		else{
+			size_t m=n/thread_count;
+			size_t rem=n%thread_count;
+			size_t id=0;
+			
+			for (size_t j=0;j<thread_count;j++){
+				//os.eval<T>(folder_path+std::to_string(id),start+j*m,m,id,iter,message);
+				id++;
+			}
+			
+			if (rem != 0){
+				//os.eval<T>(folder_path+std::to_string(id),end-rem,rem,id,iter,message);
+			}
+			
+		}
+		
+		//Wait for all threads to finish
+		//std::cout<<"Waiting on join\n";
+		for (auto& x:t){
+			x.join();
+		}
+		std::cout<<"Wir fangen an\n";
+		//Parse results;
+		std::vector<std::vector<T>> result(n);
+		std::vector<int> rows(n);
+		
+		//std::cout<<"Pointer address inside:"<<evaluation_class<<"\n";
+		//std::cout<<"Size targettimes inside:"<<(*evaluation_class).target_times.size()<<"\n";
+
+		int ids=0;
+		for (int i=0;i<id;i++){
+				for (int j=0;j<evals_per_thread[i];j++){
+					std::string data_path=folder_path+"id_"+std::to_string(i)+"/eval_"+std::to_string(j)+"/";
+					(*evaluation_class).parse(data_path,result[ids]);	
+					ids++;
+				}
+		}	
+		
+		iter++;
+		return result;
+		
+	}
+	
+	
+	
+	};
 	
 }

@@ -1,7 +1,7 @@
 #include "../core/options.h"
 #include "../core/parameters.h"
 #include <thread>
-#include "constrained_optimization.h"
+#include "../core/constrained_optimization.h"
 #include "../core/transformation.h"
 #include "../core/derivative.h"
 #include "loss_functions.h"
@@ -83,7 +83,7 @@ std::mutex g_display_mutex;
 				std::vector<T> r_n;
 
 				Derivative<ConfigDerivatives::FiniteDifferences,T> deriv(ls::err1); //change the finite differences into something agnostic
-				std::vector<T> J=deriv.get_jacobian<E>(parameters, target_times,target_data,r_n,evaluator);
+				std::vector<T> J=deriv.get_jacobian(parameters, target_times,target_data,r_n,evaluator);
 
 				evaluator.send_matrix(J,j_n,j_m, "jacobi_matrix"); //print Jacobi matrix (likely to file)
 				

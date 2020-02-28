@@ -2,12 +2,12 @@
 #include "evaluation.h"
 #include "../core/options.h"
 #include "../core/efloat.h"
-#include "parse.h"
 #include <fstream>
 #include <string>
 #include <sstream>
+#include "../core/parse.h"
 #include "../core/computation_modes.h"
-#include "filewriter.h"
+#include "../core/filewriter.h"
 
 //#include <filesystem>
 
