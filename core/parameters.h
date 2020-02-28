@@ -3,8 +3,8 @@
 #include <limits>
 #include <vector>
 #include <string>
-
-
+#include <sstream>
+#include <cmath>
 #include "EFloat.h"
 
 namespace co{
@@ -100,6 +100,8 @@ namespace co{
 			
 			
 			std::string to_lua_string() const{
+				std::ostringstream res;
+				/*
 				std::string res="EVar64(EFloat64(";
 				res.append(std::to_string(val.get_v()));
 				res.append("), EFloat64(");
@@ -107,7 +109,15 @@ namespace co{
 				res.append("),EFloat64(");
 				res.append(std::to_string(max.get_v()));
 				res.append("))");
-				return res;			
+				*/
+				res<<"EVar64(EFloat64(";
+				res<<val.get_v();
+				res<<"), EFloat64(";
+				res<<min.get_v();
+				res<<"),EFloat64(";
+				res<<max.get_v();
+				res<<"))";
+				return res.str();			
 			}
 			
 			double upper_bound() const{

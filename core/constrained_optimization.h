@@ -71,6 +71,6 @@ namespace co{
 
 	
 	void testFunction(){
-		UG_LOG("testFunction executed.\n");
+		//UG_LOG("testFunction executed.\n");
 	}
 }

@@ -52,7 +52,7 @@ std::mutex g_display_mutex;
 					sum+=x.abs();
 				}
 				std::cout<<"Has converged sum:"<<sum<<"\n";
-				if (sum<=T(0.1)){
+				if (sum<=T(0.00001)){
 					std::cout<<"Has converged true!\n";
 					return true;
 				}
@@ -63,7 +63,7 @@ std::mutex g_display_mutex;
 
 			template<class T>
 			bool run(const std::vector<EVarManager<T>>& initial_params){
-			T delta=T(0.0000001);
+			T delta=T(0.0001);
 			std::cout<<"Newton Optimizer started\n";
 			//load target data
 			std::vector<T> target_data;
@@ -78,11 +78,11 @@ std::mutex g_display_mutex;
 			size_t iter=0;
 			bool run_finished=false;
 			
-			while (run_finished, iter<20){
+			while ((run_finished==false )&& iter<20){
 				std::cout<<"Newton: Starting iteration "<<iter<<"\n";
 				std::vector<T> r_n;
 
-				Derivative<ConfigDerivatives::FiniteDifferences,T> deriv(ls::mse); //change the finite differences into something agnostic
+				Derivative<ConfigDerivatives::FiniteDifferences,T> deriv(ls::err1); //change the finite differences into something agnostic
 				std::vector<T> J=deriv.get_jacobian<E>(parameters, target_times,target_data,r_n,evaluator);
 
 				evaluator.send_matrix(J,j_n,j_m, "jacobi_matrix"); //print Jacobi matrix (likely to file)
@@ -127,7 +127,7 @@ std::mutex g_display_mutex;
 				co::mul::dgemm_nn(j_n,1,j_n,T(1.0),Qt.begin(),1,j_n,r_n.begin(),1,1,T(0.0),q1.begin(),1,1); 
 			//	std::cout<<"nach mult\n";
 				std::vector<T> res(j_m);
-				
+				/*
 				std::cout<<"\nq1\n";
 				for (auto& x:q1){
 					std::cout<<x<<"   ";
@@ -150,7 +150,7 @@ std::mutex g_display_mutex;
 					std::cout<<"\n";
 				}
 				
-				
+				*/
 				
 				dgms<typename std::vector<T>::iterator,T>(q1.begin(), q1.begin(),j_m, 1, T(-1.0)); //q1=-q1
 				/*
@@ -182,23 +182,56 @@ std::mutex g_display_mutex;
 				*/
 				//Update parameters
 				//std::cout<<"Parameter adjustment\n";
-				auto& params=parameters[0].get_params();
-				for (int i=0;i<j_m;i++){
-				/*	std::cout<<"res[i]: "<<res[i]<<" params[i]: "<<params[i].val<<"\n";
-					std::cout<<"delta*res[i]: "<<delta.testmult(res[i])<<"\n";
-					std::cout<<"params.val+delta*res[i]: "<<params[i].val+delta.testmult(res[i])<<"\n";
-					std::cin.get();
+			auto& params=parameters[0].get_params();
+			run_finished=has_converged<T>(res);
+				
+			//Update parameters only if run is still ongoing
+			
+				//remove here start
+				
+				
+			T sum=0;
+			for (auto& x:r_n){
+				sum+=x.abs();
+			}
+			
+			std::cout<<"Sim to target Error"<<sum<<"\n";
+			
+			T norm=T(0.0);
+			
+			for (auto& x: res){
+				norm+=(x*x).sqrt();
+				std::cout<<x<<"\n";
+			}
+			delta=T(1.0)/norm;
+			//remove here end
+			
+			//Test for wolfe conditions comes here
+			
+			//std::cout<<"Delta:"<<delta<<"\n";
+			//std::cout<<"norm:"<<norm<<"\n";
+			
+			
+			for (int i=0;i<j_m;i++){
+			/*	std::cout<<"res[i]: "<<res[i]<<" params[i]: "<<params[i].val<<"\n";
+				std::cout<<"delta*res[i]: "<<delta.testmult(res[i])<<"\n";
+				std::cout<<"params.val+delta*res[i]: "<<params[i].val+delta.testmult(res[i])<<"\n";
+				std::cin.get();
 				*/
+				
+					//std::cout<<"params[i]: "<<params[i]<<"\n";
+					std::cout<<"res[i]:"<<res[i]<<"\n";
+					//std::cout<<"params[i]+delta*res[i] "<<delta*res[i]<<"\n";
 					res[i]=params[i].val+delta*res[i];
 				}
 				
 				
-				run_finished=parameters[0].update_parameters_cut(res);
+				parameters[0].update_parameters_cut(res);	
 				
-				run_finished=has_converged<T>(res);
+				std::cout<<"Run has finished: "<<run_finished<<"iteration:"<<iter<<"\n";
 				iter++;
 			}
-			
+						
 			evaluator.send_parameters(parameters[0], "These are the estimated parameters of the problem.");
 			
 			size_t num_threads=3;
@@ -206,5 +239,6 @@ std::mutex g_display_mutex;
 			};
 			
 		};
+		
 	
 }

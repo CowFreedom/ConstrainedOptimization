@@ -26,6 +26,8 @@ namespace co{
 			}
 			std::ofstream lua_output;
 			std::ofstream general_output;
+			lua_output.precision(12);
+			general_output.precision(12);
 			lua_output.open (path+"parameters.lua");
 			general_output.open (path+"parameters.txt");
 			general_output<<output;

@@ -45,7 +45,7 @@ namespace co{
 		
 		BiogasEvaluation(std::string _table_dir,  std::string _infile_name, std::string _outfile_name):table_dir(_table_dir),infile_name(_infile_name), outfile_name(_outfile_name),computer(ComputationMode<ConfigComputation::Local,BiogasEvaluation<T,ConfigComputation::Local>,T>(this, ConfigOutput::File,4,_table_dir)){
 			//computer=ComputationMode<ConfigComputation::Local,T>(ConfigOutput::File,4);
-			std::cout<<"Pointer address outside at creation:"<<this<<"\n";
+			//std::cout<<"Pointer address outside at creation:"<<this<<"\n";
 		}
 		const ConfigComputation computation_mode=ConfigComputation::Local;
 		
@@ -109,7 +109,7 @@ namespace co{
 		as usual for PDE's). Therefore, this is implemented on a per-problem basis.
 		Datapath is the path of the data, if it differs from the paths in tabledir*/
 		bool parse_csv_table_times(std::string table_dir, std::string _outfile_name, std::vector<T>& data, std::vector<T>& times, std::string data_path="", int* _rows=0){
-			std::cout<<"In Parse!\n";
+			//std::cout<<"In Parse!\n";
 			std::string outfile_path=table_dir+'/'+_outfile_name; //use std filesystem later
 			std::cout<<"Parse outfilepath: "<<outfile_path<<"\n";
 			std::ifstream file(outfile_path);
@@ -207,17 +207,17 @@ namespace co{
 			int i=0;
 			int substract=0;
 			if (nt==ns){
-				std::cout<<"ns==nt!";	
-				std::cin.get();
-			T t1=sourcetimes[nt-2];
-			T t2=sourcetimes[nt-1];
-			T tc=targettimes[nt-1];
-			T t=(tc-t1)/(-t1+t2);
-			for (int k=0;k<cols;k++){
-			//std::cout<<"Bis hier: j: "<<j<<" saved_rows: "<<saved_rows<<" k:"<<k<<"\n";
-			storage[(nt-1)*cols+k]=source[(nt-1)*cols+k]*(T(1.0)-t)+source[(nt-1)*cols+k+1]*t;
-			}
-			substract=cols;
+				//std::cout<<"ns==nt!";	
+				//std::cin.get();
+				T t1=sourcetimes[nt-2];
+				T t2=sourcetimes[nt-1];
+				T tc=targettimes[nt-1];
+				T t=(tc-t1)/(-t1+t2);
+				for (int k=0;k<cols;k++){
+				//std::cout<<"Bis hier: j: "<<j<<" saved_rows: "<<saved_rows<<" k:"<<k<<"\n";
+				storage[(nt-1)*cols+k]=source[(nt-1)*cols+k]*(T(1.0)-t)+source[(nt-1)*cols+k+1]*t;
+				}
+				substract=cols;
 			}
 			if (sourcetimes[0]>targettimes[0]){
 				sourcetimes[0]=targettimes[0];

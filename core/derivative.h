@@ -52,7 +52,7 @@ namespace co{
 				}
 						
 			}
-			std::cout<<"Jacobi: Evaluation creation done\n";
+			//std::cout<<"Jacobi: Evaluation creation done\n";
 			/*
 			std::cout<<"Original values\n";
 			for (int i=0;i<w[0].get_params().size();i++){
@@ -76,7 +76,7 @@ namespace co{
 			std::vector<F> res_x_n(stride); //evaluates r(x_n)
 		
 			f(evals[n_evals], target_data, res_x_n,0);
-			std::cout<<"Jacobi: All Evals done\n";
+			//std::cout<<"Jacobi: All Evals done\n";
 			
 			//std::cout.precision(std::numeric_limits<double>::max_digits10);
 				//std::cout.setf(std::ios_base::fixed,std::ios_base::floatfield);
@@ -127,20 +127,22 @@ namespace co{
 			*/
 			int iter=0;
 			std::cout<<"bis hier\n";
-			std::cout<<"n_evals:"<<n_evals<<"Stride:"<<stride<<"mutliplier length:"<<multiplier.size()<<"\n";
-			if (multiplier.size()>=0){
+			//std::cout<<"n_evals:"<<n_evals<<"Stride:"<<stride<<"mutliplier length:"<<multiplier.size()<<"\n";
+			if (multiplier.size()>0){
 				for (size_t i=0;i<n_evals;i++){
 					std::vector<F> res_x_d(stride);
 					f(evals[i], target_data, res_x_d,0);
 					if (multiplier[iter]!=i){
 							for (size_t j=0;j<stride;j++){
-								//std::cout<<res_x_d[j]<<" minus "<<res_x_n[j]<<"\n";
+								//std::cout<<"Parameter "<<i<<"   "<<res_x_d[j]<<" minus "<<res_x_n[j]<<"\n";
+								//std::cin.get();
 								jacobi_matrix[j*n_evals+i]=(res_x_d[j]-res_x_n[j])/delta;
 						}
 					}
 					else{
 						for (size_t j=0;j<stride;j++){
-							//std::cout<<res_x_d[j]<<" minus "<<res_x_n[j]<<"  mal minus 1\n";
+							//std::cout<<"Parameter "<<i<<"   "<<res_x_d[j]<<" minus "<<res_x_n[j]<<"  mal minus 1\n";
+							//std::cin.get();
 							jacobi_matrix[j*n_evals+i]=F(-1.0)*(res_x_d[j]-res_x_n[j])/delta;
 							iter++;
 						}
@@ -152,16 +154,18 @@ namespace co{
 				std::vector<F> res_x_d(stride);
 				f(evals[i], target_data, res_x_d,0);
 				for (size_t j=0;j<stride;j++){
-							//std::cout<<res_x_d[j]<<" minus "<<res_x_n[j]<<"\n";
+							//std::cout<<"Parameter "<<i<<"   "<<res_x_d[j]<<" minus "<<res_x_n[j]<<"\n";
+							//std::cin.get();
 							jacobi_matrix[j*n_evals+i]=(res_x_d[j]-res_x_n[j])/delta;
 					}
 				}
 				
 			}
 
-	
+	//std::cin.get();
 			r_n=res_x_n;
-			std::cout<<"Get_jacobian_end\n";
+
+			
 			/*
 			std::cout<<"Jacobi matrix:\n";
 		

@@ -22,7 +22,7 @@ namespace co{
 		options.set_config_evaluation(co::ConfigEvaluation::BiogasEvaluation);
 		options.set_config_computation(co::ConfigComputation::Local);	
 		
-		BiogasEvaluation<EFloat64,ConfigComputation::Local> evaluator("D:/Documents/Programming/ug4/ug4/apps/parameter_estimation/estebis_downflow_pe","subset_target.lua", "subset_sim.lua");
+		BiogasEvaluation<EFloat64,ConfigComputation::Local> evaluator(dir,"subset_target.lua", "subset_sim.lua");
 		NewtonOptimizer<BiogasEvaluation<EFloat64,ConfigComputation::Local>> optimizer(options,evaluator);
 		
 		std::vector<EVar64Manager> params;
