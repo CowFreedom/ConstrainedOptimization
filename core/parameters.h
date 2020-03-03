@@ -110,6 +110,7 @@ namespace co{
 				res.append(std::to_string(max.get_v()));
 				res.append("))");
 				*/
+				res.precision(12);
 				res<<"EVar64(EFloat64(";
 				res<<val.get_v();
 				res<<"), EFloat64(";

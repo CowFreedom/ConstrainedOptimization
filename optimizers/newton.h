@@ -38,6 +38,138 @@ std::mutex g_display_mutex;
 			Options options;
 			E& evaluator;
 			
+			template<class T>
+			bool update_parameters_stepsize_wolfe_condition(const std::vector<T>& target_data,const std::vector<T>& target_times,const std::vector<T>& J, std::vector<T> d, std::vector<EVarManager<T>>& current_params, T s_n){
+				T alpha=T(1.0);
+				T c1=(0.0004);
+				T c2=(0.1);
+				size_t j_n=target_data.size();
+				size_t j_m=J.size()/j_n;
+				T f_xn=s_n;
+				
+				std::vector<T> current_res=d;
+				size_t iter=0;
+				
+				while (iter<15){
+					std::vector<EVarManager<T>> evaluations=current_params;
+					auto& params=evaluations[0].get_params();
+					for (int i=0;i<current_res.size();i++){
+						current_res[i]=params[i].val+alpha*d[i];
+						std::cout<<"d["<<i<<"]:"<<d[i]<<"\n";
+					}
+
+					evaluations[0].update_parameters_cut(current_res);	
+					
+					std::vector<std::vector<T>> evals=evaluator.eval_specific(evaluations, target_times, "wolfe_condition_evaluations/","Wolfe Condition evaluation");
+					T f_alpha=ls::mse(evals[0], target_data);
+					
+					
+					std::vector<T> grad_f(j_m,T(0.0));
+					for (int i=0;i<j_m;i++){
+						for (int j=0;j<j_n;j++){
+							grad_f[i]+=J[j*j_m+i];
+						}
+					}
+					std::vector<T> temp(j_m);
+					
+					dgms<typename std::vector<T>::iterator,T>(d.begin(), temp.begin(),1, j_m, c1*alpha);
+					/*
+					T f_xn=T(0.0);
+					T f_alpha=T(0.0);
+					for (size_t i=0;i<j_m;i++){
+						f_xn+=s_n[i];
+						f_alpha+=s_alpha[i];
+					}
+					*/
+					
+					
+					T f_sum1=std::inner_product(temp.begin(),temp.end(),grad_f.begin(),f_xn);
+					std::cout<<"f_alpha:"<<f_alpha<<"\nf_sum1:"<<f_sum1<<"\n alpha:"<<alpha<<"\nMSE:"<<f_alpha<<"\n";
+					std::cin.get();
+					if (f_alpha<=f_sum1){
+						current_params=evaluations;
+						std::cout<<"Done wolfing\n";
+						return true;
+					}
+					
+					alpha=T(0.25)*alpha;
+					iter++;
+				
+				}
+				
+				return false;
+			}
+			
+						template<class T>
+			bool update_parameters_stepsize_smaller_var(const std::vector<T>& target_data,const std::vector<T>& target_times,const std::vector<T>& J, std::vector<T> d, std::vector<EVarManager<T>>& current_params, T s_n){
+				T alpha=T(1.0);
+				T c=T(1.0);
+				size_t j_n=target_data.size();
+				size_t j_m=J.size()/j_n;
+				T f_xn=s_n;
+				
+				std::vector<T> current_res=d;
+				size_t iter=0;
+				
+				while (iter<15){
+					std::vector<EVarManager<T>> evaluations=current_params;
+					auto& params=evaluations[0].get_params();
+					for (int i=0;i<current_res.size();i++){
+						current_res[i]=params[i].val+alpha*d[i];
+						std::cout<<"d["<<i<<"]:"<<d[i]<<"\n";
+					}
+
+					evaluations[0].update_parameters_cut(current_res);	
+					
+					std::vector<std::vector<T>> evals=evaluator.eval_specific(evaluations, target_times, "stepsize_smaller_var_evaluations/","Stepsize evaluation");
+					T f_alpha=ls::mse(evals[0], target_data);
+					
+					
+					std::cout<<"New MSE:"<<f_alpha<<"\nOld MSE:"<<s_n<<"\n";
+					
+					if (f_alpha<=c*s_n){
+						current_params=evaluations;
+						std::cout<<"Done stepsize smaller var\n";
+						return true;
+					}
+					
+					alpha=T(0.25)*alpha;
+					iter++;
+				
+				}
+				
+				return false;
+			}
+			
+			template<class T>
+			bool update_parameters_stepsize_random(std::vector<EVarManager<T>>& parameters, std::vector<T> d){
+			
+				T norm=T(0.0);
+				for (auto& x: d){
+					norm+=(x*x).sqrt();
+				}
+				T alpha=T(1.0)/norm;
+				auto& params=parameters[0].get_params();
+				
+				for (int i=0;i<d.size();i++){
+				/*	std::cout<<"res[i]: "<<res[i]<<" params[i]: "<<params[i].val<<"\n";
+					std::cout<<"delta*res[i]: "<<delta.testmult(res[i])<<"\n";
+					std::cout<<"params.val+delta*res[i]: "<<params[i].val+delta.testmult(res[i])<<"\n";
+					std::cin.get();
+					*/
+					
+					//std::cout<<"params[i]: "<<params[i]<<"\n";
+					//std::cout<<"res[i]:"<<res[i]<<"\n";
+					//std::cout<<"params[i]+delta*res[i] "<<delta*res[i]<<"\n";
+					d[i]=params[i].val+alpha*d[i];
+				}
+					
+					
+				bool res=parameters[0].update_parameters_cut(d);				
+				
+				return res;
+			}
+			
 			public:
 			NewtonOptimizer(const Options& _options, E& _evaluator):options(_options), evaluator(_evaluator){
 				
@@ -70,7 +202,6 @@ std::mutex g_display_mutex;
 			std::vector<T> target_times;
 			evaluator.load_target(target_times,target_data);
 			std::vector<EVarManager<T>> parameters=initial_params;
-			
 			//evaluate initial parameters
 			size_t j_n=target_data.size(); //height of jacobi matrix
 			size_t j_m=parameters[0].len(); //length of jacobi matrix
@@ -81,9 +212,10 @@ std::mutex g_display_mutex;
 			while ((run_finished==false )&& iter<20){
 				std::cout<<"Newton: Starting iteration "<<iter<<"\n";
 				std::vector<T> r_n;
-
-				Derivative<ConfigDerivatives::FiniteDifferences,T> deriv(ls::err1); //change the finite differences into something agnostic
-				std::vector<T> J=deriv.get_jacobian(parameters, target_times,target_data,r_n,evaluator);
+				T s_n;
+			
+				Derivative<ConfigDerivatives::FiniteDifferences,T> deriv(ls::err1,ls::mse); //change the finite differences into something agnostic
+				std::vector<T> J=deriv.get_jacobian(parameters, target_times,target_data,r_n,s_n,evaluator);
 
 				evaluator.send_matrix(J,j_n,j_m, "jacobi_matrix"); //print Jacobi matrix (likely to file)
 				
@@ -182,51 +314,23 @@ std::mutex g_display_mutex;
 				*/
 				//Update parameters
 				//std::cout<<"Parameter adjustment\n";
-			auto& params=parameters[0].get_params();
+			
 			run_finished=has_converged<T>(res);
 				
 			//Update parameters only if run is still ongoing
 			
 				//remove here start
 				
-				
-			T sum=0;
-			for (auto& x:r_n){
-				sum+=x.abs();
-			}
-			
-			std::cout<<"Sim to target Error"<<sum<<"\n";
-			
-			T norm=T(0.0);
-			
-			for (auto& x: res){
-				norm+=(x*x).sqrt();
-				std::cout<<x<<"\n";
-			}
-			delta=T(1.0)/norm;
-			//remove here end
-			
-			//Test for wolfe conditions comes here
-			
-			//std::cout<<"Delta:"<<delta<<"\n";
-			//std::cout<<"norm:"<<norm<<"\n";
 			
 			
-			for (int i=0;i<j_m;i++){
-			/*	std::cout<<"res[i]: "<<res[i]<<" params[i]: "<<params[i].val<<"\n";
-				std::cout<<"delta*res[i]: "<<delta.testmult(res[i])<<"\n";
-				std::cout<<"params.val+delta*res[i]: "<<params[i].val+delta.testmult(res[i])<<"\n";
-				std::cin.get();
-				*/
-				
-					//std::cout<<"params[i]: "<<params[i]<<"\n";
-					std::cout<<"res[i]:"<<res[i]<<"\n";
-					//std::cout<<"params[i]+delta*res[i] "<<delta*res[i]<<"\n";
-					res[i]=params[i].val+delta*res[i];
-				}
+			//std::cout<<"Wolfe condition comes now:\n";
+			//update_parameters_stepsize_wolfe_condition(target_data,target_times,J,res,parameters,s_n);
+			update_parameters_stepsize_smaller_var(target_data,target_times,J,res,parameters,s_n);
+			//std::cout<<"Wolfe over\n";
+			//update_parameters_stepsize_random(parameters,res);
+
 				
 				
-				parameters[0].update_parameters_cut(res);	
 				
 				std::cout<<"Run has finished: "<<run_finished<<"iteration:"<<iter<<"\n";
 				iter++;

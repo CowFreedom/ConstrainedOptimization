@@ -612,7 +612,7 @@ namespace co {
 			*/
 			for (int i=(n-1);i>=0;i--){
 				x[i*col_stride]=qt_b[i];
-				std::cout<<"qt_b[i]: "<<qt_b[i]<<"\n";
+				//std::cout<<"qt_b[i]: "<<qt_b[i]<<"\n";
 				for (int j=(n-1);j>i;j--){
 					x[i*col_stride]-=R[i*n+j]*x[j*col_stride];
 				}

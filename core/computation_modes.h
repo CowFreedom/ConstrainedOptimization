@@ -5,6 +5,37 @@
 #include <windows.h>
 #include <stdio.h>
 #include <tchar.h>
+#include <iomanip>
+#include <ctime>//optional. Could be removed if we change the way time  values are attained
+#include <sstream>//
+
+#elif __APPLE__
+	#include <TargetConditionals.h>
+    #if TARGET_OS_MAC
+        // Other kinds of Mac OS
+		#include <stdio.h>
+		#include <stdlib.h>
+		#include <unistd.h>
+		#include <sys/types.h>
+		#include <spawn.h>
+		#include <sys/wait.h>
+    #else
+    #   error "Unknown Apple platform"
+    #endif
+#elif __linux__
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <unistd.h>
+	#include <sys/types.h>
+	#include <spawn.h>
+	#include <sys/wait.h>
+#elif __unix__ // all unices not caught above
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <unistd.h>
+	#include <sys/types.h>
+	#include <spawn.h>
+	#include <sys/wait.h>
 #endif
 
 #include "options.h"
@@ -16,9 +47,7 @@
 namespace co{
 			
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
-#include <iomanip>
-#include <ctime>//optional. Could be removed if we change the way time  values are attained
-#include <sstream>//
+
 
 extern bool spawn_process_and_wait_to_join(std::string _command, std::string _working_directory); //forward declare function
 
@@ -61,8 +90,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 bool spawn_process_and_wait_to_join(std::string _command, std::string _working_directory){
 	
 	LPSTR command=const_cast<LPSTR>(_command.c_str()); //for LPSTR we must lose const qualifier
-	const char* dir=_working_directory.c_str();
-
+	std::string dir=_working_directory;
 //Create file handle to redirect console output to file
 //See https://stackoverflow.com/questions/7018228/how-do-i-redirect-output-to-a-file-with-createprocess
    SECURITY_ATTRIBUTES sa;
@@ -103,7 +131,7 @@ bool spawn_process_and_wait_to_join(std::string _command, std::string _working_d
         TRUE,          // Set handle inheritance to FALSE
         flags,              // No creation flags
         NULL,           // Use parent's environment block
-        dir,           // Use parent's starting directory 
+        _T(dir).c_str(),           // Use parent's starting directory 
         &si,            // Pointer to STARTUPINFO structure
         &pi )           // Pointer to PROCESS_INFORMATION structure
     ) 
@@ -157,20 +185,45 @@ class OSEvaluator{
 		
 	//	std::cout<<"Did it work? "<<ret<<"\n";
 	}
-	
-	void join(){
-		
-	}
+
 	
 };
-	
-	
+/*UNIX VERSIONS*/	
+#elif __APPLE__ || __linux__ || __unix__
 
-
-#endif	
+class OSEvaluator{
 	
+	private:
+	std::vector<pid_t> pid;
+	std::vector<int> status;
+	
+	public:
+	OSEvaluator(int processes, std::string _evaluation_path):si(processes),pi(processes){
+		if (processes>0){
+
+		}
+		else{
+			std::cerr<<"Error in OSEvaluator!\n";
+		}
+		
+	}
 	template<class T>
-void evaluate_os2(const std::string& folder_path,const std::string& command,typename std::vector<EVarManager<T>>::const_iterator start,size_t n,size_t id,size_t iter, std::string& message);
+	void eval(std::string folder_path, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, int id, int iter){
+		
+  
+		std::cout<<"Evaluation Process started with with id: "<<id<<"\n";
+		
+		//std::cout<<"Created folder: "<<folder_path.c_str()<<"\n";
+		create_directories(folder_path,0); //TODO: Replace by std::filesystem of C++17
+		
+		
+		
+	//	std::cout<<"Did it work? "<<ret<<"\n";
+	}
+
+#endif
+	
+	
 	// size_t id, size_t iter, std::string& message
 	/*M: Computation mode (local, cluster etc.)
 	E: EvaluationClass (e.g. BiogasEvaluation)
@@ -243,7 +296,7 @@ void evaluate_os2(const std::string& folder_path,const std::string& command,type
 			case ConfigOutput::File:
 			{
 				std::cout<<"Bin in  eval::ConfigComputation File!\n";
-				res= schedule_and_eval_file(input,message);
+				res= schedule_and_eval_file(input,message,iter,"",true);
 				break;
 			}
 			
@@ -253,12 +306,32 @@ void evaluate_os2(const std::string& folder_path,const std::string& command,type
 		return res;
 	}
 	
-	
+	//Evaluate a specific iteration and store into the folder name 
+	std::vector<std::vector<T>> eval_specific(const std::vector<EVarManager<T>>& input,std::string& folder_name, int _iter,std::string message=""){
+		std::vector<std::vector<T>> res;
+		
+		switch(config_output){
+			
+			/*Choosing this options means:
+			*Parameters are written to file
+			*Evaluation will take place via an evaluate.lua file.*/
+
+			case ConfigOutput::File:
+			{
+				res= schedule_and_eval_file(input,message,_iter,folder_name,false);
+				break;
+			}
+			
+		}
+		
+		std::cout<<"done specific evaluation\n";
+		return res;
+	}	
 	
 	/*Schedulees processes and evaluates them according to OS process methods
 	Evaluations are stored in the same order as the input files, i.e. input[i] corresponds to eval[i]
 	*/
-	std::vector<std::vector<T>> schedule_and_eval_file(const std::vector<EVarManager<T>>& input,std::string& message){
+	std::vector<std::vector<T>> schedule_and_eval_file(const std::vector<EVarManager<T>>& input,std::string& message,int _iter,std::string folder_name,bool increase_iter){
 			
 				
 
@@ -273,12 +346,12 @@ void evaluate_os2(const std::string& folder_path,const std::string& command,type
 	//	OSEvaluator os(thread_count,evaluation_path);//Create Processes
 		std::vector<std::thread> t(n);//Create the threads
 		std::vector<size_t> evals_per_thread(n);
-		std::string folder_path=evaluation_path+"/iteration_"+std::to_string(iter)+"/";
+		std::string folder_path=evaluation_path+"/iteration_"+std::to_string(_iter)+"/"+folder_name;
 		std::string shell_command="ugshell -ex "+table_directory+"/evaluate.lua";
 		std::cout<<"Shell command: "<<shell_command<<"\n";
 		if (n<thread_count){
 			for (auto& x: input){
-				t[id]=std::thread(evaluate_os<T>,folder_path,shell_command, start+id,1,id,iter,std::ref(message));
+				t[id]=std::thread(evaluate_os<T>,folder_path,shell_command, start+id,1,id,_iter,std::ref(message));
 				evals_per_thread[id]=1;
 				//os.eval<T>(folder_path+std::to_string(id),start+id,1,id,iter);
 				id++;
@@ -321,8 +394,9 @@ void evaluate_os2(const std::string& folder_path,const std::string& command,type
 					ids++;
 				}
 		}	
-		
-		iter++;
+		if(increase_iter==true){
+			iter++;
+		}
 		return result;
 		
 	}

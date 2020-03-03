@@ -22,6 +22,8 @@ namespace co{
 		
 		bool load_target(std::vector<T>& t,std::vector<T>& d)=0;
 		
+		std::vector<std::vector<T>> eval_specific(const std::vector<EVarManager<T>>& v,const std::vector<T>& _target_times,std::string folder_name, std::string message="")=0;
+		
 		};
 
 	template<class T>
@@ -56,6 +58,12 @@ namespace co{
 			
 			target_times=_target_times;
 			return computer.eval(v,message);
+		};
+		
+		std::vector<std::vector<T>> eval_specific(const std::vector<EVarManager<T>>& v,const std::vector<T>& _target_times, std::string folder_name, std::string message=""){
+			
+			target_times=_target_times;
+			return computer.eval_specific(v,folder_name,computer.get_current_iteration()-1,message);
 		};
 		
 		//d=data, t=targettimes

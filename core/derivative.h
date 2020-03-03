@@ -16,16 +16,17 @@ namespace co{
 		
 		const F delta;
 		void(*f)(const std::vector<F>&,const std::vector<F>&,std::vector<F>& result,int stride);
+		F(*s)(const std::vector<F>&,const std::vector<F>&);
 		public:
-		Derivative(void(*_f)(const std::vector<F>&,const std::vector<F>&,std::vector<F>& result,int stride)):f(_f),delta(F(0.001)){}
-		Derivative(void(*_f)(const std::vector<F>&,const std::vector<F>&,std::vector<F>& result,int stride), F _delta): delta(_delta), f(_f){}
+		Derivative(void(*_f)(const std::vector<F>&,const std::vector<F>&,std::vector<F>& result,int stride),F(*_s)(const std::vector<F>&,const std::vector<F>&)):f(_f),s(_s),delta(F(0.00001)){}
+		Derivative(void(*_f)(const std::vector<F>&,const std::vector<F>&,std::vector<F>& result,int stride),F(*_s)(const std::vector<F>&,const std::vector<F>&), F _delta): delta(_delta), f(_f),s(_s){}
 		
 		
 		/*Get jacobi matrix evaluated at point w*/
 		template<class E>
-		std::vector<F> get_jacobian(const std::vector<EVarManager<F>>& w, const std::vector<F>& target_times,const std::vector<F>& target_data, std::vector<F>& r_n, E& evaluator){
+		std::vector<F> get_jacobian(const std::vector<EVarManager<F>>& w, const std::vector<F>& target_times,const std::vector<F>& target_data, std::vector<F>& r_n,F& s_n, E& evaluator){
 			//std::vector<F> x_n=evaluator.eval(w,target_times)[0]; //x_n for f(x_n)
-			std::cout<<"Get_jacobian_start\n";
+			//std::cout<<"Get_jacobian_start\n";
 			size_t n_evals=w[0].len();
 			std::vector<size_t> multiplier;
 	
@@ -68,13 +69,15 @@ namespace co{
 			//std::cout<<"Jacobi evals done\n";
 			evaluations.push_back(w[0]); //f(x_n) should also be evaluated
 			std::vector<std::vector<F>> evals=evaluator.eval(evaluations, target_times, "Evaluating derivative");
-			
+			evaluator.send_matrix(evals[0],evals[0].size(),1, "loaded_data");
+			//evaluator.send_matrix(evals[1],evals[1].size(),1, "loaded_data_deriv1");
+			//std::cout.precision(std::numeric_limits<double>::max_digits10);
 			//Now the vector
 			//std::cout<<"Length of evals:"<<evals[0].size()<<"\n";
-			size_t stride=target_times.size(); //column stride
+			size_t stride=evals[0].size(); //number of data entries
 			std::vector<F> jacobi_matrix(n_evals*stride);
 			std::vector<F> res_x_n(stride); //evaluates r(x_n)
-		
+			s_n=s(evals[n_evals],target_data); //evaluates original function
 			f(evals[n_evals], target_data, res_x_n,0);
 			//std::cout<<"Jacobi: All Evals done\n";
 			
@@ -126,7 +129,7 @@ namespace co{
 			std::cin.get();
 			*/
 			int iter=0;
-			std::cout<<"bis hier\n";
+			//std::cout<<"bis hier\n";
 			//std::cout<<"n_evals:"<<n_evals<<"Stride:"<<stride<<"mutliplier length:"<<multiplier.size()<<"\n";
 			if (multiplier.size()>0){
 				for (size_t i=0;i<n_evals;i++){
@@ -135,6 +138,7 @@ namespace co{
 					if (multiplier[iter]!=i){
 							for (size_t j=0;j<stride;j++){
 								//std::cout<<"Parameter "<<i<<"   "<<res_x_d[j]<<" minus "<<res_x_n[j]<<"\n";
+								//std::cout<<"Result: "<<(res_x_d[j]-res_x_n[j])/delta<<"\n";
 								//std::cin.get();
 								jacobi_matrix[j*n_evals+i]=(res_x_d[j]-res_x_n[j])/delta;
 						}
@@ -142,6 +146,7 @@ namespace co{
 					else{
 						for (size_t j=0;j<stride;j++){
 							//std::cout<<"Parameter "<<i<<"   "<<res_x_d[j]<<" minus "<<res_x_n[j]<<"  mal minus 1\n";
+							//std::cout<<"Result: "<<(res_x_d[j]-res_x_n[j])/delta<<"\n";
 							//std::cin.get();
 							jacobi_matrix[j*n_evals+i]=F(-1.0)*(res_x_d[j]-res_x_n[j])/delta;
 							iter++;
@@ -155,6 +160,7 @@ namespace co{
 				f(evals[i], target_data, res_x_d,0);
 				for (size_t j=0;j<stride;j++){
 							//std::cout<<"Parameter "<<i<<"   "<<res_x_d[j]<<" minus "<<res_x_n[j]<<"\n";
+							//std::cout<<"Result: "<<(res_x_d[j]-res_x_n[j])/delta<<"\n";
 							//std::cin.get();
 							jacobi_matrix[j*n_evals+i]=(res_x_d[j]-res_x_n[j])/delta;
 					}
