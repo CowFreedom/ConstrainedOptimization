@@ -5,7 +5,7 @@
 #include <string>
 #include <sstream>
 #include <cmath>
-#include "EFloat.h"
+#include "efloat.h"
 
 namespace co{
 	

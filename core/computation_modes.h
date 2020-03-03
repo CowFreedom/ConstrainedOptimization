@@ -191,35 +191,46 @@ class OSEvaluator{
 /*UNIX VERSIONS*/	
 #elif __APPLE__ || __linux__ || __unix__
 
-class OSEvaluator{
-	
-	private:
-	std::vector<pid_t> pid;
-	std::vector<int> status;
-	
-	public:
-	OSEvaluator(int processes, std::string _evaluation_path):si(processes),pi(processes){
-		if (processes>0){
+/*Creates subdirectories. Horrible and inefficient function, should be replaced by filesystem::create_directories in C++17*/
+void create_directories(const std::string& s, int start){
+	for(int i=start;i<s.size();i++){
+		if(s[i]=='/'||i==(s.size()-1)){
+			std::string substr=s.substr(0,i+1);
+			//std::cout<<substr<<"\n";
+			mkdir(substr.c_str(),0777);//create folder in the given path (Windows OS function). second argument are security arguments
+		}
+	}
+}
 
-		}
-		else{
-			std::cerr<<"Error in OSEvaluator!\n";
-		}
+bool spawn_process_and_wait_to_join(std::string _command, std::string _working_directory){
+	std::string cmd="cd "+_working_directory+ "&& exec "+_command+ " >ug_output.log";
+	system(cmd.c_str());
+	return true;
+}
+
+
+template<class T>
+void evaluate_os(const std::string& folder_path, const std::string& command, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, size_t id, size_t iter, std::string& message){
+	Writer<T> writer;
+	//std::cout<<"In evaluate os!\n";
+	for (int i=0;i<n;i++){
+	
+		//Create directory
+		std::string path=folder_path+"id_"+std::to_string(id)+"/eval_"+std::to_string(i)+"/";
+		create_directories(path,0);
+		//std::filesystem::create_directories(path);
+		//write previous parameters
+		//std::cout<<path<<"\n";
+		writer.write(path,*(start+i),message);
+		
+		
+		spawn_process_and_wait_to_join(command, path);
+		//Spawn process
+		
 		
 	}
-	template<class T>
-	void eval(std::string folder_path, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, int id, int iter){
-		
-  
-		std::cout<<"Evaluation Process started with with id: "<<id<<"\n";
-		
-		//std::cout<<"Created folder: "<<folder_path.c_str()<<"\n";
-		create_directories(folder_path,0); //TODO: Replace by std::filesystem of C++17
-		
-		
-		
-	//	std::cout<<"Did it work? "<<ret<<"\n";
-	}
+}
+
 
 #endif
 	

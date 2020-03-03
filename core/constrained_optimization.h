@@ -1,5 +1,6 @@
 #pragma once
 #include<limits>
+#include <cstring>
 
 #include "parameters.h"
 
@@ -12,13 +13,13 @@ namespace co{
 	analysis in estimating floating point error*/
 	inline uint64_t double_to_bits(double f){
 		uint64_t ui;
-		memcpy(&ui, &f, sizeof(double));
+		std::memcpy(&ui, &f, sizeof(double));
 		return ui;
 	}
 	
 	inline double bits_to_double(uint64_t ui){
 		double f;
-		memcpy(&f, &ui, sizeof(uint64_t));
+		std::memcpy(&f, &ui, sizeof(uint64_t));
 		return f;
 	}
 	
