@@ -19,6 +19,7 @@
 		#include <sys/types.h>
 		#include <spawn.h>
 		#include <sys/wait.h>
+		#include <sys/stat.h>
     #else
     #   error "Unknown Apple platform"
     #endif
@@ -29,6 +30,7 @@
 	#include <sys/types.h>
 	#include <spawn.h>
 	#include <sys/wait.h>
+	#include <sys/stat.h>
 #elif __unix__ // all unices not caught above
 	#include <stdio.h>
 	#include <stdlib.h>
@@ -36,6 +38,7 @@
 	#include <sys/types.h>
 	#include <spawn.h>
 	#include <sys/wait.h>
+	#include <sys/stat.h>
 #endif
 
 #include "options.h"
