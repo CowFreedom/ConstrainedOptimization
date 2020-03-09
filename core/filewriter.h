@@ -62,7 +62,7 @@ namespace co{
 			general_output.precision(12);
 			//general_output<<std::fixed<<std::setprecision(12);
 		//	general_output.precision(std::numeric_limits<double>::max_digits10);
-			general_output.open (path+name);
+			general_output.open(path+name);
 			general_output<<output;
 			for (int i=0;i<n;i++){
 				for (int j=0;j<m;j++){
@@ -73,7 +73,13 @@ namespace co{
 			}
 			general_output.close();
 		}
-		
+		void write_info(std::string path,std::string name, std::string info){
+			
+			std::ofstream general_output;
+			general_output.open(path+name);
+			general_output<<info;
+			general_output.close();
+		}		
 		
 	};
 	

@@ -51,9 +51,6 @@ namespace co{
 			
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 
-
-extern bool spawn_process_and_wait_to_join(std::string _command, std::string _working_directory); //forward declare function
-
 /*Creates subdirectories. Horrible and inefficient function, should be replaced by filesystem::create_directories in C++17*/
 void create_directories(const std::string& s, int start){
 	for(int i=start;i<s.size();i++){
@@ -65,10 +62,126 @@ void create_directories(const std::string& s, int start){
 	}
 }
 
+std::array<PROCESS_INFORMATION,4> process_pointers;
+
+//This function handles signals like CRTL+C abort events
+//Needed to terminate processes properly when program is interrupted by CRTL+C
+
+BOOL WINAPI consoleHandler(DWORD signal) {
+
+    if (signal == CTRL_C_EVENT){
+        std::cout<<"Ctrl-C handled\n"; // do cleanup
+		
+		for (auto& x: process_pointers){
+			TerminateProcess(x.hProcess,-1);
+			
+		}
+		
+		std::exit(-1);
+	}
+	else if (signal ==CTRL_CLOSE_EVENT){
+		std::cout<<"CRTL CLOSE handled\n";
+		std::exit(-1);
+	}
+
+    return TRUE;
+}
+
+
+class OSEvaluator{
+	
+	private:
+	PROCESS_INFORMATION pi;//Create Processes
+	STARTUPINFO si;//Create Processes
+	
+	public:
+	OSEvaluator(){
+		
+	}
+	
+	PROCESS_INFORMATION get_pi() const{
+		return pi;
+	}
+	
+	bool spawn_process_and_wait_to_join(std::string _command, std::string _working_directory, size_t id){
+	
+		LPSTR command=const_cast<LPSTR>(_command.c_str()); //for LPSTR we must lose const qualifier
+		std::string dir=_working_directory;
+	//Create file handle to redirect console output to file
+	//See https://stackoverflow.com/questions/7018228/how-do-i-redirect-output-to-a-file-with-createprocess
+	   SECURITY_ATTRIBUTES sa;
+		sa.nLength = sizeof(sa);
+		sa.lpSecurityDescriptor = NULL;
+		sa.bInheritHandle = TRUE;       
+		
+		HANDLE h = CreateFile(_T(_working_directory.append("/console_output.log").c_str()),
+			FILE_APPEND_DATA,
+			FILE_SHARE_WRITE | FILE_SHARE_READ,
+			&sa,
+			OPEN_ALWAYS,
+			FILE_ATTRIBUTE_NORMAL,
+			NULL );
+
+		ZeroMemory( &si, sizeof(si) );
+		si.cb = sizeof(si);
+		ZeroMemory( &pi, sizeof(pi) );
+		
+	//This is part of the redirection to console ->
+		si.dwFlags |= STARTF_USESTDHANDLES;
+		si.hStdInput = NULL;
+		si.hStdError = h;
+		si.hStdOutput = h;
+	//-<
+
+		DWORD flags = CREATE_NO_WINDOW;
+
+		// Start the child process. 
+		if( !CreateProcessA( NULL,   // No module name (use command line)
+			command,        // Command line
+			NULL,           // Process handle not inheritable
+			NULL,           // Thread handle not inheritable
+			TRUE,          // Set handle inheritance to FALSE
+			flags,              // No creation flags
+			NULL,           // Use parent's environment block
+			_T(dir).c_str(),           // Use parent's starting directory 
+			&si,            // Pointer to STARTUPINFO structure
+			&pi )           // Pointer to PROCESS_INFORMATION structure
+		) 
+		{
+			printf( "CreateProcess failed (%d).\n", GetLastError() );
+			return false;;
+		}
+		
+		//DELETE
+		 if (!SetConsoleCtrlHandler(consoleHandler, TRUE)) {
+        printf("\nERROR: Could not set control handler"); 
+        return 1;
+    }
+	
+	process_pointers[id]=pi;
+		
+		// /DELETE
+		
+		// Wait until child process exits.
+		WaitForSingleObject( pi.hProcess, INFINITE );
+
+		// Close process and thread handles. 
+		CloseHandle( pi.hProcess );
+		CloseHandle( pi.hThread );	
+		return true;
+	}
+	
+	~OSEvaluator(){
+		TerminateProcess(pi.hProcess,-1);
+		//std::cout<<"Process Terminated\n";
+	}
+};
+
 template<class T>
 void evaluate_os(const std::string& folder_path, const std::string& command, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, size_t id, size_t iter, std::string& message){
 	Writer<T> writer;
 	//std::cout<<"In evaluate os!\n";
+	
 	for (int i=0;i<n;i++){
 	
 		//Create directory
@@ -79,8 +192,9 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		//std::cout<<path<<"\n";
 		writer.write(path,*(start+i),message);
 		
+		OSEvaluator os;
+		os.spawn_process_and_wait_to_join(command, path, id);
 		
-		spawn_process_and_wait_to_join(command, path);
 		//Spawn process
 		
 		
@@ -89,108 +203,6 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 
 	
 }
-
-bool spawn_process_and_wait_to_join(std::string _command, std::string _working_directory){
-	
-	LPSTR command=const_cast<LPSTR>(_command.c_str()); //for LPSTR we must lose const qualifier
-	std::string dir=_working_directory;
-//Create file handle to redirect console output to file
-//See https://stackoverflow.com/questions/7018228/how-do-i-redirect-output-to-a-file-with-createprocess
-   SECURITY_ATTRIBUTES sa;
-    sa.nLength = sizeof(sa);
-    sa.lpSecurityDescriptor = NULL;
-    sa.bInheritHandle = TRUE;       
-	
-    HANDLE h = CreateFile(_T(_working_directory.append("/console_output.log").c_str()),
-        FILE_APPEND_DATA,
-        FILE_SHARE_WRITE | FILE_SHARE_READ,
-        &sa,
-        OPEN_ALWAYS,
-        FILE_ATTRIBUTE_NORMAL,
-        NULL );
-
-    //Create Processes
-    STARTUPINFO si;
-    PROCESS_INFORMATION pi;
-
-    ZeroMemory( &si, sizeof(si) );
-    si.cb = sizeof(si);
-    ZeroMemory( &pi, sizeof(pi) );
-	
-//This is part of the redirection to console ->
-    si.dwFlags |= STARTF_USESTDHANDLES;
-    si.hStdInput = NULL;
-    si.hStdError = h;
-    si.hStdOutput = h;
-//-<
-
-	DWORD flags = CREATE_NO_WINDOW;
-
-    // Start the child process. 
-    if( !CreateProcessA( NULL,   // No module name (use command line)
-        command,        // Command line
-        NULL,           // Process handle not inheritable
-        NULL,           // Thread handle not inheritable
-        TRUE,          // Set handle inheritance to FALSE
-        flags,              // No creation flags
-        NULL,           // Use parent's environment block
-        _T(dir).c_str(),           // Use parent's starting directory 
-        &si,            // Pointer to STARTUPINFO structure
-        &pi )           // Pointer to PROCESS_INFORMATION structure
-    ) 
-    {
-        printf( "CreateProcess failed (%d).\n", GetLastError() );
-        return false;;
-    }
-
-    // Wait until child process exits.
-	WaitForSingleObject( pi.hProcess, INFINITE );
-
-    // Close process and thread handles. 
-    CloseHandle( pi.hProcess );
-    CloseHandle( pi.hThread );	
-	return true;
-}
-
-
-class OSEvaluator{
-	
-	private:
-	std::vector<STARTUPINFO> si;
-	std::vector<PROCESS_INFORMATION> pi;
-	
-	public:
-	OSEvaluator(int processes, std::string _evaluation_path):si(processes),pi(processes){
-		if (processes>0){
-		
-		//Initialize process information
-		for (int i=0;i<si.size();i++){
-			ZeroMemory( &(si[i]), sizeof(si[i]) );
-			si[i].cb = sizeof(si[i]);
-			ZeroMemory( &(pi[i]), sizeof(pi[i]) );
-		}
-		}
-		else{
-			std::cerr<<"Error in OSEvaluator!\n";
-		}
-		
-	}
-	template<class T>
-	void eval(std::string folder_path, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, int id, int iter){
-		
-  
-		std::cout<<"Evaluation Process started with with id: "<<id<<"\n";
-		
-		//std::cout<<"Created folder: "<<folder_path.c_str()<<"\n";
-		create_directories(folder_path,0); //TODO: Replace by std::filesystem of C++17
-		
-		
-		
-	//	std::cout<<"Did it work? "<<ret<<"\n";
-	}
-
-	
-};
 /*UNIX VERSIONS*/	
 #elif __APPLE__ || __linux__ || __unix__
 
@@ -270,7 +282,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 	public:
 	
 	ComputationMode(E* e, ConfigOutput _config_output, int _thread_count, std::string _table_directory):evaluation_class(e),config_computation(ConfigComputation::Local),config_output(_config_output),table_directory(_table_directory), thread_count(_thread_count){
-		std::cout<<"Pointer address inside at creation:"<<evaluation_class<<"\n";
+		//std::cout<<"Pointer address inside at creation:"<<evaluation_class<<"\n";
 		if (thread_count<=0){
 			std::cerr<<"ComputationMode error: Threadcount less than zero"; //TODO Assert statement
 			std::cin.get();
@@ -309,14 +321,14 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 
 			case ConfigOutput::File:
 			{
-				std::cout<<"Bin in  eval::ConfigComputation File!\n";
+				//std::cout<<"Bin in  eval::ConfigComputation File!\n";
 				res= schedule_and_eval_file(input,message,iter,"",true);
 				break;
 			}
 			
 		}
 		
-		std::cout<<"done evaluation\n";
+		//std::cout<<"done evaluation\n";
 		return res;
 	}
 	
@@ -338,7 +350,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 			
 		}
 		
-		std::cout<<"done specific evaluation\n";
+		//std::cout<<"done specific evaluation\n";
 		return res;
 	}	
 	
@@ -346,11 +358,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 	Evaluations are stored in the same order as the input files, i.e. input[i] corresponds to eval[i]
 	*/
 	std::vector<std::vector<T>> schedule_and_eval_file(const std::vector<EVarManager<T>>& input,std::string& message,int _iter,std::string folder_name,bool increase_iter){
-			
-				
-
-
-		
+	
 		//Scheduling the processes
 		size_t n=input.size(); //number of needed evaluations
 		auto start=input.begin();
@@ -363,7 +371,8 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		std::string folder_path=evaluation_path+"/iteration_"+std::to_string(_iter)+"/"+folder_name;
 		std::string shell_command="ugshell -ex "+table_directory+"/evaluate.lua";
 		std::cout<<"Shell command: "<<shell_command<<"\n";
-		if (n<thread_count){
+		//std::cout<<"n ist:"<<n;
+		if (n<=thread_count){
 			for (auto& x: input){
 				t[id]=std::thread(evaluate_os<T>,folder_path,shell_command, start+id,1,id,_iter,std::ref(message));
 				evals_per_thread[id]=1;
@@ -376,13 +385,14 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 			size_t rem=n%thread_count;
 			size_t id=0;
 			
-			for (size_t j=0;j<thread_count;j++){
+			for (size_t i=0;i<thread_count;i++){
+					evals_per_thread[i]=(i<rem)?m+1:m;
+					for (int j=1;j<=evals_per_thread[i];j++){
+						t[id]=std::thread(evaluate_os<T>,folder_path,shell_command, start+id,j,id,_iter,std::ref(message));
+						evals_per_thread[id]=j;
+				}
 				//os.eval<T>(folder_path+std::to_string(id),start+j*m,m,id,iter,message);
 				id++;
-			}
-			
-			if (rem != 0){
-				//os.eval<T>(folder_path+std::to_string(id),end-rem,rem,id,iter,message);
 			}
 			
 		}
@@ -392,7 +402,6 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		for (auto& x:t){
 			x.join();
 		}
-		std::cout<<"Wir fangen an\n";
 		//Parse results;
 		std::vector<std::vector<T>> result(n);
 		std::vector<int> rows(n);

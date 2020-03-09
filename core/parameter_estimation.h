@@ -28,7 +28,6 @@ namespace co{
 		std::vector<EVar64Manager> params;
 		params.push_back(parameters);
 		optimizer.run(params);
-		
 		return true;
 		
 	}

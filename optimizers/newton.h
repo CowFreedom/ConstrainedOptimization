@@ -7,6 +7,9 @@
 #include "loss_functions.h"
 #include <limits>
 #include <numeric>
+#include <sstream>
+#include <iomanip>
+
 //#include<chrono>
 //#include <mutex>
 
@@ -29,7 +32,41 @@ std::mutex g_display_mutex;
 			}
 			*/
 			
+			/*The number of displayed digits in res.precision depends on the numeric datatype*/
+		template<class T>
+		std::string print_info(const EVarManager<T>& vars,const std::vector<T>& J_T_J_inv_scaled, size_t iteration, T squared_error);
 			
+		template<>
+		std::string print_info<EFloat64>(const EVarManager<EFloat64>& vars,const std::vector<EFloat64>& J_T_J_inv_scaled, size_t iteration, EFloat64 squared_error){
+			std::ostringstream res;
+			res.precision(12); //dependent on type
+			
+			size_t m=vars.len();
+			const std::vector<EVar<EFloat64>>& params=vars.get_params();
+			const std::vector<std::string>& names=vars.get_names();
+			
+			std::vector<double> std_devs_inv(m,0.0);
+			
+			//Calculate variances for each parameter
+			for (int i=0;i<m;i++){
+				std_devs_inv[i]=1.0/sqrt(J_T_J_inv_scaled[i+i*m].get_v());
+			}
+			
+			res<<std::setw(30)<<std::left<<"Newton iteration: "<<iteration<<"\n";
+			res<<std::setw(30)<<std::left<<"Squared Error: "<<squared_error<<"\n";
+			res<<std::setw(30)<<std::left<<"Parameter"<<"|"<<std::setw(25)<<"Estimate"<<"|"<<std::setw(30)<<"Approx. Standard Error"<<"|"<<std::setw(20)<<"Approx. Correlation Matrix\n";
+			for (int i=0;i<m;i++){
+				res<<std::setw(30)<<std::left<<names[i]<<"|"<<std::setw(25)<<std::right<<params[i].get_value_as_double()<<"|"<<std::setw(30)<<sqrt(J_T_J_inv_scaled[i+i*m].get_v())<<"|";
+				for (int j=0;j<=i;j++){
+					res<<"\t"<<std::setw(13)<<std_devs_inv[i]*std_devs_inv[j]*J_T_J_inv_scaled[j+i*m].get_v();
+				}
+				res<<"\n";
+			}
+			
+			//for (size_t i=0;
+			return res.str();
+			
+		}			
 
 		template<class E>
 		class NewtonOptimizer{
@@ -55,7 +92,7 @@ std::mutex g_display_mutex;
 					auto& params=evaluations[0].get_params();
 					for (int i=0;i<current_res.size();i++){
 						current_res[i]=params[i].val+alpha*d[i];
-						std::cout<<"d["<<i<<"]:"<<d[i]<<"\n";
+						//std::cout<<"d["<<i<<"]:"<<d[i]<<"\n";
 					}
 
 					evaluations[0].update_parameters_cut(current_res);	
@@ -84,8 +121,8 @@ std::mutex g_display_mutex;
 					
 					
 					T f_sum1=std::inner_product(temp.begin(),temp.end(),grad_f.begin(),f_xn);
-					std::cout<<"f_alpha:"<<f_alpha<<"\nf_sum1:"<<f_sum1<<"\n alpha:"<<alpha<<"\nMSE:"<<f_alpha<<"\n";
-					std::cin.get();
+					//std::cout<<"f_alpha:"<<f_alpha<<"\nf_sum1:"<<f_sum1<<"\n alpha:"<<alpha<<"\nMSE:"<<f_alpha<<"\n";
+					//std::cin.get();
 					if (f_alpha<=f_sum1){
 						current_params=evaluations;
 						std::cout<<"Done wolfing\n";
@@ -100,23 +137,22 @@ std::mutex g_display_mutex;
 				return false;
 			}
 			
-						template<class T>
+			template<class T>
 			bool update_parameters_stepsize_smaller_var(const std::vector<T>& target_data,const std::vector<T>& target_times,const std::vector<T>& J, std::vector<T> d, std::vector<EVarManager<T>>& current_params, T s_n){
 				T alpha=T(1.0);
 				T c=T(1.0);
 				size_t j_n=target_data.size();
 				size_t j_m=J.size()/j_n;
-				T f_xn=s_n;
 				
 				std::vector<T> current_res=d;
 				size_t iter=0;
-				
+				std::cout<<"\n****Estimating stepsize****\n";
 				while (iter<15){
 					std::vector<EVarManager<T>> evaluations=current_params;
 					auto& params=evaluations[0].get_params();
 					for (int i=0;i<current_res.size();i++){
 						current_res[i]=params[i].val+alpha*d[i];
-						std::cout<<"d["<<i<<"]:"<<d[i]<<"\n";
+						//std::cout<<"d["<<i<<"]:"<<d[i]<<"\n";
 					}
 
 					evaluations[0].update_parameters_cut(current_res);	
@@ -124,12 +160,13 @@ std::mutex g_display_mutex;
 					std::vector<std::vector<T>> evals=evaluator.eval_specific(evaluations, target_times, "stepsize_smaller_var_evaluations/","Stepsize evaluation");
 					T f_alpha=ls::mse(evals[0], target_data);
 					
-					
-					std::cout<<"New MSE:"<<f_alpha<<"\nOld MSE:"<<s_n<<"\n";
+					std::cout<<"Current stepsize: "<<f_alpha.get_v()<<"\n";
+					std::cout<<"New SE:"<<f_alpha<<"\nOld SE:"<<s_n<<"****\n";
 					
 					if (f_alpha<=c*s_n){
 						current_params=evaluations;
-						std::cout<<"Done stepsize smaller var\n";
+						std::cout<<"Stepsize Finder: Done (new SE smaller than old MSE)\n";
+						std::cout<<"****Estimating stepsize done ****\n";
 						return true;
 					}
 					
@@ -184,7 +221,7 @@ std::mutex g_display_mutex;
 					sum+=x.abs();
 				}
 				std::cout<<"Has converged sum:"<<sum<<"\n";
-				if (sum<=T(0.00001)){
+				if (sum<=T(0.0001)){
 					std::cout<<"Has converged true!\n";
 					return true;
 				}
@@ -195,153 +232,157 @@ std::mutex g_display_mutex;
 
 			template<class T>
 			bool run(const std::vector<EVarManager<T>>& initial_params){
-			T delta=T(0.0001);
-			std::cout<<"Newton Optimizer started\n";
-			//load target data
-			std::vector<T> target_data;
-			std::vector<T> target_times;
-			evaluator.load_target(target_times,target_data);
-			std::vector<EVarManager<T>> parameters=initial_params;
-			//evaluate initial parameters
-			size_t j_n=target_data.size(); //height of jacobi matrix
-			size_t j_m=parameters[0].len(); //length of jacobi matrix
-			//x_n=evaluator.eval(initial_params,target_times)[0];
-			size_t iter=0;
-			bool run_finished=false;
-			
-			while ((run_finished==false )&& iter<20){
-				std::cout<<"Newton: Starting iteration "<<iter<<"\n";
-				std::vector<T> r_n;
-				T s_n;
-			
-				Derivative<ConfigDerivatives::FiniteDifferences,T> deriv(ls::err1,ls::mse); //change the finite differences into something agnostic
-				std::vector<T> J=deriv.get_jacobian(parameters, target_times,target_data,r_n,s_n,evaluator);
+				
+				T delta=T(0.0001);
+				//std::cout<<"Newton Optimizer started\n";
+				//load target data
+				std::vector<T> target_data;
+				std::vector<T> target_times;
+				evaluator.load_target(target_times,target_data);
+				std::vector<EVarManager<T>> parameters=initial_params;
+				//evaluate initial parameters
+				size_t j_n=target_data.size(); //height of jacobi matrix
+				size_t j_m=parameters[0].len(); //length of jacobi matrix
+				//x_n=evaluator.eval(initial_params,target_times)[0];
+				size_t iter=0;
+				bool run_finished=false;
+				
+				while ((run_finished==false )&& iter<40){
+					std::cout<<"Newton: Starting iteration "<<iter<<"\n";
+					std::vector<T> r_n;
+					T s_n;
+					Derivative<ConfigDerivatives::FiniteDifferences,T> deriv(ls::err1,ls::mse); //change the finite differences into something agnostic
+					std::vector<T> J=deriv.get_jacobian(parameters, target_times,target_data,r_n,s_n,evaluator);
 
-				evaluator.send_matrix(J,j_n,j_m, "jacobi_matrix"); //print Jacobi matrix (likely to file)
+					evaluator.send_matrix(J,j_n,j_m, "jacobi_matrix"); //print Jacobi matrix (likely to file)
+					
+					std::vector<T> J_T(j_n*j_m); //transpose of Jacobi matrix
+					transpose(J.begin(),J_T.begin(),j_n,j_m); //fill J_T with values
+					//evaluator.send_matrix(J_T,j_m,j_n, "jacobi_transpose");
+					//evaluator.send_matrix(J_T,j_m,j_n, "jacobi_transpose");
+					std::vector<T> J_T_J(j_m*j_m);
+					mul::dgemm_nn(j_m,j_m,j_n,T(1.0),J_T.begin(),1,j_n,J.begin(),1,j_m,T(0.0),J_T_J.begin(),1,j_m);
+					//evaluator.send_matrix(J_T_J,j_m,j_m, "jacobi_transpose_dot_jacobi");
 				
-				std::vector<T> J_T(j_n*j_m); //transpose of Jacobi matrix
-				transpose(J.begin(),J_T.begin(),j_n,j_m); //fill J_T with values
-				evaluator.send_matrix(J_T,j_m,j_n, "jacobi_transpose");
-				//evaluator.send_matrix(J_T,j_m,j_n, "jacobi_transpose");
-				std::vector<T> J_T_J(j_m*j_m);
-				mul::dgemm_nn(j_m,j_m,j_n,T(1.0),J_T.begin(),1,j_n,J.begin(),1,j_m,T(0.0),J_T_J.begin(),1,j_m);
-				evaluator.send_matrix(J_T_J,j_m,j_m, "jacobi_transpose_dot_jacobi");
-			
-				std::cout.precision(std::numeric_limits<double>::max_digits10);
-				/*
-				for (int i=0;i<j_m;i++){
-					for (int j=0;j<j_m;j++){
-						std::cout<<J_T_J[i*j_m+j].get_v()<<"   ";
+					std::cout.precision(std::numeric_limits<double>::max_digits10);
+					/*
+					for (int i=0;i<j_m;i++){
+						for (int j=0;j<j_m;j++){
+							std::cout<<J_T_J[i*j_m+j].get_v()<<"   ";
+						}
+						std::cout<<"\n";
 					}
-					std::cout<<"\n";
-				}
-				*/
-				
-				/*Optional start: Create inverse matrix to calculate covariance matrix*/
-				std::vector<T> J_T_J_inv(j_m*j_m);
-				dc::inverse_square_qr<T>(J_T_J.begin(), J_T_J_inv.begin(), j_m);
-				evaluator.send_matrix(J_T_J_inv,j_m,j_m, "jacobi_transpose_dot_jacobi_inverse");
-				T sigma=std::inner_product(r_n.begin(),r_n.end(),r_n.begin(),T(0.0))/(T(j_n-j_m));
-				dgms<typename std::vector<T>::iterator,T>(J_T_J_inv.begin(), J_T_J_inv.begin(),j_m, j_m, sigma);
-				evaluator.send_matrix(J_T_J_inv,j_m,j_m, "jacobi_transpose_dot_jacobi_inverse_scaled");
-				
-				//bis hier wurde kontrolliert
-				/*Optional end*/
-		
-				//Calculate R\deltatheta=-q1
-				std::vector<T> Qt(j_n*j_n);
-				std::vector<T> R(j_n*j_m);
-				dc::qr<typename std::vector<T>::iterator,T>(J.begin(), j_n, j_m, Qt.begin(), R.begin());
-								
-				
-			//	std::cout<<"nach qr\n";
-				std::vector<T> q1(j_n);
-				co::mul::dgemm_nn(j_n,1,j_n,T(1.0),Qt.begin(),1,j_n,r_n.begin(),1,1,T(0.0),q1.begin(),1,1); 
-			//	std::cout<<"nach mult\n";
-				std::vector<T> res(j_m);
-				/*
-				std::cout<<"\nq1\n";
-				for (auto& x:q1){
-					std::cout<<x<<"   ";
-				}
-				
+					*/
+					
+					/*Optional start: Create inverse matrix to calculate covariance matrix*/
+					std::vector<T> J_T_J_inv(j_m*j_m);
+					dc::inverse_square_qr<T>(J_T_J.begin(), J_T_J_inv.begin(), j_m);
+					//evaluator.send_matrix(J_T_J_inv,j_m,j_m, "jacobi_transpose_dot_jacobi_inverse");
+					T sigma=std::inner_product(r_n.begin(),r_n.end(),r_n.begin(),T(0.0))/(T(j_n-j_m));
+					dgms<typename std::vector<T>::iterator,T>(J_T_J_inv.begin(), J_T_J_inv.begin(),j_m, j_m, sigma);
+					evaluator.send_matrix(J_T_J_inv,j_m,j_m, "jacobi_transpose_dot_jacobi_inverse_scaled");
+					
+					//bis hier wurde kontrolliert
+					/*Optional end*/
+			
+					//Calculate R\deltatheta=-q1
+					std::vector<T> Qt(j_n*j_n);
+					std::vector<T> R(j_n*j_m);
+					dc::qr<typename std::vector<T>::iterator,T>(J.begin(), j_n, j_m, Qt.begin(), R.begin());
+									
+					
+				//	std::cout<<"nach qr\n";
+					std::vector<T> q1(j_n);
+					co::mul::dgemm_nn(j_n,1,j_n,T(1.0),Qt.begin(),1,j_n,r_n.begin(),1,1,T(0.0),q1.begin(),1,1); 
+				//	std::cout<<"nach mult\n";
+					std::vector<T> res(j_m);
+					/*
+					std::cout<<"\nq1\n";
+					for (auto& x:q1){
+						std::cout<<x<<"   ";
+					}
+					
 
-				std::cout<<"\nQt=\n";
-				//transpose(Qt.begin(),Qt.begin(),j_n,j_n);
-				for (int i=0;i<j_n;i++){
-					for (int j=0;j<j_n;j++){
-						std::cout<<Qt[i*j_n+j].get_v()<<"   ";
+					std::cout<<"\nQt=\n";
+					//transpose(Qt.begin(),Qt.begin(),j_n,j_n);
+					for (int i=0;i<j_n;i++){
+						for (int j=0;j<j_n;j++){
+							std::cout<<Qt[i*j_n+j].get_v()<<"   ";
+						}
+						std::cout<<"\n";
 					}
-					std::cout<<"\n";
-				}
-				std::cout<<"\nR=\n";
-				for (int i=0;i<j_n;i++){
-					for (int j=0;j<j_m;j++){
-						std::cout<<R[i*j_m+j].get_v()<<"   ";
+					std::cout<<"\nR=\n";
+					for (int i=0;i<j_n;i++){
+						for (int j=0;j<j_m;j++){
+							std::cout<<R[i*j_m+j].get_v()<<"   ";
+						}
+						std::cout<<"\n";
 					}
-					std::cout<<"\n";
+					
+					*/
+					
+					dgms<typename std::vector<T>::iterator,T>(q1.begin(), q1.begin(),j_m, 1, T(-1.0)); //q1=-q1
+					/*
+					std::cout<<"\nr_n\n";
+					for (auto& x:r_n){
+						std::cout<<x<<"   ";
+					}
+						std::cout<<"\n-q1\n";
+					for (auto& x:q1){
+						std::cout<<x<<"   ";
+					}
+					
+					*/
+					dc::backwards_substitution<T>(R.begin(),res.begin(), 1,q1.begin(), j_m);
+					/*
+					std::cout<<"\res\n";
+					for (auto& x:res){
+						std::cout<<x<<"   ";
+					}
+					
+					std::cout<<"Stop\n";
+					std::cin.get();
+					*/
+					/*std::cout<<"q1:\n";
+					
+					for (auto x:q1){
+						std::cout<<x<<"  ";
+					}
+					*/
+					//Update parameters
+					//std::cout<<"Parameter adjustment\n";
+				
+					run_finished=has_converged<T>(res);
+						
+					//Update parameters only if run is still ongoing
+					
+						//remove here start
+						
+					
+					
+					//std::cout<<"Wolfe condition comes now:\n";
+					//update_parameters_stepsize_wolfe_condition(target_data,target_times,J,res,parameters,s_n);
+					update_parameters_stepsize_smaller_var(target_data,target_times,J,res,parameters,s_n);
+					//std::cout<<"Wolfe over\n";
+					//update_parameters_stepsize_random(parameters,res);
+					std::string infos=print_info<T>(parameters[0],J_T_J_inv, iter,s_n);
+					evaluator.send_info(infos,"summary_of_estimation");
+					std::cout<<infos<<"\n";
+					
+					
+					
+					//std::cout<<"Run has finished: "<<run_finished<<"iteration:"<<iter<<"\n";
+					iter++;
 				}
-				
-				*/
-				
-				dgms<typename std::vector<T>::iterator,T>(q1.begin(), q1.begin(),j_m, 1, T(-1.0)); //q1=-q1
-				/*
-				std::cout<<"\nr_n\n";
-				for (auto& x:r_n){
-					std::cout<<x<<"   ";
-				}
-					std::cout<<"\n-q1\n";
-				for (auto& x:q1){
-					std::cout<<x<<"   ";
-				}
-				
-				*/
-				dc::backwards_substitution<T>(R.begin(),res.begin(), 1,q1.begin(), j_m);
-				/*
-				std::cout<<"\res\n";
-				for (auto& x:res){
-					std::cout<<x<<"   ";
-				}
-				
-				std::cout<<"Stop\n";
-				std::cin.get();
-				*/
-				/*std::cout<<"q1:\n";
-				
-				for (auto x:q1){
-					std::cout<<x<<"  ";
-				}
-				*/
-				//Update parameters
-				//std::cout<<"Parameter adjustment\n";
-			
-			run_finished=has_converged<T>(res);
-				
-			//Update parameters only if run is still ongoing
-			
-				//remove here start
-				
-			
-			
-			//std::cout<<"Wolfe condition comes now:\n";
-			//update_parameters_stepsize_wolfe_condition(target_data,target_times,J,res,parameters,s_n);
-			update_parameters_stepsize_smaller_var(target_data,target_times,J,res,parameters,s_n);
-			//std::cout<<"Wolfe over\n";
-			//update_parameters_stepsize_random(parameters,res);
 
-				
-				
-				
-				std::cout<<"Run has finished: "<<run_finished<<"iteration:"<<iter<<"\n";
-				iter++;
-			}
 						
 			evaluator.send_parameters(parameters[0], "These are the estimated parameters of the problem.");
 			
 			size_t num_threads=3;
+		
 			return true;
-			};
-			
+			}
+		
 		};
 		
 	

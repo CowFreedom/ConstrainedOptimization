@@ -90,6 +90,15 @@ namespace co{
 			w.write(path,params,description);
 			return true;
 		}
+		
+		bool send_info(std::string info, std::string description=""){
+			std::string path=computer.get_current_evaluation_path();
+			size_t iteration=computer.get_current_iteration()-1;
+			path+=std::string("/iteration_")+std::to_string(iteration)+"/";
+			Writer<T> w;
+			w.write_info(path,description+".txt",info);
+			return true;
+		}
 		/*just copies parse_csv_table_times. Needed for if ConfigComputation::File is set, so that computation_modes.h can parse the result
 		*/
 		bool parse(std::string& data_path, std::vector<T>& data){
@@ -119,7 +128,7 @@ namespace co{
 		bool parse_csv_table_times(std::string table_dir, std::string _outfile_name, std::vector<T>& data, std::vector<T>& times, std::string data_path="", int* _rows=0){
 			//std::cout<<"In Parse!\n";
 			std::string outfile_path=table_dir+'/'+_outfile_name; //use std filesystem later
-			std::cout<<"Parse outfilepath: "<<outfile_path<<"\n";
+			//std::cout<<"Parse: Lua table path "<<outfile_path<<"\n";
 			std::ifstream file(outfile_path);
 			std::stringstream buffer;
 			buffer << file.rdbuf();
@@ -158,7 +167,7 @@ namespace co{
 						inSelectedColumns=false;		
 				        std::vector<T> v;
 						std::string filepath= file_dir+'/'+filename; //path to file
-						std::cout<<"File path:"<<filepath<<"\n";
+						//std::cout<<"File path:"<<filepath<<"\n";
 						if(num_files==0){
 							std::vector<int> time_col;
 							time_col.push_back(selected_cols.front());

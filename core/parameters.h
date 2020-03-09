@@ -176,7 +176,7 @@ namespace co{
 							temp.push_back(EVar<T>(new_params[i],params[i].min,params[i].max));
 						}
 						else{
-							std::cerr<<"Error: Cannot update parameters\n";
+							std::cerr<<"Error: Cannot update parameters, as the range of the updated parameters exceed the domain of the variables.\n";
 							std::cin.get();
 							return false;
 						}
@@ -206,19 +206,32 @@ namespace co{
 								temp.push_back(EVar<T>(params[i].max,params[i].min,params[i].max));
 							}
 							else{
-								std::cerr<<"Error: Cannot update parameters\n";
-								std::cin.get();
+							
+								if ((new_params[i].get_v()>=params[i].min.get_v()) &&(new_params[i].get_v()<=params[i].max.get_v())){
+									std::cout<<"Parameter at unfeasible low and high bounds. Error boudns reset\n";
+									temp.push_back(EVar<T>(new_params[i],params[i].min,params[i].max));
+									T res=T(new_params[i].get_v());
+								}
+								
+								else{
+									std::cerr<<"Error: Cannot update parameters\n";
+									std::cout<<new_params[i].get_v();
+									std::cin.get();
+								}
+								
 								return false;
 							}
 							
 						}
 						
 					}
+					/*
 					std::cout<<"New parameters:\n";
 					for(auto& x: temp){
 						std::cout<<x <<"  ";
 					}
-					
+					std::cout<<"\n";
+					*/
 					params=temp;
 					return true;
 				}
