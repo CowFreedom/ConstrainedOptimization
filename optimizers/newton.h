@@ -28,7 +28,7 @@ std::mutex g_display_mutex;
   //  g_display_mutex.unlock();
 			
 			
-			std::cout<<"Thread with id "<<id<<"finished!\n";			
+			std::cout<<"Thread with id "<<id<<"finished!\ns";			
 			}
 			*/
 			
@@ -53,7 +53,7 @@ std::mutex g_display_mutex;
 			}
 			
 			res<<std::setw(30)<<std::left<<"Newton iteration: "<<iteration<<"\n";
-			res<<std::setw(30)<<std::left<<"Squared Error: "<<squared_error<<"\n";
+			res<<std::setw(30)<<std::left<<"Squared Error: "<<squared_error.get_v()<<"\n";
 			res<<std::setw(30)<<std::left<<"Parameter"<<"|"<<std::setw(25)<<"Estimate"<<"|"<<std::setw(30)<<"Approx. Standard Error"<<"|"<<std::setw(20)<<"Approx. Correlation Matrix\n";
 			for (int i=0;i<m;i++){
 				res<<std::setw(30)<<std::left<<names[i]<<"|"<<std::setw(25)<<std::right<<params[i].get_value_as_double()<<"|"<<std::setw(30)<<sqrt(J_T_J_inv_scaled[i+i*m].get_v())<<"|";
@@ -138,7 +138,7 @@ std::mutex g_display_mutex;
 			}
 			
 			template<class T>
-			bool update_parameters_stepsize_smaller_var(const std::vector<T>& target_data,const std::vector<T>& target_times,const std::vector<T>& J, std::vector<T> d, std::vector<EVarManager<T>>& current_params, T s_n){
+			bool update_parameters_stepsize_smaller_var(const std::vector<T>& target_data,const std::vector<T>& target_times,const std::vector<T>& J, std::vector<T> d, std::vector<EVarManager<T>>& current_params, T& s_n){
 				T alpha=T(1.0);
 				T c=T(1.0);
 				size_t j_n=target_data.size();
@@ -160,10 +160,11 @@ std::mutex g_display_mutex;
 					std::vector<std::vector<T>> evals=evaluator.eval_specific(evaluations, target_times, "stepsize_smaller_var_evaluations/","Stepsize evaluation");
 					T f_alpha=ls::mse(evals[0], target_data);
 					
-					std::cout<<"Current stepsize: "<<f_alpha.get_v()<<"\n";
+					std::cout<<"Current stepsize: "<<alpha.get_v()<<"\n";
 					std::cout<<"New SE:"<<f_alpha<<"\nOld SE:"<<s_n<<"****\n";
 					
 					if (f_alpha<=c*s_n){
+						s_n=f_alpha;
 						current_params=evaluations;
 						std::cout<<"Stepsize Finder: Done (new SE smaller than old MSE)\n";
 						std::cout<<"****Estimating stepsize done ****\n";
@@ -174,7 +175,7 @@ std::mutex g_display_mutex;
 					iter++;
 				
 				}
-				
+				std::cerr<<"No valid stepsize could be found within a limited number of iterations\n";
 				return false;
 			}
 			
@@ -219,6 +220,8 @@ std::mutex g_display_mutex;
 				
 				for (auto& x:res){
 					sum+=x.abs();
+					//std::cout<<x<<"\n";
+					//std::cin.get();
 				}
 				std::cout<<"Has converged sum:"<<sum<<"\n";
 				if (sum<=T(0.0001)){
@@ -232,7 +235,6 @@ std::mutex g_display_mutex;
 
 			template<class T>
 			bool run(const std::vector<EVarManager<T>>& initial_params){
-				
 				T delta=T(0.0001);
 				//std::cout<<"Newton Optimizer started\n";
 				//load target data
@@ -362,7 +364,10 @@ std::mutex g_display_mutex;
 					
 					//std::cout<<"Wolfe condition comes now:\n";
 					//update_parameters_stepsize_wolfe_condition(target_data,target_times,J,res,parameters,s_n);
-					update_parameters_stepsize_smaller_var(target_data,target_times,J,res,parameters,s_n);
+					bool success=update_parameters_stepsize_smaller_var(target_data,target_times,J,res,parameters,s_n);
+					if (success!=true){
+						break;
+					}
 					//std::cout<<"Wolfe over\n";
 					//update_parameters_stepsize_random(parameters,res);
 					std::string infos=print_info<T>(parameters[0],J_T_J_inv, iter,s_n);
@@ -375,12 +380,17 @@ std::mutex g_display_mutex;
 					iter++;
 				}
 
-						
+			if (run_finished){	
 			evaluator.send_parameters(parameters[0], "These are the estimated parameters of the problem.");
-			
+			std::cout<<"Newton procedure finished successfully.\n";
 			size_t num_threads=3;
 		
 			return true;
+			}
+			else{
+			std::cout<<"Newton procedure finished  unsuccessfully\n";
+				return false;
+			}
 			}
 		
 		};

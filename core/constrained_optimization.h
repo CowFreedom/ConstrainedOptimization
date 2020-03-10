@@ -1,14 +1,19 @@
 #pragma once
 #include<limits>
 #include <cstring>
+#include<thread>
 
 #include "parameters.h"
 
+
 namespace co{
+	
+	const unsigned NTHREADS_SUPPORTED = std::thread::hardware_concurrency();
 	
 	constexpr double max_double=std::numeric_limits<double>::max();
 	constexpr double infinity=std::numeric_limits<double>::infinity();
 	constexpr double machine_epsilon=std::numeric_limits<double>::epsilon()*0.5;
+	
 	/*Converts a double number to its bits. Useful for numerical
 	analysis in estimating floating point error*/
 	inline uint64_t double_to_bits(double f){

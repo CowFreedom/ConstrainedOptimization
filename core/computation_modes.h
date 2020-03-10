@@ -103,6 +103,8 @@ class OSEvaluator{
 		return pi;
 	}
 	
+	
+	
 	bool spawn_process_and_wait_to_join(std::string _command, std::string _working_directory, size_t id){
 	
 		LPSTR command=const_cast<LPSTR>(_command.c_str()); //for LPSTR we must lose const qualifier
@@ -199,9 +201,121 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		
 		
 	}
+}
+
+BOOL CreateProcessInJob(HANDLE hJob,LPCTSTR lpApplicationName,LPTSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes, LPSECURITY_ATTRIBUTES lpThreadAttributes,
+    BOOL bInheritHandles,DWORD dwCreationFlags, LPVOID lpEnvironment, LPCTSTR lpCurrentDirectory, LPSTARTUPINFO lpStartupInfo, LPPROCESS_INFORMATION ppi, LPTSTR log_path, size_t id)
+{
 	
+		//Create file handle to redirect console output to file
+	//See https://stackoverflow.com/questions/7018228/how-do-i-redirect-output-to-a-file-with-createprocess
+	
+	
+	   SECURITY_ATTRIBUTES sa;
+		sa.nLength = sizeof(sa);
+		sa.lpSecurityDescriptor = NULL;
+		sa.bInheritHandle = TRUE;       
+		
+		HANDLE h = CreateFile(log_path,
+			FILE_APPEND_DATA,
+			FILE_SHARE_WRITE | FILE_SHARE_READ,
+			&sa,
+			OPEN_ALWAYS,
+			FILE_ATTRIBUTE_NORMAL,
+			NULL );
 
 	
+	//This is part of the redirection to console ->
+	lpStartupInfo->dwFlags |= STARTF_USESTDHANDLES;
+	lpStartupInfo->hStdInput = NULL;
+	lpStartupInfo->hStdError = h;
+	lpStartupInfo->hStdOutput = h;
+	//-<
+	
+
+    BOOL fRc = CreateProcess(
+        lpApplicationName,
+        lpCommandLine,
+        lpProcessAttributes,
+        lpThreadAttributes,
+        bInheritHandles,
+        dwCreationFlags | CREATE_SUSPENDED,
+        lpEnvironment,
+        lpCurrentDirectory,
+        lpStartupInfo,
+        ppi);
+	
+    if (fRc) {
+        fRc = AssignProcessToJobObject(hJob, ppi->hProcess);
+        if (fRc && !(dwCreationFlags & CREATE_SUSPENDED)) {
+            fRc = ResumeThread(ppi->hThread) != (DWORD)-1;
+        }
+        if (!fRc) {
+            TerminateProcess(ppi->hProcess, 0);
+            CloseHandle(ppi->hProcess);
+            CloseHandle(ppi->hThread);
+            ppi->hProcess = ppi->hThread = nullptr;
+        }
+    }
+	else{
+			printf( "CreateProcess failed (%d).\n", GetLastError() );
+			return false;;
+	}
+	
+    return fRc;
+}
+
+template<class T>
+void evaluate_os2(const std::string& folder_path, const std::string& command, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, size_t id, size_t iter, std::string& message){
+	Writer<T> writer;
+	//std::cout<<"In evaluate os!\n";
+	
+	//Create Job Object
+	HANDLE hJob = CreateJobObject(nullptr, nullptr);
+	JOBOBJECT_EXTENDED_LIMIT_INFORMATION info = { };
+	info.BasicLimitInformation.LimitFlags =JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE; //Child processes should exit when parent exits
+	SetInformationJobObject(hJob,JobObjectExtendedLimitInformation,&info, sizeof(info));
+	
+	
+	for (int i=0;i<n;i++){
+		//Create directory
+		std::string path=folder_path+"id_"+std::to_string(id)+"/eval_"+std::to_string(i)+"/";
+		create_directories(path,0);
+		
+		writer.write(path,*(start+i),message);
+		
+		//Create process handles
+		PROCESS_INFORMATION pi;
+		STARTUPINFO si;
+		ZeroMemory( &si, sizeof(si) );
+		si.cb = sizeof(si);
+		ZeroMemory( &pi, sizeof(pi) );
+		
+
+		std::string log_path_string=path+"/console_output.log";
+		LPSTR cmd=const_cast<LPSTR>(command.c_str());
+		LPSTR working_directory=const_cast<LPSTR>(path.c_str());
+		LPSTR log_path=const_cast<LPSTR>(log_path_string.c_str());
+		BOOL handle_inheritance=TRUE; //If it is false, the redirected output to console_output.log is not working
+		if (CreateProcessInJob(hJob,
+			NULL,
+			 cmd,
+			 nullptr, nullptr, handle_inheritance, CREATE_NO_WINDOW,
+			 nullptr, working_directory, &si, &pi, log_path, id)) {
+			WaitForSingleObject( pi.hProcess, INFINITE );
+			CloseHandle(pi.hProcess);
+			CloseHandle(pi.hThread);
+		 }
+		 // Wait until child process exits.
+		
+		CloseHandle(hJob);
+		//OSEvaluator os;
+		//os.spawn_process_and_wait_to_join(command, path, id);
+		
+		//Spawn process
+		
+		
+	}
 }
 /*UNIX VERSIONS*/	
 #elif __APPLE__ || __linux__ || __unix__
@@ -366,7 +480,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		size_t id=0;
 		
 	//	OSEvaluator os(thread_count,evaluation_path);//Create Processes
-		std::vector<std::thread> t(n);//Create the threads
+		std::vector<std::thread> t(thread_count);//Create the threads
 		std::vector<size_t> evals_per_thread(n);
 		std::string folder_path=evaluation_path+"/iteration_"+std::to_string(_iter)+"/"+folder_name;
 		std::string shell_command="ugshell -ex "+table_directory+"/evaluate.lua";
@@ -374,7 +488,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		//std::cout<<"n ist:"<<n;
 		if (n<=thread_count){
 			for (auto& x: input){
-				t[id]=std::thread(evaluate_os<T>,folder_path,shell_command, start+id,1,id,_iter,std::ref(message));
+				t[id]=std::thread(evaluate_os2<T>,folder_path,shell_command, start+id,1,id,_iter,std::ref(message));
 				evals_per_thread[id]=1;
 				//os.eval<T>(folder_path+std::to_string(id),start+id,1,id,iter);
 				id++;

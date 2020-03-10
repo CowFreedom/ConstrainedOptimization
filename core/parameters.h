@@ -91,7 +91,7 @@ namespace co{
 					return EVar(EFloat64(0.0),EFloat64(0.0),EFloat64(0.0)); //TODO CHANGE 
 				}
 			}
-				
+
 			friend std::ostream& operator<<(std::ostream& os, const EVar<EFloat64>& v){
 			os<<"EVar64(value: "<<v.val<<",min: "<<double(v.min)<<",max: "<<double(v.max)<<")";
 			//os<<"EVar64("<<v.val<<","<<v.min<<","<<v.max<<")";
@@ -208,7 +208,7 @@ namespace co{
 							else{
 							
 								if ((new_params[i].get_v()>=params[i].min.get_v()) &&(new_params[i].get_v()<=params[i].max.get_v())){
-									std::cout<<"Parameter at unfeasible low and high bounds. Error boudns reset\n";
+									std::cout<<"Parameter at infeasible low and high bounds. Error bounds reset\n";
 									temp.push_back(EVar<T>(new_params[i],params[i].min,params[i].max));
 									T res=T(new_params[i].get_v());
 								}

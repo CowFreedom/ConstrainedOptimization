@@ -7,6 +7,8 @@
 #include "../evaluation_classes/biogas_evaluation.h"
 //#include <filesystem>
 
+extern const float version_number=0.3;
+
 namespace co{
 	
 	/*dir: directory where configuration files are
