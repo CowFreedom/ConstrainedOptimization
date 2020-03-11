@@ -480,13 +480,15 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		size_t id=0;
 		
 	//	OSEvaluator os(thread_count,evaluation_path);//Create Processes
-		std::vector<std::thread> t(thread_count);//Create the threads
+
+		std::vector<std::thread> t;//Create the threads
 		std::vector<size_t> evals_per_thread(n);
 		std::string folder_path=evaluation_path+"/iteration_"+std::to_string(_iter)+"/"+folder_name;
 		std::string shell_command="ugshell -ex "+table_directory+"/evaluate.lua";
 		std::cout<<"Shell command: "<<shell_command<<"\n";
 		//std::cout<<"n ist:"<<n;
 		if (n<=thread_count){
+			t.resize(n);
 			for (auto& x: input){
 				t[id]=std::thread(evaluate_os2<T>,folder_path,shell_command, start+id,1,id,_iter,std::ref(message));
 				evals_per_thread[id]=1;
@@ -495,6 +497,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 			}
 		}
 		else{
+			t.resize(thread_count);
 			size_t m=n/thread_count;
 			size_t rem=n%thread_count;
 			size_t id=0;
@@ -510,7 +513,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 			}
 			
 		}
-		
+		//	std::cout<<"bis hier\n";
 		//Wait for all threads to finish
 		//std::cout<<"Waiting on join\n";
 		for (auto& x:t){

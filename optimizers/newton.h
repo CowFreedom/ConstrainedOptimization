@@ -249,6 +249,7 @@ std::mutex g_display_mutex;
 				size_t iter=0;
 				bool run_finished=false;
 				
+		
 				while ((run_finished==false )&& iter<40){
 					std::cout<<"Newton: Starting iteration "<<iter<<"\n";
 					std::vector<T> r_n;

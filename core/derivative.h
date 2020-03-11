@@ -69,7 +69,7 @@ namespace co{
 			//std::cout<<"Jacobi evals done\n";
 			evaluations.push_back(w[0]); //f(x_n) should also be evaluated
 			std::vector<std::vector<F>> evals=evaluator.eval(evaluations, target_times, "Evaluating derivative");
-			evaluator.send_matrix(evals[0],evals[0].size(),1, "loaded_data");
+			evaluator.send_matrix(evals[n_evals],evals[n_evals].size(),1, "loaded_data");
 			//evaluator.send_matrix(evals[1],evals[1].size(),1, "loaded_data_deriv1");
 			//std::cout.precision(std::numeric_limits<double>::max_digits10);
 			//Now the vector

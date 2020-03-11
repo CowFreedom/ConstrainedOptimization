@@ -20,6 +20,7 @@ namespace co{
 		for (size_t i=0;i<x.size();i++){
 			sum+=(y[i]-x[i])*(y[i]-x[i]);
 		}
+		
 		return sum;
 	}
 	
