@@ -243,7 +243,9 @@ namespace co{
 				targettimes[0]=sourcetimes[0];
 			}
 			if(targettimes[nt-1]>sourcetimes[ns-1]){
-				std::cerr<<"Error: Sourcetimes smalller than targettimes";
+				std::cerr<<"Error: The target vector's last time value is higher than the source vectors last time value. This error is often caused by UG4 not finishing the computation. Check the most recent console_output.log in the respective evaluation folders.";
+				std::cin.get();
+				return false;
 			}
 			//sourcetimes[0]=targettimes[0]; //remove later. dont do it
 			//std::cout<<"Bis hier!\n";
@@ -251,7 +253,7 @@ namespace co{
 				//	std::cout<<"sourcetime[j]: "<< sourcetimes[j]<<"sourcetime[j+1]"<<sourcetimes[j+1]<<"  targettimes[i]"<<targettimes[i]<<"\n";
 				//	std::cout<<"nt-substract:"<<nt-substract<<"\n";
 					if (sourcetimes[j]>sourcetimes[j+1]){
-						std::cout<<"ERROR\n";
+						std::cout<<"Error: The sourcetimes vector is not monotonically increasing.\n";
 						std::cin.get();
 						return false;
 					}
