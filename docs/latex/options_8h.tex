@@ -1,0 +1,89 @@
+\hypertarget{options_8h}{}\doxysection{core/options.h File Reference}
+\label{options_8h}\index{core/options.h@{core/options.h}}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classco_1_1_options}{co\+::\+Options}}
+\item 
+class \mbox{\hyperlink{classco_1_1_newton_options}{co\+::\+Newton\+Options}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{options_8h_a5301f8e0d7ec4e6a71db4264a5cdac24}{co\+::\+Config\+Method}} \{ {\bfseries Newton}
+ \}
+\item 
+enum \mbox{\hyperlink{options_8h_ab1e3d9da62d4c30662c956cf641fe959}{co\+::\+Config\+Computation}} \{ {\bfseries Local}, 
+{\bfseries Cluster}
+ \}
+\item 
+enum \mbox{\hyperlink{options_8h_ad240f8f2302df8ff537f9adf3af1dc6a}{co\+::\+Config\+Evaluation}} \{ {\bfseries Biogas\+Evaluation}
+ \}
+\item 
+enum \mbox{\hyperlink{options_8h_ad6ad175646a82541a4f47cf428dbd645}{co\+::\+Config\+Derivatives}} \{ {\bfseries Finite\+Differences}
+ \}
+\item 
+enum \mbox{\hyperlink{options_8h_a0ee4dbb7d5183ef7c7bbb2431b3bd88f}{co\+::\+Config\+Output}} \{ {\bfseries File}
+ \}
+\item 
+enum \mbox{\hyperlink{options_8h_aa2b9fadcd704adc5f40d1c784305652c}{co\+::\+Config\+Mode}} \{ {\bfseries Debug}
+ \}
+\item 
+enum \mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{co\+::\+Error\+Code}} \{ \newline
+{\bfseries No\+Error}, 
+{\bfseries Path\+Error}, 
+{\bfseries Parse\+Error}, 
+{\bfseries Optimization\+Error}, 
+\newline
+{\bfseries Computation\+Error}
+ \}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+The only purpose of this file is to define settings and error codes that are used throughout the plugin. Optimizers are configured and report errors according to the enums and classes defined in this header. Noteworthy are the co\+::\+Config\+Output and co\+::\+Config\+Evaluation enums, as they are problem dependent and might significantly alter the behavior of the optimizers. 
+
+\doxysubsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{options_8h_ab1e3d9da62d4c30662c956cf641fe959}\label{options_8h_ab1e3d9da62d4c30662c956cf641fe959}} 
+\index{options.h@{options.h}!ConfigComputation@{ConfigComputation}}
+\index{ConfigComputation@{ConfigComputation}!options.h@{options.h}}
+\doxysubsubsection{\texorpdfstring{ConfigComputation}{ConfigComputation}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{options_8h_ab1e3d9da62d4c30662c956cf641fe959}{co\+::\+Config\+Computation}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+Usually used to indicate the computation method within an optimizers. Is part of the template definition of instances of evaluator.\+h classes. This affects how callbacks to U\+G4 or other systems are handled in order to evaluate function expressions f(x) that are problem specific. The evaluations can be done locally, which means all calculations are done on the same computer. Cluster evaluations on distributed systems are also possible, ergo not yet implemented (version 0.\+31). \mbox{\Hypertarget{options_8h_ad6ad175646a82541a4f47cf428dbd645}\label{options_8h_ad6ad175646a82541a4f47cf428dbd645}} 
+\index{options.h@{options.h}!ConfigDerivatives@{ConfigDerivatives}}
+\index{ConfigDerivatives@{ConfigDerivatives}!options.h@{options.h}}
+\doxysubsubsection{\texorpdfstring{ConfigDerivatives}{ConfigDerivatives}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{options_8h_ad6ad175646a82541a4f47cf428dbd645}{co\+::\+Config\+Derivatives}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+This is usually part of the template definition of an optimizer function like \mbox{\hyperlink{newton_8h}{newton.\+h}}. Indicates how derivatives should be calculated. \mbox{\Hypertarget{options_8h_ad240f8f2302df8ff537f9adf3af1dc6a}\label{options_8h_ad240f8f2302df8ff537f9adf3af1dc6a}} 
+\index{options.h@{options.h}!ConfigEvaluation@{ConfigEvaluation}}
+\index{ConfigEvaluation@{ConfigEvaluation}!options.h@{options.h}}
+\doxysubsubsection{\texorpdfstring{ConfigEvaluation}{ConfigEvaluation}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{options_8h_ad240f8f2302df8ff537f9adf3af1dc6a}{co\+::\+Config\+Evaluation}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+This is usually part of the template definition of an optimizer function like \mbox{\hyperlink{newton_8h}{newton.\+h}}. Indicates how function expressions f(x) should be evaluated. Usually all instances of Evaluation are values of this enum. See more in evaluations.\+h. \mbox{\Hypertarget{options_8h_a5301f8e0d7ec4e6a71db4264a5cdac24}\label{options_8h_a5301f8e0d7ec4e6a71db4264a5cdac24}} 
+\index{options.h@{options.h}!ConfigMethod@{ConfigMethod}}
+\index{ConfigMethod@{ConfigMethod}!options.h@{options.h}}
+\doxysubsubsection{\texorpdfstring{ConfigMethod}{ConfigMethod}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{options_8h_a5301f8e0d7ec4e6a71db4264a5cdac24}{co\+::\+Config\+Method}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+Usually used to indicate which optimizing algorithm should be used. Possible values are usually all optimizers supported by the plugin. \mbox{\Hypertarget{options_8h_aa2b9fadcd704adc5f40d1c784305652c}\label{options_8h_aa2b9fadcd704adc5f40d1c784305652c}} 
+\index{options.h@{options.h}!ConfigMode@{ConfigMode}}
+\index{ConfigMode@{ConfigMode}!options.h@{options.h}}
+\doxysubsubsection{\texorpdfstring{ConfigMode}{ConfigMode}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{options_8h_aa2b9fadcd704adc5f40d1c784305652c}{co\+::\+Config\+Mode}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+Usually indicates if an optimizer like \mbox{\hyperlink{newton_8h}{newton.\+h}} is run in Debug or Release mode. Debug mode might create diagnostic information but it is not guaranteed that values of this enum have an effect. \mbox{\Hypertarget{options_8h_a0ee4dbb7d5183ef7c7bbb2431b3bd88f}\label{options_8h_a0ee4dbb7d5183ef7c7bbb2431b3bd88f}} 
+\index{options.h@{options.h}!ConfigOutput@{ConfigOutput}}
+\index{ConfigOutput@{ConfigOutput}!options.h@{options.h}}
+\doxysubsubsection{\texorpdfstring{ConfigOutput}{ConfigOutput}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{options_8h_a0ee4dbb7d5183ef7c7bbb2431b3bd88f}{co\+::\+Config\+Output}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+This is usually used in computation\+\_\+modes.\+h to indicate what happens to results of function evaluations f(x). In some problem sets they are written to file which means they have to be parsed afterwards in order to be used in subsequent calculations. \mbox{\Hypertarget{options_8h_a3b446c9a001680777b38dc2783d4e47a}\label{options_8h_a3b446c9a001680777b38dc2783d4e47a}} 
+\index{options.h@{options.h}!ErrorCode@{ErrorCode}}
+\index{ErrorCode@{ErrorCode}!options.h@{options.h}}
+\doxysubsubsection{\texorpdfstring{ErrorCode}{ErrorCode}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{co\+::\+Error\+Code}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+Error enums to indicate failures or success in the program execution of this plugin. Used heavily for example in parse.\+h or \mbox{\hyperlink{parameter__estimation_8h}{parameter\+\_\+estimation.\+h}}. 

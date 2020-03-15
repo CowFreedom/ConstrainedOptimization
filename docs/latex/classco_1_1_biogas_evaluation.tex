@@ -1,0 +1,91 @@
+\hypertarget{classco_1_1_biogas_evaluation}{}\doxysection{co\+::Biogas\+Evaluation$<$ T, M $>$ Class Template Reference}
+\label{classco_1_1_biogas_evaluation}\index{co::BiogasEvaluation$<$ T, M $>$@{co::BiogasEvaluation$<$ T, M $>$}}
+
+
+{\ttfamily \#include $<$biogas\+\_\+evaluation.\+h$>$}
+
+Inheritance diagram for co\+::Biogas\+Evaluation$<$ T, M $>$\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classco_1_1_biogas_evaluation}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual std\+::vector$<$ std\+::vector$<$ T $>$ $>$ \mbox{\hyperlink{classco_1_1_biogas_evaluation_a98ce4eaf01406af903947df79fb18256}{eval}} (const std\+::vector$<$ E\+Var\+Manager$<$ T $>$$>$ \&v, const std\+::vector$<$ T $>$ \&target, \mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} \&e, std\+::string message=\char`\"{}\char`\"{})=0
+\item 
+\mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} \mbox{\hyperlink{classco_1_1_biogas_evaluation_a344eaa91a8fc2ba04cd279ad676d6cba}{load\+\_\+target}} (std\+::vector$<$ T $>$ \&t, std\+::vector$<$ T $>$ \&d)=0
+\item 
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_a936dea3499285cb36c97a192a7bb0abf}\label{classco_1_1_biogas_evaluation_a936dea3499285cb36c97a192a7bb0abf}} 
+std\+::vector$<$ std\+::vector$<$ T $>$ $>$ {\bfseries eval\+\_\+specific} (const std\+::vector$<$ E\+Var\+Manager$<$ T $>$$>$ \&v, const std\+::vector$<$ T $>$ \&\+\_\+target\+\_\+times, std\+::string folder\+\_\+name, \mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} \&e, std\+::string message=\char`\"{}\char`\"{})=0
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_a1e275064f0073a2a93ad73ddb0eb3b14}\label{classco_1_1_biogas_evaluation_a1e275064f0073a2a93ad73ddb0eb3b14}} 
+const \mbox{\hyperlink{options_8h_ab1e3d9da62d4c30662c956cf641fe959}{Config\+Computation}} {\bfseries computation\+\_\+mode} =M
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$class T, Config\+Computation M$>$\newline
+class co\+::\+Biogas\+Evaluation$<$ T, M $>$}
+
+This class represents how problems of the U\+G4 biogas\+\_\+app kind are evaluated. This specific example servers as an interface. For an implementation of this interface see \mbox{\hyperlink{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4}{Biogas\+Evaluation$<$\+T,\+Config\+Computation\+::\+Local$>$}}. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_a98ce4eaf01406af903947df79fb18256}\label{classco_1_1_biogas_evaluation_a98ce4eaf01406af903947df79fb18256}} 
+\index{co::BiogasEvaluation$<$ T, M $>$@{co::BiogasEvaluation$<$ T, M $>$}!eval@{eval}}
+\index{eval@{eval}!co::BiogasEvaluation$<$ T, M $>$@{co::BiogasEvaluation$<$ T, M $>$}}
+\doxysubsubsection{\texorpdfstring{eval()}{eval()}}
+{\footnotesize\ttfamily template$<$class T , Config\+Computation M$>$ \\
+virtual std\+::vector$<$std\+::vector$<$T$>$ $>$ \mbox{\hyperlink{classco_1_1_biogas_evaluation}{co\+::\+Biogas\+Evaluation}}$<$ T, M $>$\+::eval (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ E\+Var\+Manager$<$ T $>$$>$ \&}]{v,  }\item[{const std\+::vector$<$ T $>$ \&}]{target,  }\item[{\mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} \&}]{e,  }\item[{std\+::string}]{message = {\ttfamily \char`\"{}\char`\"{}} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Abstract class that represents evaluations of the objective function f(t). Target is needed as the parameter because the output vector might be tailored towards target as seen in tailor\+\_\+array in \mbox{\hyperlink{biogas__evaluation_8h}{biogas\+\_\+evaluation.\+h}}. The output is a vector of vectors as each E\+Var\+Manager v may need multiple evaluations (as done in derivative.\+h). The template parameter T represents the numeric datatype (such as E\+Float64) underlying the problem. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in,out}}  & {\em v} & Vector containing variables managed by an E\+Var\+Manager. \\
+\hline
+\mbox{\texttt{ in,out}}  & {\em target} & Vector containing values of the target. These are usually time values which are needed to tailor the time values of the simulation to experimental data. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Vector of vectors collecting evaluations for each variable pair in E\+Var\+Manager. 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4}{Biogas\+Evaluation$<$\+T,\+Config\+Computation\+::\+Local$>$}} For a specific implementation. ~\newline
+ 
+\end{DoxySeeAlso}
+
+
+Implements \mbox{\hyperlink{classco_1_1_evaluation_adebe73ab266c6bc267aa45dbd334aad2}{co\+::\+Evaluation$<$ T, M $>$}}.
+
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_a344eaa91a8fc2ba04cd279ad676d6cba}\label{classco_1_1_biogas_evaluation_a344eaa91a8fc2ba04cd279ad676d6cba}} 
+\index{co::BiogasEvaluation$<$ T, M $>$@{co::BiogasEvaluation$<$ T, M $>$}!load\_target@{load\_target}}
+\index{load\_target@{load\_target}!co::BiogasEvaluation$<$ T, M $>$@{co::BiogasEvaluation$<$ T, M $>$}}
+\doxysubsubsection{\texorpdfstring{load\_target()}{load\_target()}}
+{\footnotesize\ttfamily template$<$class T , Config\+Computation M$>$ \\
+\mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} \mbox{\hyperlink{classco_1_1_biogas_evaluation}{co\+::\+Biogas\+Evaluation}}$<$ T, M $>$\+::load\+\_\+target (\begin{DoxyParamCaption}\item[{std\+::vector$<$ T $>$ \&}]{t,  }\item[{std\+::vector$<$ T $>$ \&}]{d }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Abstract class that represents how problem data is loaded (like experimental data etc.). The data is saved in two containers. The first represent time data (the t values in a problem of the form f(t)) and the second codomain data (the function values resulting from f(t)). If the problem also includes spatial domain data x (like f(t,x)) a new function should probably be created that also saves this spatial data. The template parameter T represents the numeric datatype (such as E\+Float64) underlying the problem. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in,out}}  & {\em t} & Vector storing the time values of the problem. \\
+\hline
+\mbox{\texttt{ in,out}}  & {\em d} & Vector representing \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Error enum indicating the success of the loading operation. 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4}{Biogas\+Evaluation$<$\+T,\+Config\+Computation\+::\+Local$>$}} For a specific implementation. 
+\end{DoxySeeAlso}
+
+
+Implements \mbox{\hyperlink{classco_1_1_evaluation_a4e2443061b4b9c7a0961898409d8ad9f}{co\+::\+Evaluation$<$ T, M $>$}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+evaluation\+\_\+classes/\mbox{\hyperlink{biogas__evaluation_8h}{biogas\+\_\+evaluation.\+h}}\end{DoxyCompactItemize}

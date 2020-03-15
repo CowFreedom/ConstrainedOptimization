@@ -1,0 +1,118 @@
+\hypertarget{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4}{}\doxysection{co\+::Biogas\+Evaluation$<$ T, Config\+Computation\+::Local $>$ Class Template Reference}
+\label{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4}\index{co::BiogasEvaluation$<$ T, ConfigComputation::Local $>$@{co::BiogasEvaluation$<$ T, ConfigComputation::Local $>$}}
+
+
+{\ttfamily \#include $<$biogas\+\_\+evaluation.\+h$>$}
+
+Inheritance diagram for co\+::Biogas\+Evaluation$<$ T, Config\+Computation\+::Local $>$\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a960a5f71ccbe3058842b5355e760e986}\label{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a960a5f71ccbe3058842b5355e760e986}} 
+{\bfseries Biogas\+Evaluation} (std\+::string \+\_\+table\+\_\+dir, std\+::string \+\_\+infile\+\_\+name, std\+::string \+\_\+outfile\+\_\+name)
+\item 
+virtual std\+::vector$<$ std\+::vector$<$ T $>$ $>$ \mbox{\hyperlink{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_ac6081e5201f591226b112f1d2359a675}{eval}} (const std\+::vector$<$ E\+Var\+Manager$<$ T $>$$>$ \&v, const std\+::vector$<$ T $>$ \&\+\_\+target\+\_\+times, \mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} \&e, std\+::string message=\char`\"{}\char`\"{}) override
+\item 
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_aa309e98812c82f0ba57aa6183e049cc7}\label{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_aa309e98812c82f0ba57aa6183e049cc7}} 
+std\+::vector$<$ std\+::vector$<$ T $>$ $>$ {\bfseries eval\+\_\+specific} (const std\+::vector$<$ E\+Var\+Manager$<$ T $>$$>$ \&v, const std\+::vector$<$ T $>$ \&\+\_\+target\+\_\+times, std\+::string folder\+\_\+name, \mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} \&e, std\+::string message=\char`\"{}\char`\"{})
+\item 
+\mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} \mbox{\hyperlink{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a1110c56b71bee455050af339707bd1be}{load\+\_\+target}} (std\+::vector$<$ T $>$ \&t, std\+::vector$<$ T $>$ \&d) override
+\item 
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a341a31ceede8bf6f6c91a81430bc7fe7}\label{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a341a31ceede8bf6f6c91a81430bc7fe7}} 
+bool {\bfseries send\+\_\+matrix} (std\+::vector$<$ T $>$ \&jacobi, size\+\_\+t n, size\+\_\+t m, std\+::string description=\char`\"{}\char`\"{}) const
+\item 
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a7f2b8635a2e235ebfd3dd3df3410fc2b}\label{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a7f2b8635a2e235ebfd3dd3df3410fc2b}} 
+bool {\bfseries send\+\_\+parameters} (E\+Var\+Manager$<$ T $>$ \&params, std\+::string description=\char`\"{}\char`\"{})
+\item 
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a98df0981db2a8f81cd9808438fa2ca2e}\label{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a98df0981db2a8f81cd9808438fa2ca2e}} 
+bool {\bfseries send\+\_\+info} (std\+::string info, std\+::string description=\char`\"{}\char`\"{})
+\item 
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a0839dde47f458094b01250f9b0bce380}\label{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a0839dde47f458094b01250f9b0bce380}} 
+\mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} {\bfseries parse} (std\+::string \&data\+\_\+path, std\+::vector$<$ T $>$ \&data)
+\item 
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a112636a872537a8104e96c40a72156fd}\label{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a112636a872537a8104e96c40a72156fd}} 
+\mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} {\bfseries parse\+\_\+csv\+\_\+table\+\_\+times} (std\+::string table\+\_\+dir, std\+::string \+\_\+outfile\+\_\+name, std\+::vector$<$ T $>$ \&data, std\+::vector$<$ T $>$ \&times, std\+::string data\+\_\+path=\char`\"{}\char`\"{}, int $\ast$\+\_\+rows=0)
+\item 
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a7759d3f10eeaf5f31c4216c857e6c4a2}\label{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a7759d3f10eeaf5f31c4216c857e6c4a2}} 
+\mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} {\bfseries tailor\+\_\+array} (std\+::vector$<$ T $>$ \&targettimes, std\+::vector$<$ T $>$ \&sourcetimes, const std\+::vector$<$ T $>$ \&source, std\+::vector$<$ T $>$ \&storage, int cols)
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a37919837d2670d8c48274c3f1ade9641}\label{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a37919837d2670d8c48274c3f1ade9641}} 
+std\+::string {\bfseries outfile\+\_\+name}
+\item 
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a9d44a711cfe79a78e62e0c926fc9f855}\label{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a9d44a711cfe79a78e62e0c926fc9f855}} 
+std\+::vector$<$ T $>$ {\bfseries target\+\_\+times}
+\item 
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a3ad2b789293d87e54e29fd90b358c100}\label{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a3ad2b789293d87e54e29fd90b358c100}} 
+const \mbox{\hyperlink{options_8h_ab1e3d9da62d4c30662c956cf641fe959}{Config\+Computation}} {\bfseries computation\+\_\+mode} =Config\+Computation\+::\+Local
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$class T$>$\newline
+class co\+::\+Biogas\+Evaluation$<$ T, Config\+Computation\+::\+Local $>$}
+
+This class represents how problems of the U\+G4 biogas\+\_\+app kind are evaluated. This class can be reused for other problems that behave \char`\"{}similar\char`\"{} (in the sense of data loading, interpolation and evaluation) to the biogas\+\_\+app problem (which are many). Because the Config\+Computation enum is set to Local, all function evaluations in computation\+\_\+modes.\+h are local. Within the code the Config\+Output is set to File, which means it assumes that function evaluations f(t) are written to disk and must be parsed in order to be used. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_ac6081e5201f591226b112f1d2359a675}\label{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_ac6081e5201f591226b112f1d2359a675}} 
+\index{co::BiogasEvaluation$<$ T, ConfigComputation::Local $>$@{co::BiogasEvaluation$<$ T, ConfigComputation::Local $>$}!eval@{eval}}
+\index{eval@{eval}!co::BiogasEvaluation$<$ T, ConfigComputation::Local $>$@{co::BiogasEvaluation$<$ T, ConfigComputation::Local $>$}}
+\doxysubsubsection{\texorpdfstring{eval()}{eval()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+virtual std\+::vector$<$std\+::vector$<$T$>$ $>$ \mbox{\hyperlink{classco_1_1_biogas_evaluation}{co\+::\+Biogas\+Evaluation}}$<$ T, Config\+Computation\+::\+Local $>$\+::eval (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ E\+Var\+Manager$<$ T $>$$>$ \&}]{v,  }\item[{const std\+::vector$<$ T $>$ \&}]{target,  }\item[{\mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} \&}]{e,  }\item[{std\+::string}]{message = {\ttfamily \char`\"{}\char`\"{}} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Abstract class that represents evaluations of the objective function f(t). Target is needed as the parameter because the output vector might be tailored towards target as seen in tailor\+\_\+array in \mbox{\hyperlink{biogas__evaluation_8h}{biogas\+\_\+evaluation.\+h}}. The output is a vector of vectors as each E\+Var\+Manager v may need multiple evaluations (as done in derivative.\+h). The template parameter T represents the numeric datatype (such as E\+Float64) underlying the problem. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in,out}}  & {\em v} & Vector containing variables managed by an E\+Var\+Manager. \\
+\hline
+\mbox{\texttt{ in,out}}  & {\em target} & Vector containing values of the target. These are usually time values which are needed to tailor the time values of the simulation to experimental data. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Vector of vectors collecting evaluations for each variable pair in E\+Var\+Manager. 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4}{Biogas\+Evaluation$<$\+T,\+Config\+Computation\+::\+Local$>$}} For a specific implementation. ~\newline
+ 
+\end{DoxySeeAlso}
+
+
+Implements \mbox{\hyperlink{classco_1_1_evaluation_adebe73ab266c6bc267aa45dbd334aad2}{co\+::\+Evaluation$<$ T, Config\+Computation\+::\+Local $>$}}.
+
+\mbox{\Hypertarget{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a1110c56b71bee455050af339707bd1be}\label{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4_a1110c56b71bee455050af339707bd1be}} 
+\index{co::BiogasEvaluation$<$ T, ConfigComputation::Local $>$@{co::BiogasEvaluation$<$ T, ConfigComputation::Local $>$}!load\_target@{load\_target}}
+\index{load\_target@{load\_target}!co::BiogasEvaluation$<$ T, ConfigComputation::Local $>$@{co::BiogasEvaluation$<$ T, ConfigComputation::Local $>$}}
+\doxysubsubsection{\texorpdfstring{load\_target()}{load\_target()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+\mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} \mbox{\hyperlink{classco_1_1_biogas_evaluation}{co\+::\+Biogas\+Evaluation}}$<$ T, Config\+Computation\+::\+Local $>$\+::load\+\_\+target (\begin{DoxyParamCaption}\item[{std\+::vector$<$ T $>$ \&}]{t,  }\item[{std\+::vector$<$ T $>$ \&}]{d }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Abstract class that represents how problem data is loaded (like experimental data etc.). The data is saved in two containers. The first represent time data (the t values in a problem of the form f(t)) and the second codomain data (the function values resulting from f(t)). If the problem also includes spatial domain data x (like f(t,x)) a new function should probably be created that also saves this spatial data. The template parameter T represents the numeric datatype (such as E\+Float64) underlying the problem. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in,out}}  & {\em t} & Vector storing the time values of the problem. \\
+\hline
+\mbox{\texttt{ in,out}}  & {\em d} & Vector representing \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Error enum indicating the success of the loading operation. 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+\mbox{\hyperlink{classco_1_1_biogas_evaluation_3_01_t_00_01_config_computation_1_1_local_01_4}{Biogas\+Evaluation$<$\+T,\+Config\+Computation\+::\+Local$>$}} For a specific implementation. 
+\end{DoxySeeAlso}
+
+
+Implements \mbox{\hyperlink{classco_1_1_evaluation_a4e2443061b4b9c7a0961898409d8ad9f}{co\+::\+Evaluation$<$ T, Config\+Computation\+::\+Local $>$}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+evaluation\+\_\+classes/\mbox{\hyperlink{biogas__evaluation_8h}{biogas\+\_\+evaluation.\+h}}\end{DoxyCompactItemize}
