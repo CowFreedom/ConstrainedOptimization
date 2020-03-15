@@ -1,3 +1,33 @@
+/*! \mainpage Constrained Optimization Plugin for UG4
+ *
+ * \section intro_sec Overview
+ *
+ *The Constrained Optimization Plugin is a package consisting of various algorithms capable of optimizing functions with bounded domain. The following
+ *algorithms are currently implemented:
+ *File | Description
+ *------------- | -------------
+ *newton.h  | The Gauss Newton procedure minimizes functions that can be represented as a sum of squares.
+ *
+ * This package is under active development. This manual was created in March 2020 for version number 0.31.
+ 
+ *\subsection System Requirements
+ *Due to the usage of OS specific functions for process generation, the plugin is not necessarily multiplatform.
+ *In its current form, the package has been shown to work on Windows 10.  Two compilers were tested, GCC 9.2.0 and Visual Studio v16.3.10. It is assumed that the package also works for older compiler versions.
+ *Small experiments in Linux Fedora have also been conducted. The results were encouraging but Linux is officially not yet supported.
+ * For a list of bugs and recommended features see the page issues.
+ *
+
+ */
+
+/** \file parameter_estimation.h
+ * This file is used if the optimization functions are indirectly called.
+ * Indirectly means that the user only passes secondary information like path, options and
+ * shell commands instead of directly calling the optimization functions.
+ * The only work this file does is configuring the optimizers and reporting the
+ * status of the end result. Useful if the optimizers can be selected and configured
+ * based on user input.
+ */
+
 #pragma once
 #include<string>
 #include "options.h"
@@ -7,7 +37,8 @@
 #include "../evaluation_classes/biogas_evaluation.h"
 //#include <filesystem>
 
-extern const float version_number=0.3;
+extern const float version_number=0.31; /*!< Version number of the project. Higher numbers indicated more up-to-date versions. Contrary to the version counting procedure in e.g. Rust, the version number's digits do not
+give an indication about the severity of the updates. This means, that version 1.0 does not necessarily amount to significant changes compared to version 0.1.*/
 
 namespace co{
 	
@@ -29,6 +60,7 @@ namespace co{
 		
 		std::vector<EVar64Manager> params;
 		params.push_back(parameters);
+		
 		ErrorCode res=optimizer.run(params);
 		
 		switch (res){
@@ -49,7 +81,7 @@ namespace co{
 				break;
 			}
 			case ErrorCode::OptimizationError:{
-				std::cout<<"Newton procedure finished unsuccessfully to an error in the optimization procedure.\n";
+				std::cout<<"Newton procedure finished unsuccessfully due to an error in the optimization procedure.\n";
 				return false;
 				break;
 			}

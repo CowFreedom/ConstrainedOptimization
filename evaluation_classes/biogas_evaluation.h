@@ -1,3 +1,13 @@
+/** \file biogas_evaluation.h
+*This file defines a child class of the abstract base class Evaluation, which 
+*can be used by optimizers like newton.h. BiogasEvaluation defines how data is loaded and the target function to be optimized is evaluated
+*for the UG4 biogas_app problem.
+*This class can be reused for other problems that behave "similar" (in the sense of data loading, interpolation and evaluation) to the 
+*biogas_app problem (which are many).
+*As evaluation subclasses are not only dependent on the numeric type but also the computation mode ConfigComputation, different definitions of
+*BiogasEvaluation might be needed.
+*/
+
 #pragma once
 #include "evaluation.h"
 #include "../core/options.h"
@@ -9,10 +19,11 @@
 #include "../core/computation_modes.h"
 #include "../core/filewriter.h"
 
-//#include <filesystem>
-
 namespace co{
 
+	/*! This class represents how problems of the UG4 biogas_app kind are evaluated. This specific example servers as an interface. For an implementation of this
+	* interface see BiogasEvaluation<T,ConfigComputation::Local>.
+	*/
 	template<class T,ConfigComputation M>
 	class BiogasEvaluation: public Evaluation<T,M>{
 		public:
@@ -26,6 +37,10 @@ namespace co{
 		
 		};
 
+	/*! This class represents how problems of the UG4 biogas_app kind are evaluated. This class can be reused for other problems that behave "similar" (in the sense of data loading, interpolation and evaluation) to the 
+	* biogas_app problem (which are many).
+	* Because the ConfigComputation enum is set to Local, all function evaluations in computation_modes.h are local. Within the code
+	* the ConfigOutput is set to File, which means it assumes that function evaluations f(t) are written to disk and must be parsed in order to be used.*/*/
 	template<class T>
 	class BiogasEvaluation<T,ConfigComputation::Local>: public Evaluation<T,ConfigComputation::Local>{
 		
@@ -33,8 +48,6 @@ namespace co{
 		//std::vector<T> timepoints; //This vector is only used to tailor the sim vector accordingly.
 		std::string table_dir;
 		std::string infile_name;
-		
-
 		
 		ComputationMode<ConfigComputation::Local,BiogasEvaluation<T,ConfigComputation::Local>,T> computer; //evaluates inputs according to the model formulation TODO: Change threadcount (last argument)
 		
@@ -44,6 +57,9 @@ namespace co{
 		BiogasEvaluation(){
 			
 		}
+		
+		//void(*f)(const std::vector<T>&,const std::vector<T>&,std::vector<T>& result,int stride)=ls::err1;
+		//T(*s)(const std::vector<T>&,const std::vector<T>&)=ls::mse;
 		
 		BiogasEvaluation(std::string _table_dir,  std::string _infile_name, std::string _outfile_name):table_dir(_table_dir),infile_name(_infile_name), outfile_name(_outfile_name),computer(ComputationMode<ConfigComputation::Local,BiogasEvaluation<T,ConfigComputation::Local>,T>(this, ConfigOutput::File,NTHREADS_SUPPORTED,_table_dir)){
 			//computer=ComputationMode<ConfigComputation::Local,T>(ConfigOutput::File,4);
@@ -99,7 +115,7 @@ namespace co{
 			w.write_info(path,description+".txt",info);
 			return true;
 		}
-		/*just copies parse_csv_table_times. Needed for if ConfigComputation::File is set, so that computation_modes.h can parse the result
+		/*just copies parse_csv_table_times. Needed if ConfigComputation::File is set, so that computation_modes.h can parse the result
 		*/
 		ErrorCode parse(std::string& data_path, std::vector<T>& data){
 						
@@ -254,7 +270,6 @@ namespace co{
 				//	std::cout<<"nt-substract:"<<nt-substract<<"\n";
 					if (sourcetimes[j]>sourcetimes[j+1]){
 						std::cout<<"Error: The sourcetimes vector is not monotonically increasing.\n";
-						std::cin.get();
 						return ErrorCode::ParseError;
 					}
 					

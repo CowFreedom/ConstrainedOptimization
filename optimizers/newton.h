@@ -1,6 +1,12 @@
+/** \file newton.h
+ *The Gauss Newton procedure minimizes functions that can be represented as sums of squares. 
+ *While the implementation is generic and straightforward, instances of evaluation.h heavily 
+ *steer the way the actual compuation is done. 
+ *Currently three line search methods are implemented.
+ */
+
 #include "../core/options.h"
 #include "../core/parameters.h"
-#include <thread>
 #include "../core/constrained_optimization.h"
 #include "../core/transformation.h"
 #include "../core/derivative.h"
@@ -10,32 +16,39 @@
 #include <sstream>
 #include <iomanip>
 
-//#include<chrono>
-//#include <mutex>
-
-
 namespace co{
  
-/*
-std::mutex g_display_mutex;
-			void f1(){
-			std::thread::id id = std::this_thread::get_id();
- 
-    g_display_mutex.lock();
-		std::cout<<"Thread with id "<<id<<"started!\n";
-	std::this_thread::sleep_for(std::chrono::milliseconds(4000));	
-				  std::thread::id this_id = std::this_thread::get_id();
-  //  g_display_mutex.unlock();
+
 			
+		
 			
-			std::cout<<"Thread with id "<<id<<"finished!\ns";			
-			}
-			*/
-			
-			/*The number of displayed digits in res.precision depends on the numeric datatype*/
+		/**  
+		 Creates a string that stores information about the current Newton iteration.
+		 This information includes the values of the currently estimated parameters, error measures and 
+		 covariances. Because the number of digits saved in the string heavily depends on the width of the underlying numeric datatype, 
+		 the function is templatized.
+		 This entails that wider types save more digits while shorter types are stored with less precision.
+		 @param[in] vars The status of the variables of the current Newton iteration.
+		 @param[in] J_T_J_inv_scaled Inverse of first order Hessian approximation multiplied by the standard deviation. Serves as approximation to Covariance Matrix.
+		 @param[in] iteration Current Newton iteration
+		 @param[in] squared_error Estimated of squared error between the experimental data points and the simulated data points.
+		 \return String containing formatted information about the current optimization iteration
+		 */
 		template<class T>
 		std::string print_info(const EVarManager<T>& vars,const std::vector<T>& J_T_J_inv_scaled, size_t iteration, T squared_error);
 			
+		/**  
+		 Creates a string that stores information about the current Newton iteration for the EFloat64 datatype.
+		 This information includes the values of the currently estimated parameters, error measures and 
+		 covariances. Because EFloat64's underlying value type is a double, 12 digits of precision are saved.
+		 Please note that this does not mean that all 12 digits are reliable. Look at the low and high error bounds of the datatype
+		 to get an estimate of its true value.
+		 @param[in] vars The status of the variables of the current Newton iteration.
+		 @param[in] J_T_J_inv_scaled Inverse of first order Hessian approximation multiplied by the standard deviation. Serves as approximation to Covariance Matrix.
+		 @param[in] iteration Current Newton iteration
+		 @param[in] squared_error Estimated of squared error between the experimental data points and the simulated data points
+		 \return String containing formatted information about the current optimization iteration
+		 */
 		template<>
 		std::string print_info<EFloat64>(const EVarManager<EFloat64>& vars,const std::vector<EFloat64>& J_T_J_inv_scaled, size_t iteration, EFloat64 squared_error){
 			std::ostringstream res;
@@ -63,11 +76,11 @@ std::mutex g_display_mutex;
 				res<<"\n";
 			}
 			
-			//for (size_t i=0;
 			return res.str();
 			
 		}			
-
+		/*! This class represents an instance of the Newton Gauss algorithm. Instances of this class must be created if one wants to run the Newton Gauss algorithm.
+		Instances of evaluator.h steer the computation behavior while instances of co::Options internally configure the class.*/
 		template<class E>
 		class NewtonOptimizer{
 			
@@ -217,11 +230,17 @@ std::mutex g_display_mutex;
 			}
 			
 			public:
+			/*! Creates the class.
+			@param[in] _options Configures the Newton Gauss optimizer internally, such as choosing the derivative evaluation type (e.g. Finite Differences) and line search method.
+			@param[in] _evaluator Steers how data is loaded and evaluated (e.g. parsed from file, given from within UG4) */
 			NewtonOptimizer(const Options& _options, E& _evaluator):options(_options), evaluator(_evaluator){
 				
 			}
-			
-			//Checks if zero is found. In this case, a zero is found if the sum of /delta w is smaller than a threshold
+
+			/*! Checks if the Newton iterations have converged to a root. This is equal to having a descent direction whose magnitude is close to zero.
+			@param[in] res Value of the descent direction of the function to be evaluated. 
+			\return A bool indicating if iterations have converged.
+			*/
 			template<class T>
 			bool has_converged(const std::vector<T>& res){
 				T sum=T(0.0);
@@ -240,7 +259,10 @@ std::mutex g_display_mutex;
 					return false;
 				}
 			}
-
+			/*! Runs Gauss Newton's algorithm. Only this function has to be called to run the complete procedure.
+			@param[in] initial_params Initial parameters containing starting values for the procedure.
+			\return Code indicating success or failure of running the Newton procedure.
+			*/
 			template<class T>
 			ErrorCode run(const std::vector<EVarManager<T>>& initial_params){
 				T delta=T(0.0001);
