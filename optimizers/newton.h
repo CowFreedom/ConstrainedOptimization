@@ -96,8 +96,12 @@ std::mutex g_display_mutex;
 					}
 
 					evaluations[0].update_parameters_cut(current_res);	
-					
-					std::vector<std::vector<T>> evals=evaluator.eval_specific(evaluations, target_times, "wolfe_condition_evaluations/","Wolfe Condition evaluation");
+					ErrorCode eval_error;
+					std::vector<std::vector<T>> evals=evaluator.eval_specific(evaluations, target_times,"wolfe_condition_evaluations/", eval_error,"Wolfe Condition evaluation");
+					if(eval_error!=ErrorCode::NoError){
+						std::cout<<"Error evaluating the target function\n";
+						return false;
+					}
 					T f_alpha=ls::mse(evals[0], target_data);
 					
 					
@@ -156,8 +160,12 @@ std::mutex g_display_mutex;
 					}
 
 					evaluations[0].update_parameters_cut(current_res);	
-					
-					std::vector<std::vector<T>> evals=evaluator.eval_specific(evaluations, target_times, "stepsize_smaller_var_evaluations/","Stepsize evaluation");
+					ErrorCode eval_error;
+					std::vector<std::vector<T>> evals=evaluator.eval_specific(evaluations, target_times,"stepsize_smaller_var_evaluations/", eval_error,"Stepsize evaluation");
+					if(eval_error!=ErrorCode::NoError){
+						std::cout<<"Error evaluating the target function\n";
+						return false;
+					}
 					T f_alpha=ls::mse(evals[0], target_data);
 					
 					std::cout<<"Current stepsize: "<<alpha.get_v()<<"\n";
@@ -234,13 +242,19 @@ std::mutex g_display_mutex;
 			}
 
 			template<class T>
-			bool run(const std::vector<EVarManager<T>>& initial_params){
+			ErrorCode run(const std::vector<EVarManager<T>>& initial_params){
 				T delta=T(0.0001);
 				//std::cout<<"Newton Optimizer started\n";
 				//load target data
 				std::vector<T> target_data;
 				std::vector<T> target_times;
-				evaluator.load_target(target_times,target_data);
+				ErrorCode load_code=evaluator.load_target(target_times,target_data); //load target vector
+				if (load_code!=ErrorCode::NoError){
+					std::cerr<<"Error loading target data!\n";
+					return load_code;
+				}
+				
+				
 				std::vector<EVarManager<T>> parameters=initial_params;
 				//evaluate initial parameters
 				size_t j_n=target_data.size(); //height of jacobi matrix
@@ -255,7 +269,11 @@ std::mutex g_display_mutex;
 					std::vector<T> r_n;
 					T s_n;
 					Derivative<ConfigDerivatives::FiniteDifferences,T> deriv(ls::err1,ls::mse); //change the finite differences into something agnostic
-					std::vector<T> J=deriv.get_jacobian(parameters, target_times,target_data,r_n,s_n,evaluator);
+					ErrorCode eval_error;
+					std::vector<T> J=deriv.get_jacobian(parameters, target_times,target_data,r_n,s_n,evaluator,eval_error);
+					if(eval_error!=ErrorCode::NoError){
+						return eval_error;
+					}
 
 					evaluator.send_matrix(J,j_n,j_m, "jacobi_matrix"); //print Jacobi matrix (likely to file)
 					
@@ -383,14 +401,10 @@ std::mutex g_display_mutex;
 
 			if (run_finished){	
 			evaluator.send_parameters(parameters[0], "These are the estimated parameters of the problem.");
-			std::cout<<"Newton procedure finished successfully.\n";
-			size_t num_threads=3;
-		
-			return true;
+			return ErrorCode::NoError;
 			}
 			else{
-			std::cout<<"Newton procedure finished  unsuccessfully\n";
-				return false;
+				return ErrorCode::OptimizationError;
 			}
 			}
 		

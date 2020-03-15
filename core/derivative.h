@@ -24,7 +24,7 @@ namespace co{
 		
 		/*Get jacobi matrix evaluated at point w*/
 		template<class E>
-		std::vector<F> get_jacobian(const std::vector<EVarManager<F>>& w, const std::vector<F>& target_times,const std::vector<F>& target_data, std::vector<F>& r_n,F& s_n, E& evaluator){
+		std::vector<F> get_jacobian(const std::vector<EVarManager<F>>& w, const std::vector<F>& target_times,const std::vector<F>& target_data, std::vector<F>& r_n,F& s_n, E& evaluator, ErrorCode& e){
 			//std::vector<F> x_n=evaluator.eval(w,target_times)[0]; //x_n for f(x_n)
 			//std::cout<<"Get_jacobian_start\n";
 			size_t n_evals=w[0].len();
@@ -68,7 +68,7 @@ namespace co{
 			//evaluations.push_back();
 			//std::cout<<"Jacobi evals done\n";
 			evaluations.push_back(w[0]); //f(x_n) should also be evaluated
-			std::vector<std::vector<F>> evals=evaluator.eval(evaluations, target_times, "Evaluating derivative");
+			std::vector<std::vector<F>> evals=evaluator.eval(evaluations, target_times, e,"Evaluating derivative");
 			evaluator.send_matrix(evals[n_evals],evals[n_evals].size(),1, "loaded_data");
 			//evaluator.send_matrix(evals[1],evals[1].size(),1, "loaded_data_deriv1");
 			//std::cout.precision(std::numeric_limits<double>::max_digits10);

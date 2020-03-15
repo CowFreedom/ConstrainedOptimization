@@ -28,6 +28,13 @@ namespace co{
 		Debug
 	};
 	
+	enum class ErrorCode{
+		NoError,
+		PathError,
+		ParseError,
+		OptimizationError,
+		ComputationError,
+	};
 	
 	class Options{
 		private:

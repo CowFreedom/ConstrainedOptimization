@@ -10,11 +10,11 @@ int main(){
 	co::EVar<co::EFloat64> v_k_s_Propionic_Degradation(0.066,0.00001,0.95);
 	co::EVar<co::EFloat64> v_k_s_aceto_Methanogenesis(0.141,0.1,0.9);
 	co::EVar<co::EFloat64> v_general_decay_rate(8.3E-04,0.00001,0.9);
-	co::EVar<co::EFloat64> v_Acetic(0.138,0.1,15);
+	co::EVar<co::EFloat64> v_Acetic(0.138,0.1,1);
 
-	co::EVar<co::EFloat64> v_MO_acetoM(1.0,0.1,5);
-	co::EVar<co::EFloat64> v_MO_Propionic(1.0,0.1,5);
-	co::EVar<co::EFloat64> v_MO_ButyricValeric(1.0,0.1,5);	
+	co::EVar<co::EFloat64> v_MO_acetoM(1.0,0.8,5);
+	co::EVar<co::EFloat64> v_MO_Propionic(1.0,0.8,5);
+	co::EVar<co::EFloat64> v_MO_ButyricValeric(1.0,0.8,5);	
 
 	co::EVarManager<co::EFloat64> vars;
 	vars.add("k_m_Propionic_Degradation",v_k_m_Propionic_Degradation);

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "options.h"
+
 //Check if windows is installed
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #include <windows.h>
@@ -180,7 +182,7 @@ class OSEvaluator{
 };
 
 template<class T>
-void evaluate_os(const std::string& folder_path, const std::string& command, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, size_t id, size_t iter, std::string& message){
+void evaluate_os(const std::string& folder_path, const std::string& command, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, size_t id, size_t iter, std::string& message, ErrorCode& e){
 	Writer<T> writer;
 	//std::cout<<"In evaluate os!\n";
 	
@@ -266,7 +268,7 @@ BOOL CreateProcessInJob(HANDLE hJob,LPCTSTR lpApplicationName,LPTSTR lpCommandLi
 }
 
 template<class T>
-void evaluate_os2(const std::string& folder_path, const std::string& command, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, size_t id, size_t iter, std::string& message){
+void evaluate_os2(const std::string& folder_path, const std::string& command, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, size_t id, size_t iter, std::string& message, ErrorCode& e){
 	Writer<T> writer;
 	//std::cout<<"In evaluate os!\n";
 	
@@ -276,6 +278,7 @@ void evaluate_os2(const std::string& folder_path, const std::string& command, ty
 	info.BasicLimitInformation.LimitFlags =JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE; //Child processes should exit when parent exits
 	SetInformationJobObject(hJob,JobObjectExtendedLimitInformation,&info, sizeof(info));
 	
+	e=ErrorCode::NoError;
 	
 	for (int i=0;i<n;i++){
 		//Create directory
@@ -306,6 +309,11 @@ void evaluate_os2(const std::string& folder_path, const std::string& command, ty
 			CloseHandle(pi.hProcess);
 			CloseHandle(pi.hThread);
 		 }
+		 else{
+			 std::cerr<<"There was an error with CreateProcess\n";
+			 e=ErrorCode::ComputationError;
+			 break;
+		 }
 		 // Wait until child process exits.
 		
 		CloseHandle(hJob);
@@ -314,14 +322,13 @@ void evaluate_os2(const std::string& folder_path, const std::string& command, ty
 		
 		//Spawn process
 		
-		
 	}
 }
 /*UNIX VERSIONS*/	
 #elif __APPLE__ || __linux__ || __unix__
 
 /*Creates subdirectories. Horrible and inefficient function, should be replaced by filesystem::create_directories in C++17*/
-void create_directories(const std::string& s, int start){
+ErrorCode create_directories(const std::string& s, int start){
 	for(int i=start;i<s.size();i++){
 		if(s[i]=='/'||i==(s.size()-1)){
 			std::string substr=s.substr(0,i+1);
@@ -329,17 +336,19 @@ void create_directories(const std::string& s, int start){
 			mkdir(substr.c_str(),0777);//create folder in the given path (Windows OS function). second argument are security arguments
 		}
 	}
+	return ErrorCode::NoError;
 }
 
-bool spawn_process_and_wait_to_join(std::string _command, std::string _working_directory){
+bool spawn_process_and_wait_to_join(std::string _command, std::string _working_directory,ErrorCode& e){
 	std::string cmd="cd "+_working_directory+ "&& exec "+_command+ " >ug_output.log";
 	system(cmd.c_str());
+	e=ErrorCode::NoError;
 	return true;
 }
 
 
 template<class T>
-void evaluate_os(const std::string& folder_path, const std::string& command, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, size_t id, size_t iter, std::string& message){
+void evaluate_os(const std::string& folder_path, const std::string& command, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, size_t id, size_t iter, std::string& message, ErrorCode& e){
 	Writer<T> writer;
 	//std::cout<<"In evaluate os!\n";
 	for (int i=0;i<n;i++){
@@ -353,7 +362,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		writer.write(path,*(start+i),message);
 		
 		
-		spawn_process_and_wait_to_join(command, path);
+		spawn_process_and_wait_to_join(command, path,e);
 		//Spawn process
 		
 		
@@ -376,7 +385,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		const ConfigComputation config_computation;
 		const ConfigOutput config_output; //determines, if f will be invoked through cmd or function pointers directly
 		
-		std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& input, std::string message="");
+		std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& input, ErrorCode& e, std::string message="");
 	};
 	
 	
@@ -424,7 +433,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 	}
 	
 	//Evaluate the problem with the given input
-	std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& input,std::string message=""){
+	std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& input,ErrorCode& e,std::string message=""){
 		std::vector<std::vector<T>> res;
 		
 		switch(config_output){
@@ -436,7 +445,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 			case ConfigOutput::File:
 			{
 				//std::cout<<"Bin in  eval::ConfigComputation File!\n";
-				res= schedule_and_eval_file(input,message,iter,"",true);
+				res= schedule_and_eval_file(input,message,iter,"",true,e);
 				break;
 			}
 			
@@ -447,7 +456,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 	}
 	
 	//Evaluate a specific iteration and store into the folder name 
-	std::vector<std::vector<T>> eval_specific(const std::vector<EVarManager<T>>& input,std::string& folder_name, int _iter,std::string message=""){
+	std::vector<std::vector<T>> eval_specific(const std::vector<EVarManager<T>>& input,std::string& folder_name, int _iter,ErrorCode& e,std::string message=""){
 		std::vector<std::vector<T>> res;
 		
 		switch(config_output){
@@ -458,12 +467,11 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 
 			case ConfigOutput::File:
 			{
-				res= schedule_and_eval_file(input,message,_iter,folder_name,false);
+				res= schedule_and_eval_file(input,message,_iter,folder_name,false,e);
 				break;
 			}
 			
 		}
-		
 		//std::cout<<"done specific evaluation\n";
 		return res;
 	}	
@@ -471,7 +479,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 	/*Schedulees processes and evaluates them according to OS process methods
 	Evaluations are stored in the same order as the input files, i.e. input[i] corresponds to eval[i]
 	*/
-	std::vector<std::vector<T>> schedule_and_eval_file(const std::vector<EVarManager<T>>& input,std::string& message,int _iter,std::string folder_name,bool increase_iter){
+	std::vector<std::vector<T>> schedule_and_eval_file(const std::vector<EVarManager<T>>& input,std::string& message,int _iter,std::string folder_name,bool increase_iter,ErrorCode& e){
 	
 		//Scheduling the processes
 		size_t n=input.size(); //number of needed evaluations
@@ -480,7 +488,8 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		size_t id=0;
 		
 	//	OSEvaluator os(thread_count,evaluation_path);//Create Processes
-
+		std::vector<ErrorCode> error_codes(thread_count,ErrorCode::NoError);
+		e=ErrorCode::NoError; //In the beginning, there are no errors
 		std::vector<std::thread> t;//Create the threads
 		std::vector<size_t> evals_per_thread(n);
 		std::string folder_path=evaluation_path+"/iteration_"+std::to_string(_iter)+"/"+folder_name;
@@ -490,7 +499,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		if (n<=thread_count){
 			t.resize(n);
 			for (auto& x: input){
-				t[id]=std::thread(evaluate_os2<T>,folder_path,shell_command, start+id,1,id,_iter,std::ref(message));
+				t[id]=std::thread(evaluate_os2<T>,folder_path,shell_command, start+id,1,id,_iter,std::ref(message),std::ref(error_codes[id]));
 				evals_per_thread[id]=1;
 				//os.eval<T>(folder_path+std::to_string(id),start+id,1,id,iter);
 				id++;
@@ -505,7 +514,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 			for (size_t i=0;i<thread_count;i++){
 					evals_per_thread[i]=(i<rem)?m+1:m;
 					for (int j=1;j<=evals_per_thread[i];j++){
-						t[id]=std::thread(evaluate_os<T>,folder_path,shell_command, start+id,j,id,_iter,std::ref(message));
+						t[id]=std::thread(evaluate_os<T>,folder_path,shell_command, start+id,j,id,_iter,std::ref(message),std::ref(error_codes[id]));
 						evals_per_thread[id]=j;
 				}
 				//os.eval<T>(folder_path+std::to_string(id),start+j*m,m,id,iter,message);
@@ -525,18 +534,30 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		
 		//std::cout<<"Pointer address inside:"<<evaluation_class<<"\n";
 		//std::cout<<"Size targettimes inside:"<<(*evaluation_class).target_times.size()<<"\n";
-
 		int ids=0;
 		for (int i=0;i<id;i++){
+			if (error_codes[id]!=ErrorCode::NoError){
+				std::cerr<<"Error computing at least one evaluation (id"<<id<<")\n";
+				e=error_codes[id];
+				break;
+			}
 				for (int j=0;j<evals_per_thread[i];j++){
 					std::string data_path=folder_path+"id_"+std::to_string(i)+"/eval_"+std::to_string(j)+"/";
-					(*evaluation_class).parse(data_path,result[ids]);	
+					e=(*evaluation_class).parse(data_path,result[ids]);	
+					if (e!=ErrorCode::NoError){
+						std::cerr<<"Error parsing at least one computed evaluation (id "<<id<<")\n";
+						break;
+					}
+					
 					ids++;
 				}
 		}	
+
 		if(increase_iter==true){
 			iter++;
 		}
+		
+		
 		return result;
 		
 	}

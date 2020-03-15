@@ -29,7 +29,44 @@ namespace co{
 		
 		std::vector<EVar64Manager> params;
 		params.push_back(parameters);
-		optimizer.run(params);
+		ErrorCode res=optimizer.run(params);
+		
+		switch (res){
+			case ErrorCode::NoError:{
+				std::cout<<"Newton procedure finished successfully.\n";
+				return true;
+				break;
+				
+			}
+			case ErrorCode::ParseError:{
+				std::cout<<"Newton procedure finished unsuccessfully due to a error in parsing the data.\n";
+				return false;
+				break;
+			}
+			case ErrorCode::ComputationError:{
+				std::cout<<"Newton procedure finished successfully due to an error in the computation.\n";
+				return false;
+				break;
+			}
+			case ErrorCode::OptimizationError:{
+				std::cout<<"Newton procedure finished unsuccessfully to an error in the optimization procedure.\n";
+				return false;
+				break;
+			}
+			case ErrorCode::PathError:{
+				std::cout<<"Newton procedure finished unsuccessfully due to a path error.\n";
+				return false;
+				break;
+			}
+			default:{
+				std::cout<<"Newton procedure finished  unsuccessfully\n";
+				return false;
+				break;
+			}
+			
+		}
+		
+		
 		return true;
 		
 	}

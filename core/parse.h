@@ -31,8 +31,12 @@ namespace co{
 	delimiter: delimiting string
 	ParseType: Type to be parsed*/
 	template<class T>
-	bool parse_csv(std::string filepath, std::vector<T>& out,std::string delimiter){
+	ErrorCode parse_csv(std::string filepath, std::vector<T>& out,std::string delimiter){
 			std::ifstream file(filepath);
+			if (file.fail()){
+				std::cerr<<"Couldn't open  "<<filepath<<"\n";
+				return ErrorCode::ParseError;
+			}
 			std::string line;
 			//std::array<char,64> numbuf;
 			char numbuf[64];
@@ -69,7 +73,7 @@ namespace co{
 				}	
 
 			}
-			return true;	
+			return ErrorCode::NoError;	
 	}
 
 	/*Merges files in a given path. Merging is done sequentially in order of the input files.
@@ -82,8 +86,13 @@ namespace co{
 	rows: returns counted numbers of rows that do not start with "#" comments. Note: Empty rows will still be counted!
 */	
 	template<class T>
-	bool parse_csv_specific(std::string filepath, std::vector<T>& out,std::string delimiter, std::vector<int> cols){
+	ErrorCode parse_csv_specific(std::string filepath, std::vector<T>& out,std::string delimiter, std::vector<int> cols){
 			std::ifstream file(filepath);
+			if (file.fail()){
+				std::cerr<<"Couldn't open  "<<filepath<<"\n";
+				return ErrorCode::ParseError;
+			}
+
 			std::string line;
 			//std::array<char,64> numbuf;
 			char numbuf[64];
@@ -135,17 +144,20 @@ namespace co{
 				line_number++;
 			}
 			
-
-			return true;	
+			return ErrorCode::NoError;	
 	}
 	
 		/*Parses contents specified a table and saves them in joined_tables*/
 		template<class T>
-		bool parse_csv_table(std::string table_dir, std::string outfile_name, std::vector<T>& joined_tables){
+		ErrorCode parse_csv_table(std::string table_dir, std::string outfile_name, std::vector<T>& joined_tables){
 			std::cout<<"In Parse!\n";
 			std::string outfile_path=table_dir+'/'+outfile_name; //use std filesystem later
 			std::cout<<"Parse outfilepath: "<<outfile_path<<"\n";
 			std::ifstream file(outfile_path);
+			if (file.fail()){
+				std::cerr<<"Couldn't open parse input table at "<<outfile_path<<"\n";
+				return ErrorCode::ParseError;
+			}
 			std::stringstream buffer;
 			buffer << file.rdbuf();
 			std::string s=buffer.str();
@@ -178,7 +190,10 @@ namespace co{
 				        std::vector<double> v;
 						std::string filepath= table_dir+'/'+filename; //path to file
 						std::cout<<"File path:"<<filepath<<"\n";
-						co::parse_csv_specific(filepath,v," ",selected_cols);
+						ErrorCode file_error=co::parse_csv_specific(filepath,v," ",selected_cols);
+						if (file_error!=ErrorCode::NoError){
+							return file_error;
+						}
 						files.push_back(v);
 						cols.push_back(selected_cols.size());
 						rows=v.size()/selected_cols.size();
@@ -202,8 +217,8 @@ namespace co{
 					}
 				}
 			}
-			std::cout<<"Size JT:"<<joined_tables.size()<<"\n";
-			return true;
+			//std::cout<<"Size JT:"<<joined_tables.size()<<"\n";
+			return ErrorCode::NoError;
 		}
 	
 }

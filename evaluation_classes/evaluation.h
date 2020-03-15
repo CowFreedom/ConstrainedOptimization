@@ -16,10 +16,10 @@ namespace co{
 		const ConfigComputation computation_mode=M;
 		
 		/*Target is needed as the output vector might be tailored towards target*/
-		virtual std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& v, const std::vector<T>& target, std::string message="")=0;
+		virtual std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& v, const std::vector<T>& target, ErrorCode& e, std::string message="")=0;
 		
 		//t: target times, d= target data
-		virtual bool load_target(std::vector<T>& t,std::vector<T>& d)=0;
+		virtual ErrorCode load_target(std::vector<T>& t,std::vector<T>& d)=0;
 		
 
 		

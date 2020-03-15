@@ -18,11 +18,11 @@ namespace co{
 		public:
 		const ConfigComputation computation_mode=M;
 		
-		virtual std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& v, const std::vector<T>& target, std::string message="") =0;
+		virtual std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& v, const std::vector<T>& target, ErrorCode& e,std::string message="") =0;
 		
-		bool load_target(std::vector<T>& t,std::vector<T>& d)=0;
+		ErrorCode load_target(std::vector<T>& t,std::vector<T>& d)=0;
 		
-		std::vector<std::vector<T>> eval_specific(const std::vector<EVarManager<T>>& v,const std::vector<T>& _target_times,std::string folder_name, std::string message="")=0;
+		std::vector<std::vector<T>> eval_specific(const std::vector<EVarManager<T>>& v,const std::vector<T>& _target_times,std::string folder_name, ErrorCode& e,std::string message="")=0;
 		
 		};
 
@@ -51,25 +51,25 @@ namespace co{
 		}
 		const ConfigComputation computation_mode=ConfigComputation::Local;
 		
-		virtual std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& v,const std::vector<T>& _target_times, std::string message="") override{
+		virtual std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& v,const std::vector<T>& _target_times,ErrorCode& e, std::string message="") override{
 			//std::cout<<"Evaluiere!\n";
 			
 			//parse("D:/Documents/Programming/ug4/ug4/apps/parameter_estimation/estebis_downflow_pe","subset_output.lua");
 			
 			target_times=_target_times;
-			return computer.eval(v,message);
+			return computer.eval(v,e,message);
 		};
 		
-		std::vector<std::vector<T>> eval_specific(const std::vector<EVarManager<T>>& v,const std::vector<T>& _target_times, std::string folder_name, std::string message=""){
+		std::vector<std::vector<T>> eval_specific(const std::vector<EVarManager<T>>& v,const std::vector<T>& _target_times, std::string folder_name,ErrorCode& e, std::string message=""){
 			
 			target_times=_target_times;
-			return computer.eval_specific(v,folder_name,computer.get_current_iteration()-1,message);
+			return computer.eval_specific(v,folder_name,computer.get_current_iteration()-1,e,message);
 		};
 		
 		//d=data, t=targettimes
-		bool load_target(std::vector<T>& t,std::vector<T>& d) override{
-			parse_csv_table_times(table_dir,infile_name,d,t); //TODO Remove function arguments 
-			return true;
+		ErrorCode load_target(std::vector<T>& t,std::vector<T>& d) override{
+			ErrorCode ret=parse_csv_table_times(table_dir,infile_name,d,t); //TODO Remove function arguments 
+			return ret;
 			
 		}
 		
@@ -101,21 +101,17 @@ namespace co{
 		}
 		/*just copies parse_csv_table_times. Needed for if ConfigComputation::File is set, so that computation_modes.h can parse the result
 		*/
-		bool parse(std::string& data_path, std::vector<T>& data){
+		ErrorCode parse(std::string& data_path, std::vector<T>& data){
 						
 			std::vector<T> times;
 			std::vector<T> raw_data;
 			int rows;
-			bool ret=parse_csv_table_times(table_dir,outfile_name,raw_data, times, data_path, &rows);
+			ErrorCode ret=parse_csv_table_times(table_dir,outfile_name,raw_data, times, data_path, &rows);
 			int cols=raw_data.size()/rows;
-			/*std::cout<<"The cols are:"<<cols<<"\n";
-			std::cout<<"Size targettimes:"<<target_times.size()<<"\n";
-			std::cout<<"Size raw_data:"<<raw_data.size()<<"\n";
-			std::cout<<"Size data:"<<data.size()<<"\n";
-		
-			*/
-			tailor_array(target_times,times,raw_data,data,cols);
-			//(const std::vector<T>& targettimes, const std::vector<T>& sourcetimes, const std::vector<T>& source, std::vector<T>& storage, int cols)
+			//If parsing was successful, linearly interpolate data to target times
+			if (ret==ErrorCode::NoError){
+				ret=tailor_array(target_times,times,raw_data,data,cols);
+			}
 			return ret;
 		}
 		
@@ -125,11 +121,15 @@ namespace co{
 		The reason this is not in the parse.h file, is that other differential problems might have multiple variables (
 		as usual for PDE's). Therefore, this is implemented on a per-problem basis.
 		Datapath is the path of the data, if it differs from the paths in tabledir*/
-		bool parse_csv_table_times(std::string table_dir, std::string _outfile_name, std::vector<T>& data, std::vector<T>& times, std::string data_path="", int* _rows=0){
+		ErrorCode parse_csv_table_times(std::string table_dir, std::string _outfile_name, std::vector<T>& data, std::vector<T>& times, std::string data_path="", int* _rows=0){
 			//std::cout<<"In Parse!\n";
 			std::string outfile_path=table_dir+'/'+_outfile_name; //use std filesystem later
 			//std::cout<<"Parse: Lua table path "<<outfile_path<<"\n";
 			std::ifstream file(outfile_path);
+			if (file.fail()){
+				std::cerr<<"Couldn't open parse input table at "<<outfile_path<<"\n";
+				return ErrorCode::ParseError;
+			}
 			std::stringstream buffer;
 			buffer << file.rdbuf();
 			std::string s=buffer.str();
@@ -207,15 +207,15 @@ namespace co{
 				*_rows=rows; //assign outside rows to rows
 			}
 			
-			return true;
+			return ErrorCode::NoError;
 		}
 		
 		/*Linearly interpolates source into target  and saves it into storage
 		nt: length of target
 		ns: length of source
 		cols: number of columns in source!*/
-		bool tailor_array(std::vector<T>& targettimes, std::vector<T>& sourcetimes, const std::vector<T>& source, std::vector<T>& storage, int cols){
-			
+		ErrorCode tailor_array(std::vector<T>& targettimes, std::vector<T>& sourcetimes, const std::vector<T>& source, std::vector<T>& storage, int cols){
+	
 			int saved_rows=0;
 			int j=0;
 			int nt=targettimes.size();
@@ -244,8 +244,8 @@ namespace co{
 			}
 			if(targettimes[nt-1]>sourcetimes[ns-1]){
 				std::cerr<<"Error: The target vector's last time value is higher than the source vectors last time value. This error is often caused by UG4 not finishing the computation. Check the most recent console_output.log in the respective evaluation folders.";
-				std::cin.get();
-				return false;
+				//std::cin.get();
+				return ErrorCode::ParseError;
 			}
 			//sourcetimes[0]=targettimes[0]; //remove later. dont do it
 			//std::cout<<"Bis hier!\n";
@@ -255,7 +255,7 @@ namespace co{
 					if (sourcetimes[j]>sourcetimes[j+1]){
 						std::cout<<"Error: The sourcetimes vector is not monotonically increasing.\n";
 						std::cin.get();
-						return false;
+						return ErrorCode::ParseError;
 					}
 					
 					if ((sourcetimes[j]<=targettimes[i])&&(sourcetimes[j+1]>=targettimes[i])){
@@ -278,8 +278,7 @@ namespace co{
 				}
 			}
 		
-				
-			return true;
+			return ErrorCode::NoError;
 		}		
 
 };
