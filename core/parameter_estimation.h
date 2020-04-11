@@ -33,6 +33,7 @@
 #include "options.h"
 #include "parameters.h"
 #include "../optimizers/newton.h"
+#include "../optimizers/pso.h"
 #include "efloat.h"
 #include "../evaluation_classes/biogas_evaluation.h"
 //#include <filesystem>

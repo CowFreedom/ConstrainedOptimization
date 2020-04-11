@@ -65,7 +65,7 @@ namespace co{
 	
 	/*! This class collects different configuration enums. The configurations these enums represent are general
 	and not problem specific.
-	@see NewtonOptions Class collecting configurations specific to the Newton optimizer.*/*/
+	@see NewtonOptions Class collecting configurations specific to the Newton optimizer.*/
 	class Options{
 		private:
 		ConfigMethod config_method;

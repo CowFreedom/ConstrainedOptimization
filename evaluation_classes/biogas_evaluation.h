@@ -35,12 +35,18 @@ namespace co{
 		
 		std::vector<std::vector<T>> eval_specific(const std::vector<EVarManager<T>>& v,const std::vector<T>& _target_times,std::string folder_name, ErrorCode& e,std::string message="")=0;
 		
+		virtual void r_i(const std::vector<T>& x, const std::vector<T>& y, std::vector<T>& result,int stride)=0;
+		
+	
+		virtual T s(const std::vector<T>& x, const std::vector<T>& y)=0;
+
+		
 		};
 
 	/*! This class represents how problems of the UG4 biogas_app kind are evaluated. This class can be reused for other problems that behave "similar" (in the sense of data loading, interpolation and evaluation) to the 
 	* biogas_app problem (which are many).
 	* Because the ConfigComputation enum is set to Local, all function evaluations in computation_modes.h are local. Within the code
-	* the ConfigOutput is set to File, which means it assumes that function evaluations f(t) are written to disk and must be parsed in order to be used.*/*/
+	* the ConfigOutput is set to File, which means it assumes that function evaluations f(t) are written to disk and must be parsed in order to be used.*/
 	template<class T>
 	class BiogasEvaluation<T,ConfigComputation::Local>: public Evaluation<T,ConfigComputation::Local>{
 		
@@ -57,10 +63,51 @@ namespace co{
 		BiogasEvaluation(){
 			
 		}
+	/*	
+		virtual void r_i(const std::vector<T>& x, const std::vector<T>& y, std::vector<T>& result,int stride) override{	
+			for (size_t i=0;i<x.size();i++){
+				if (i%2 ==0){
+					result[i+stride]=(y[i]-x[i]);
+				}
+				else{
+					result[i+stride]=T(10.0)*(y[i]-x[i]);
+				}
+				
+			}			
+		}
+		*/
 		
-		//void(*f)(const std::vector<T>&,const std::vector<T>&,std::vector<T>& result,int stride)=ls::err1;
-		//T(*s)(const std::vector<T>&,const std::vector<T>&)=ls::mse;
+		virtual void r_i(const std::vector<T>& x, const std::vector<T>& y, std::vector<T>& result,int stride) override{	
+			for (size_t i=0;i<x.size();i++){
+				result[i+stride]=(y[i]-x[i]);
+			}			
+		}
 		
+		
+		virtual T s(const std::vector<T>& x, const std::vector<T>& y) override{
+			T sum=T(0.0);
+			for (size_t i=0;i<x.size();i++){
+				sum+=(y[i]-x[i])*(y[i]-x[i]);
+			}	
+			return sum;
+		}		
+		
+		
+	/*
+		virtual T s(const std::vector<T>& x, const std::vector<T>& y) override{
+			T sum=T(0.0);
+			for (size_t i=0;i<x.size();i++){
+				
+								if (i%2 ==0){
+					sum+=(y[i]-x[i])*(y[i]-x[i]);
+				}
+				else{
+					sum+=T(10.0)*(y[i]-x[i])*(y[i]-x[i]);
+				}
+			}	
+			return sum;
+		}
+		*/
 		BiogasEvaluation(std::string _table_dir,  std::string _infile_name, std::string _outfile_name):table_dir(_table_dir),infile_name(_infile_name), outfile_name(_outfile_name),computer(ComputationMode<ConfigComputation::Local,BiogasEvaluation<T,ConfigComputation::Local>,T>(this, ConfigOutput::File,NTHREADS_SUPPORTED,_table_dir)){
 			//computer=ComputationMode<ConfigComputation::Local,T>(ConfigOutput::File,4);
 			//std::cout<<"Pointer address outside at creation:"<<this<<"\n";
@@ -248,7 +295,7 @@ namespace co{
 				T t=(tc-t1)/(-t1+t2);
 				for (int k=0;k<cols;k++){
 				//std::cout<<"Bis hier: j: "<<j<<" saved_rows: "<<saved_rows<<" k:"<<k<<"\n";
-				storage[(nt-1)*cols+k]=source[(nt-1)*cols+k]*(T(1.0)-t)+source[(nt-1)*cols+k+1]*t;
+				storage[(nt-1)*cols+k]=source[(nt-2)*cols+k]*(T(1.0)-t)+source[(nt-1)*cols+k]*t;
 				}
 				substract=cols;
 			}

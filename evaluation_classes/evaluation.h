@@ -53,7 +53,9 @@ namespace co{
 		*/
 		virtual ErrorCode load_target(std::vector<T>& t,std::vector<T>& d)=0;
 		
-
+		virtual void r_i(const std::vector<T>& x, const std::vector<T>& y, std::vector<T>& result,int stride)=0;
+		
+		virtual T s(const std::vector<T>& x, const std::vector<T>& y)=0;	
 		
 	};
 }

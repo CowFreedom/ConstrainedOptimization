@@ -115,7 +115,7 @@ namespace co{
 						std::cout<<"Error evaluating the target function\n";
 						return false;
 					}
-					T f_alpha=ls::mse(evals[0], target_data);
+					T f_alpha=evaluator.s(evals[0], target_data);
 					
 					
 					std::vector<T> grad_f(j_m,T(0.0));
@@ -155,44 +155,77 @@ namespace co{
 			}
 			
 			template<class T>
-			bool update_parameters_stepsize_smaller_var(const std::vector<T>& target_data,const std::vector<T>& target_times,const std::vector<T>& J, std::vector<T> d, std::vector<EVarManager<T>>& current_params, T& s_n){
+			bool update_parameters_stepsize_smaller_var(const std::vector<T>& target_data,const std::vector<T>& target_times,const std::vector<T>& J, std::vector<T> d, std::vector<EVarManager<T>>& current_params, T& s_n,T& e_g2){
 				T alpha=T(1.0);
 				T c=T(1.0);
 				size_t j_n=target_data.size();
 				size_t j_m=J.size()/j_n;
-				
-				std::vector<T> current_res=d;
+				int n_threads=(NTHREADS_SUPPORTED-1>0)?(NTHREADS_SUPPORTED-1):1;
+				T scale=T(0.5);
+				T eps=T(1e-8);
+			
+				std::vector<T> alphas(n_threads);
 				size_t iter=0;
 				std::cout<<"\n****Estimating stepsize****\n";
-				while (iter<15){
-					std::vector<EVarManager<T>> evaluations=current_params;
-					auto& params=evaluations[0].get_params();
-					for (int i=0;i<current_res.size();i++){
-						current_res[i]=params[i].val+alpha*d[i];
+				T lam=T(0.9);
+				T d2=T(0.0);
+				for (int i=0;i<d.size();i++){
+					d2+=d[i]*d[i];
+				}
+ 				e_g2=lam*e_g2+(T(1.0)-lam)*d2;
+				while (iter<10){
+					//std::vector<EVarManager<T>> evaluations=current_params;
+					std::vector<EVarManager<T>> evaluations;
+					for (int i=0;i<n_threads;i++){
+						alphas[i]=alpha;
+						std::vector<T> current_res=d;
+						evaluations.push_back(current_params[0]);
+						auto& params=evaluations[i].get_params();
+						for (int i=0;i<current_res.size();i++){
+							T factor=(alpha/(e_g2+eps).sqrt());
+							current_res[i]=params[i].val+factor*d[i];
 						//std::cout<<"d["<<i<<"]:"<<d[i]<<"\n";
+						}
+						evaluations[i].update_parameters_cut(current_res);	
+						alpha=scale*alpha;
 					}
-
-					evaluations[0].update_parameters_cut(current_res);	
+					
 					ErrorCode eval_error;
 					std::vector<std::vector<T>> evals=evaluator.eval_specific(evaluations, target_times,"stepsize_smaller_var_evaluations/", eval_error,"Stepsize evaluation");
 					if(eval_error!=ErrorCode::NoError){
 						std::cout<<"Error evaluating the target function\n";
 						return false;
 					}
-					T f_alpha=ls::mse(evals[0], target_data);
+					std::vector<T> f_alphas(n_threads);
+					std::ostringstream output;
+					output.precision(6); //dependent on type
+					output<<"Old SE:"<<s_n<<"\n";
+					output<<std::setw(30)<<std::left<<"alpha value"<<"|"<<std::setw(30)<<"New Squared Error"<<"| \n";
+					T f_alpha=T(std::numeric_limits<double>::max());
+					int best_alpha=0;
+					for (int i=0;i<n_threads;i++){
+						T f_alpha_temp=evaluator.s(evals[i], target_data);
+						output<<std::setw(30)<<std::left<<(double) alphas[i]<<"|"<<std::setw(30)<<f_alpha_temp<<"|"<<"\n";
+						if (f_alpha_temp<=f_alpha){
+							f_alpha=f_alpha_temp;
+							best_alpha=i;
+						}
+					}
 					
-					std::cout<<"Current stepsize: "<<alpha.get_v()<<"\n";
-					std::cout<<"New SE:"<<f_alpha<<"\nOld SE:"<<s_n<<"****\n";
-					
+					output<<"\n";
+					output<<"Best SE:"<<f_alpha<<"\nOld SE:"<<s_n<<"****\n";
+					std::cout<<output.str();
 					if (f_alpha<=c*s_n){
 						s_n=f_alpha;
-						current_params=evaluations;
+						std::vector<EVarManager<T>> res;
+						res.push_back(evaluations[best_alpha]);
+						current_params=res;
 						std::cout<<"Stepsize Finder: Done (new SE smaller than old MSE)\n";
 						std::cout<<"****Estimating stepsize done ****\n";
 						return true;
 					}
 					
-					alpha=T(0.25)*alpha;
+					alpha=scale*alpha;
 					iter++;
 				
 				}
@@ -284,9 +317,9 @@ namespace co{
 				//x_n=evaluator.eval(initial_params,target_times)[0];
 				size_t iter=0;
 				bool run_finished=false;
-				
+				T e_g2=T(0.0); ;//adagrad like adaptive stepsize factor
 		
-				while ((run_finished==false )&& iter<40){
+				while ((run_finished==false )&& iter<4000){
 					std::cout<<"Newton: Starting iteration "<<iter<<"\n";
 					std::vector<T> r_n;
 					T s_n;
@@ -400,12 +433,13 @@ namespace co{
 					//Update parameters only if run is still ongoing
 					
 						//remove here start
-						
 					
+					//initialize adaptive step size
+
 					
 					//std::cout<<"Wolfe condition comes now:\n";
 					//update_parameters_stepsize_wolfe_condition(target_data,target_times,J,res,parameters,s_n);
-					bool success=update_parameters_stepsize_smaller_var(target_data,target_times,J,res,parameters,s_n);
+					bool success=update_parameters_stepsize_smaller_var(target_data,target_times,J,res,parameters,s_n,e_g2);
 					if (success!=true){
 						break;
 					}

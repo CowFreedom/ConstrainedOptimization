@@ -77,8 +77,8 @@ namespace co{
 			size_t stride=evals[0].size(); //number of data entries
 			std::vector<F> jacobi_matrix(n_evals*stride);
 			std::vector<F> res_x_n(stride); //evaluates r(x_n)
-			s_n=s(evals[n_evals],target_data); //evaluates original function
-			f(evals[n_evals], target_data, res_x_n,0);
+			s_n=evaluator.s(evals[n_evals],target_data); //evaluates original function
+			evaluator.r_i(evals[n_evals], target_data, res_x_n,0);
 			//std::cout<<"Jacobi: All Evals done\n";
 			
 			//std::cout.precision(std::numeric_limits<double>::max_digits10);
@@ -134,7 +134,7 @@ namespace co{
 			if (multiplier.size()>0){
 				for (size_t i=0;i<n_evals;i++){
 					std::vector<F> res_x_d(stride);
-					f(evals[i], target_data, res_x_d,0);
+					evaluator.r_i(evals[i], target_data, res_x_d,0);
 					if (multiplier[iter]!=i){
 							for (size_t j=0;j<stride;j++){
 								//std::cout<<"Parameter "<<i<<"   "<<res_x_d[j]<<" minus "<<res_x_n[j]<<"\n";
@@ -157,7 +157,7 @@ namespace co{
 			else{
 				for (size_t i=0;i<n_evals;i++){
 				std::vector<F> res_x_d(stride);
-				f(evals[i], target_data, res_x_d,0);
+				evaluator.r_i(evals[i], target_data, res_x_d,0);
 				for (size_t j=0;j<stride;j++){
 							//std::cout<<"Parameter "<<i<<"   "<<res_x_d[j]<<" minus "<<res_x_n[j]<<"\n";
 							//std::cout<<"Result: "<<(res_x_d[j]-res_x_n[j])/delta<<"\n";
