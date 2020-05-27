@@ -93,9 +93,9 @@ namespace co{
 				int n=position.size();
 				std::vector<T> g(n);
 				double radius=0.0;
-				std::cout<<"n:"<<n<<"\n";
-				std::cout<<"personal best n"<<personal_best_position.size()<<"\n";
-				std::cout<<"local best_position n"<<local_best_position.size()<<"\n";
+				//std::cout<<"n:"<<n<<"\n";
+				//std::cout<<"personal best n"<<personal_best_position.size()<<"\n";
+				//std::cout<<"local best_position n"<<local_best_position.size()<<"\n";
 				T divisor=T(1.0)/T(3.0);
 				bool schranke =true;
 				for (int i=0;i<n;i++){
@@ -131,7 +131,7 @@ namespace co{
 				std::random_device rd;  //Will be used to obtain a seed for the random number engine
 				std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
 				std::vector<T> position_new(n);
-			std::cout<<"Id:"<<id<<" with radius: "<<sqrt(radius)<<"\n";
+		//	std::cout<<"Id:"<<id<<" with radius: "<<sqrt(radius)<<"\n";
 				std::uniform_real_distribution<> dis(-radius, radius); //suboptimal, n dimensional normal distribution generated
 				for (int i=0;i<n;i++){	
 					position_new[i]=g[i]+T(dis(gen)); //b
@@ -316,7 +316,7 @@ namespace co{
 			std::vector<T> p_min(n_groups,T(std::numeric_limits<double>::max()));
 			std::vector<std::vector<T>> lp_pos(n_groups);//local_best_position
 			std::vector<int> min_id(n_groups);
-			std::cout<<"lp_pos size: "<<lp_pos.size();
+			//std::cout<<"lp_pos size: "<<lp_pos.size();
 			//initialize local fitness
 			for (int i=0;i<n_particles;i++){
 				int group_id=_particles[i].get_group_id();
@@ -430,15 +430,15 @@ namespace co{
 					
 				for (int i=0;i<n_particles;i++){
 					std::vector<T> temp;
-					std::cout<<"i in redraw_topology false: "<<i<<"\n";
+					//std::cout<<"i in redraw_topology false: "<<i<<"\n";
 					int group_id=particles[i].get_group_id();
-					std::cout<<"vor update direction\n";
+				//	std::cout<<"vor update direction\n";
 					particles[i].update_direction(target_data,bounds,evaluations[i],param_names,local_best_position[group_id]);
 					
 				}
 				}
 				else{
-					std::cout<<"!!!Redraw topology!!!\n";
+					//std::cout<<"!!!Redraw topology!!!\n";
 					redraw_topology=false;
 					for (int i=0;i<n_particles;i++){
 						particles[i].update_direction_random(bounds,evaluations[i],param_names);
