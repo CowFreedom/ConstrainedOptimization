@@ -31,11 +31,13 @@ to the build process for ug4. Within your UG4 install library, go to
 and open 
     ug_includes.cmake
 Now search for
+```
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	   add_cxx_flag("-Wall")
 	   add_cxx_flag("-Wno-multichar")
 	   add_cxx_flag("-Wno-unused-local-typedefs")
 	   add_cxx_flag("-Wno-maybe-uninitialized")
+```
 and add 
 
     add_cxx_flag("-pthread")
@@ -52,9 +54,11 @@ to the build process for ug4. Within your UG4 install library, go to
 and open 
     ug_includes.cmake
 Now search for
+```
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 	    add_cxx_flag("-Wall")
 	    add_cxx_flag("-Wno-multichar")
+```
 and add 
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
