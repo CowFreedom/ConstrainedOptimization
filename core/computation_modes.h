@@ -182,7 +182,7 @@ class OSEvaluator{
 };
 
 template<class T>
-void evaluate_os(const std::string& folder_path, const std::string& command, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, size_t id, size_t iter, std::string& message, ErrorCode& e){
+void evaluate_os_old(const std::string& folder_path, const std::string& command, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, size_t id, size_t iter, std::string& message, ErrorCode& e){
 	Writer<T> writer;
 	//std::cout<<"In evaluate os!\n";
 	
@@ -268,15 +268,11 @@ BOOL CreateProcessInJob(HANDLE hJob,LPCTSTR lpApplicationName,LPTSTR lpCommandLi
 }
 
 template<class T>
-void evaluate_os2(const std::string& folder_path, const std::string& command, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, size_t id, size_t iter, std::string& message, ErrorCode& e){
+void evaluate_os(const std::string& folder_path, const std::string& command, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, size_t id, size_t iter, std::string& message, ErrorCode& e){
 	Writer<T> writer;
 	//std::cout<<"In evaluate os!\n";
 	
-	//Create Job Object
-	HANDLE hJob = CreateJobObject(nullptr, nullptr);
-	JOBOBJECT_EXTENDED_LIMIT_INFORMATION info = { };
-	info.BasicLimitInformation.LimitFlags =JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE; //Child processes should exit when parent exits
-	SetInformationJobObject(hJob,JobObjectExtendedLimitInformation,&info, sizeof(info));
+
 	
 	e=ErrorCode::NoError;
 	
@@ -286,6 +282,14 @@ void evaluate_os2(const std::string& folder_path, const std::string& command, ty
 		create_directories(path,0);
 		
 		writer.write(path,*(start+i),message);
+		
+		
+		
+		//Create Job Object
+		HANDLE hJob = CreateJobObject(nullptr, nullptr);
+		JOBOBJECT_EXTENDED_LIMIT_INFORMATION info = { };
+		info.BasicLimitInformation.LimitFlags =JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE; //Child processes should exit when parent exits
+		SetInformationJobObject(hJob,JobObjectExtendedLimitInformation,&info, sizeof(info));
 		
 		//Create process handles
 		PROCESS_INFORMATION pi;
@@ -341,7 +345,7 @@ ErrorCode create_directories(const std::string& s, int start){
 
 bool spawn_process_and_wait_to_join(std::string _command, std::string _working_directory,ErrorCode& e){
 	std::string cmd="cd "+_working_directory+ "&& exec "+_command+ " >ug_output.log";
-	system(cmd.c_str());
+	int res=system(cmd.c_str());
 	e=ErrorCode::NoError;
 	return true;
 }
@@ -349,18 +353,18 @@ bool spawn_process_and_wait_to_join(std::string _command, std::string _working_d
 
 template<class T>
 void evaluate_os(const std::string& folder_path, const std::string& command, typename std::vector<EVarManager<T>>::const_iterator start, size_t n, size_t id, size_t iter, std::string& message, ErrorCode& e){
+
 	Writer<T> writer;
 	//std::cout<<"In evaluate os!\n";
 	for (int i=0;i<n;i++){
-	
 		//Create directory
 		std::string path=folder_path+"id_"+std::to_string(id)+"/eval_"+std::to_string(i)+"/";
+
 		create_directories(path,0);
 		//std::filesystem::create_directories(path);
 		//write previous parameters
 		//std::cout<<path<<"\n";
 		writer.write(path,*(start+i),message);
-		
 		
 		spawn_process_and_wait_to_join(command, path,e);
 		//Spawn process
@@ -368,6 +372,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		
 	}
 }
+
 
 
 #endif
@@ -488,7 +493,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		size_t id=0;
 		
 	//	OSEvaluator os(thread_count,evaluation_path);//Create Processes
-		std::vector<ErrorCode> error_codes(thread_count,ErrorCode::NoError);
+		std::vector<ErrorCode> error_codes(n,ErrorCode::NoError);
 		e=ErrorCode::NoError; //In the beginning, there are no errors
 		std::vector<std::thread> t;//Create the threads
 		std::vector<size_t> evals_per_thread(n);
@@ -499,26 +504,30 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		if (n<=thread_count){
 			t.resize(n);
 			for (auto& x: input){
-				t[id]=std::thread(evaluate_os2<T>,folder_path,shell_command, start+id,1,id,_iter,std::ref(message),std::ref(error_codes[id]));
+				t[id]=std::thread(evaluate_os<T>,folder_path,shell_command, start+id,1,id,_iter,std::ref(message),std::ref(error_codes[id]));
 				evals_per_thread[id]=1;
 				//os.eval<T>(folder_path+std::to_string(id),start+id,1,id,iter);
 				id++;
 			}
+
 		}
 		else{
 			t.resize(thread_count);
 			size_t m=n/thread_count;
 			size_t rem=n%thread_count;
-			size_t id=0;
-			
+			id=thread_count;
+			int pos=0;
 			for (size_t i=0;i<thread_count;i++){
 					evals_per_thread[i]=(i<rem)?m+1:m;
-					for (int j=1;j<=evals_per_thread[i];j++){
+					t[i]=std::thread(evaluate_os<T>,folder_path,shell_command, start+pos,evals_per_thread[i],i,_iter,std::ref(message),std::ref(error_codes[i]));
+					pos+=evals_per_thread[i]; //TODO WEITERMACHEN
+				/*	for (int j=1;j<=evals_per_thread[i];j++){
 						t[id]=std::thread(evaluate_os<T>,folder_path,shell_command, start+id,j,id,_iter,std::ref(message),std::ref(error_codes[id]));
 						evals_per_thread[id]=j;
 				}
+*/
 				//os.eval<T>(folder_path+std::to_string(id),start+j*m,m,id,iter,message);
-				id++;
+				
 			}
 			
 		}
@@ -531,14 +540,15 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		//Parse results;
 		std::vector<std::vector<T>> result(n);
 		std::vector<int> rows(n);
-		
 		//std::cout<<"Pointer address inside:"<<evaluation_class<<"\n";
 		//std::cout<<"Size targettimes inside:"<<(*evaluation_class).target_times.size()<<"\n";
+
 		int ids=0;
+
 		for (int i=0;i<id;i++){
-			if (error_codes[id]!=ErrorCode::NoError){
-				std::cerr<<"Error computing at least one evaluation (id"<<id<<")\n";
-				e=error_codes[id];
+			if (error_codes[ids]!=ErrorCode::NoError){
+				std::cerr<<"Error computing at least one evaluation (id"<<i<<")\n";
+				e=error_codes[ids];
 				break;
 			}
 				for (int j=0;j<evals_per_thread[i];j++){
@@ -556,7 +566,6 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		if(increase_iter==true){
 			iter++;
 		}
-		
 		
 		return result;
 		

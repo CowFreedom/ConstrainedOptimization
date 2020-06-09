@@ -26,8 +26,8 @@ namespace co{
 			}
 			std::ofstream lua_output;
 			std::ofstream general_output;
-			lua_output.precision(12);
-			general_output.precision(12);
+			lua_output.precision(15);
+			general_output.precision(15);
 			lua_output.open (path+"parameters.lua");
 			general_output.open (path+"parameters.txt");
 			general_output<<output;
@@ -50,7 +50,7 @@ namespace co{
 			general_output.close();
 		}
 		
-		void write_matrix(std::string path,std::vector<EFloat64>& mat, size_t n,size_t m,std::string name,std::string reason=""){
+		void write_matrix(std::string path,const std::vector<EFloat64>& mat, size_t n,size_t m,std::string name,std::string reason=""){
 			std::string output;
 			if (reason.length()!=0){
 				output.append("--");
@@ -59,7 +59,7 @@ namespace co{
 			}
 			
 			std::ofstream general_output;
-			general_output.precision(12);
+			general_output.precision(15);
 			//general_output<<std::fixed<<std::setprecision(12);
 		//	general_output.precision(std::numeric_limits<double>::max_digits10);
 			general_output.open(path+name);

@@ -54,7 +54,7 @@ namespace co{
 		//std::vector<T> timepoints; //This vector is only used to tailor the sim vector accordingly.
 		std::string table_dir;
 		std::string infile_name;
-		
+		ConfigOutput config_output;
 		ComputationMode<ConfigComputation::Local,BiogasEvaluation<T,ConfigComputation::Local>,T> computer; //evaluates inputs according to the model formulation TODO: Change threadcount (last argument)
 		
 		public:
@@ -108,10 +108,11 @@ namespace co{
 			return sum;
 		}
 		*/
-		BiogasEvaluation(std::string _table_dir,  std::string _infile_name, std::string _outfile_name):table_dir(_table_dir),infile_name(_infile_name), outfile_name(_outfile_name),computer(ComputationMode<ConfigComputation::Local,BiogasEvaluation<T,ConfigComputation::Local>,T>(this, ConfigOutput::File,NTHREADS_SUPPORTED,_table_dir)){
+		BiogasEvaluation(std::string _table_dir,  std::string _infile_name, std::string _outfile_name, ConfigOutput _config_output):table_dir(_table_dir),infile_name(_infile_name), outfile_name(_outfile_name),config_output(_config_output),computer(ComputationMode<ConfigComputation::Local,BiogasEvaluation<T,ConfigComputation::Local>,T>(this, _config_output,NTHREADS_SUPPORTED,_table_dir)){
 			//computer=ComputationMode<ConfigComputation::Local,T>(ConfigOutput::File,4);
 			//std::cout<<"Pointer address outside at creation:"<<this<<"\n";
 		}
+	
 		const ConfigComputation computation_mode=ConfigComputation::Local;
 		
 		virtual std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& v,const std::vector<T>& _target_times,ErrorCode& e, std::string message="") override{
@@ -137,16 +138,36 @@ namespace co{
 		}
 		
 		/*Writes the Jacobi matrix to file. Jacobi is an NxM matrix*/
-		bool send_matrix(std::vector<T>& jacobi, size_t n,size_t m,std::string description="") const{
+		bool send_matrix(std::vector<T>& jacobi, size_t n,size_t m,std::string description="") const{			
+			if (config_output==ConfigOutput::File){
+				return send_matrix_to_file(jacobi, n,m,description);
+			}
+			else{
+				return false;
+			}
+		}
+		
+		bool send_matrix_to_file(std::vector<T>& jacobi, size_t n,size_t m,std::string description) const{
 			std::string path=computer.get_current_evaluation_path();
 			size_t iteration=computer.get_current_iteration()-1;
 			path+=std::string("/iteration_")+std::to_string(iteration)+"/";
 			Writer<T> w;
-			w.write_matrix(path,jacobi,n,m,description+".txt",description);
-			
+			w.write_matrix(path,jacobi,n,m,description+".txt",description);	
 			return true;
+			
 		}
-		bool send_parameters(EVarManager<T>& params, std::string description=""){
+		
+		bool send_parameters(EVarManager<T>& params, std::string description="") const{
+			if (config_output==ConfigOutput::File){
+				return send_parameters_to_file(params, description);
+			}
+			else{
+				return false;
+			}
+			
+		}
+		
+		bool send_parameters_to_file(EVarManager<T>& params, std::string description) const {
 			std::string path=computer.get_current_evaluation_path();
 			size_t iteration=computer.get_current_iteration()-1;
 			Writer<T> w;
@@ -155,6 +176,13 @@ namespace co{
 		}
 		
 		bool send_info(std::string info, std::string description=""){
+			if (config_output==ConfigOutput::File){
+				return send_info_to_file(info, description);
+			}
+			return false;
+		}
+		
+		bool send_info_to_file(std::string info, std::string description){
 			std::string path=computer.get_current_evaluation_path();
 			size_t iteration=computer.get_current_iteration()-1;
 			path+=std::string("/iteration_")+std::to_string(iteration)+"/";

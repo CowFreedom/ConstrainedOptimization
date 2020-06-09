@@ -10,9 +10,10 @@ int main(){
 	std::string dir="D:/Documents/Programming/ug4/ug4/apps/parameter_estimation/estebis_downflow_march_cumulative_pso";
 	std::vector<co::EFloat64> bounds={co::EFloat64(0.8),co::EFloat64(2.0),co::EFloat64(0.00001),co::EFloat64(0.4),co::EFloat64(0.000001),co::EFloat64(0.001),co::EFloat64(0.1),co::EFloat64(2) };
 
-	co::NewtonOptions options;
+	co::PSOOptions options;
 	co::BiogasEvaluation<co::EFloat64,co::ConfigComputation::Local> evaluator(dir,"subset_target.lua", "subset_sim.lua");
-	co::ParticleSwarmOptimizer<co::BiogasEvaluation<co::EFloat64,co::ConfigComputation::Local>> pso(options,evaluator);
+	int max_iterations=200;
+	co::ParticleSwarmOptimizer<co::BiogasEvaluation<co::EFloat64,co::ConfigComputation::Local>> pso(options,evaluator,max_iterations);
 		
 	pso.run<co::EFloat64>(names,bounds);
 

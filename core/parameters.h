@@ -18,8 +18,8 @@ namespace co{
 			const T val;
 			const T min; //minimum value allowed
 			const T max; //maximum value allowed. 
-		
 
+		
 			EVar(const T& _val, const T& _min, const T& _max):val(_val),min(_min),max(_max){
 				//if debug then test if _min<_max
 				
@@ -54,6 +54,8 @@ namespace co{
 			EFloat64 min; //minimum value allowed
 			EFloat64 max; //maximum value allowed. 
 		
+			EVar():val(EFloat64(0.0)),min(EFloat64(std::numeric_limits<double>::min())),max(EFloat64(std::numeric_limits<double>::max())){
+			}
 
 			EVar(const EFloat64& _val, const EFloat64& _min, const EFloat64& _max):val(_val),min(_min),max(_max){
 				//test if _min<_max
@@ -238,9 +240,10 @@ namespace co{
 			}
 			
 			
-			void add(std::string name, const EVar<T>& ev){
+			bool add(std::string name, const EVar<T>& ev){
 				params.push_back(ev);
 				names.push_back(name);
+				return true;
 			}
 			size_t len() const{
 				return params.size();
@@ -248,6 +251,14 @@ namespace co{
 			const std::vector<EVar<T>>& get_params() const{
 				return params;
 			}
+			
+
+			EVar<EFloat64>& get_param(int i){
+				return params[i];
+			}	
+			std::string get_name(int i) const{
+				return names[i];
+			}				
 			const std::vector<std::string>& get_names() const{
 				return names;
 			}
@@ -256,5 +267,40 @@ namespace co{
 	using EVar64=EVar<EFloat64>;
 	using EVar64Manager=EVarManager<EFloat64>;
 
-
+	template<class T>
+	class VarDescriptor{
+			private:
+			
+			std::vector<T> bounds;
+			std::vector<std::string> names;
+			
+			public:
+			VarDescriptor(){
+				
+			}
+			bool add(std::string name, const T& low, const T& high){
+				if (low>high){
+					std::cerr<<"VarDescriptor bounds error: High bound smaller than low bound \n";
+					return false;
+				}
+				else{
+					bounds.push_back(low);
+					bounds.push_back(high);
+					names.push_back(name);
+					return true;					
+				}
+			}
+			size_t len() const{
+				return names.size();
+			}
+			const std::vector<T>& get_bounds() const{
+				return bounds;
+			}
+			const std::vector<std::string>& get_names() const{
+				return names;
+			}
+						
+	};
+	
+	using VarDescriptor64=VarDescriptor<EFloat64>;
 }

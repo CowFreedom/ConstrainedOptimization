@@ -27,9 +27,9 @@ namespace co{
 	class ParticleSwarmOptimizer{
 		
 		private:
-		int n_particles=11;
-		int n_groups=2;
-		Options options;
+		int n_particles;
+		int n_groups;
+		PSOOptions options;
 		E& evaluator;
 		
 		template<class T>
@@ -177,9 +177,7 @@ namespace co{
 				return true;	
 			}
 
-		void update_direction_random(const std::vector<T>& bounds, EVarManager<T>& evaluation,const std::vector<std::string>& param_names){
-
-				
+		void update_direction_random(const std::vector<T>& bounds, EVarManager<T>& evaluation,const std::vector<std::string>& param_names){		
 				std::random_device rd;  //Will be used to obtain a seed for the random number engine
 				std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
 	
@@ -233,6 +231,7 @@ namespace co{
 			
 		};
 		
+	
 			
 		template<class T>
 		std::string print_info(const std::vector<Particle<T>>& particles, const std::vector<std::string>& param_names, int iteration,const std::vector<int>& best_id, const std::vector<T>& local_fitness, const std::vector<std::vector<T>>& local_best_position){
@@ -260,6 +259,7 @@ namespace co{
 				}
 				res<<"\n";
 			}
+			
 			res<<std::setw(30)<<std::left<<"Best group: "<<minimum_group<<"\n";
 			res<<std::setw(30)<<std::left<<"Best particle id: "<<best_id[minimum_group]<<"\n";
 			res<<std::setw(30)<<std::left<<"Minimum Error: "<<minimum_error.get_v()<<"\n";
@@ -362,8 +362,9 @@ namespace co{
 		/*! Creates the class.
 			@param[in] _options Configures the Newton Gauss optimizer internally, such as choosing the derivative evaluation type (e.g. Finite Differences) and line search method.
 			@param[in] _evaluator Steers how data is loaded and evaluated (e.g. parsed from file, given from within UG4) */
-		ParticleSwarmOptimizer(const Options& _options, E& _evaluator):options(_options), evaluator(_evaluator){
-				
+		ParticleSwarmOptimizer(const PSOOptions& _options, E& _evaluator):options(_options), evaluator(_evaluator){
+				n_particles=options.get_n_particles();
+				n_groups=options.get_n_groups();
 		}
 		
 		/*! Runs the Particle Swarm Optimization algorithm. Only this function has to be called to run the complete procedure.
@@ -371,13 +372,15 @@ namespace co{
 		\return Code indicating success or failure of running the Particle Swarm Optimization procedure.
 		*/
 		template<class T>
-		ErrorCode run(const std::vector<std::string>& param_names, const std::vector<T>& bounds){
+		ErrorCode run(EVarManager<T>& estimated_params, const std::vector<std::string>& param_names, const std::vector<T>& bounds){
+			int max_iterations=options.get_max_iterations();
 			size_t n=param_names.size();
 			std::vector<Particle<T>> particles;
 			
 			std::vector<T> target_data;
 			std::vector<T> target_times;
 			ErrorCode load_code=evaluator.load_target(target_times,target_data); //load target vector
+			
 			if (load_code!=ErrorCode::NoError){
 				std::cerr<<"Error loading target data!\n";
 				return load_code;
@@ -394,10 +397,14 @@ namespace co{
 				indices[i]=particles[i].get_group_id();
 			}
 			
+			std::vector<T> global_minimum_position(n); //best position of all groups
+			
 			T previous_minimum_fitness=T(std::numeric_limits<double>::max());
 			bool redraw_topology=false;
 			bool schranke=has_converged(local_fitness);
-			while (iter<200000 && schranke==false){
+			
+			
+			while (iter<max_iterations && schranke==false){
 				std::cout<<"Starting Particle Swarm Optimization iteration "<<iter<<"\n";
 				std::vector<EVarManager<T>> evaluations(n_particles);
 				
@@ -490,14 +497,16 @@ namespace co{
 					x.print_fitness();
 				}
 				*/
-				//Get lowest local fitness
-				T minimum_fitness=T(std::numeric_limits<double>::max());
 				
+				//Get lowest local fitness
+				T minimum_fitness=T(std::numeric_limits<double>::max());		
 				for (int i=0;i<n_groups;i++){
 					if (local_fitness[i]<=minimum_fitness){
 						minimum_fitness=local_fitness[i];
+						global_minimum_position=local_best_position[i];
 					}
 				}
+				
 				
 				/*
 				for (int i=0;i<n_particles;i++){
@@ -556,8 +565,20 @@ namespace co{
 				}
 				
 				previous_minimum_fitness=minimum_fitness;
-		
 			
+			}
+			EVarManager<T> parameters;
+			
+			for (int i=0; i<n;i++){
+				parameters.add(param_names[i],EVar<T>(global_minimum_position[i],bounds[2*i],bounds[(2*i)+1]));
+			}
+			estimated_params=parameters;
+			
+			if (schranke){
+				evaluator.send_parameters(parameters, "These are the estimated parameters of the problem.");
+			}
+			else{
+				evaluator.send_parameters(parameters, "These are the estimated parameters of the problem. The run did finish but not converge.");
 			}
 			std::cout<<"Particle Swarm Optimization finished\n";
 			return ErrorCode::NoError;

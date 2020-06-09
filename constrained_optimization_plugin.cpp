@@ -39,6 +39,7 @@
 #include "core/parameter_estimation.h"
 #include "core/parameters.h"
 #include "core/efloat.h"
+#include "evaluation_classes/evaluation.h"
 #include "evaluation_classes/biogas_evaluation.h"
 #include<string>
 
@@ -85,12 +86,20 @@ struct Functionality
 static void Common(Registry& reg, string grp)
 {
 //	The code below shows how a simple function can be registered
-	 reg.add_function("RunParameterEstimator", &RunParameterEstimator, "call Function",
+/*	 reg.add_function("RunParameterEstimator", &RunParameterEstimator, "call Function",
 	 				 "", "", "Runs the Parameter Estimator. See manual for details.");
 					 
 //	The code below shows how a simple function can be registered
 	 reg.add_function("RunParameterEstimator2", &co::run_parameter_estimator, "call Function",
 	 				 "dir#shell_command#parameters", "Runs the Parameter Estimator. See manual for details.");	
+	*/				 
+//	The code below shows how a simple function can be registered
+	 reg.add_function("RunNewtonGauss_BiogasEval", co::RunNewtonGauss_BiogasEval,"call Function",
+	 				 "dir#EVarManager#estimated_parameters#stepsize_alpha", "Runs the Newton-Gauss algorithm with BiogasEvaluation<EFloat64, ConfigComputation::Local>. See manual for details.");	
+
+//	The code below shows how a simple function can be registered
+	 reg.add_function("RunPSO_BiogasEval", co::RunPSO_BiogasEval,"call Function",
+	 				 "dir#var_descriptor#estimated_parameters#n_particles#n_groups#max_iterations", "Runs the Particle Swarm Optimization algorithm with BiogasEvaluation<EFloat64, ConfigComputation::Local>. See manual for details.");	
 
 //Registration of a class	
 	reg.add_class_<TestClass>("TestClass", grp)
@@ -108,7 +117,17 @@ static void Common(Registry& reg, string grp)
 
 	reg.add_class_<co::EVar64Manager>("EVar64Manager", grp)
 				.add_constructor()
-				.add_method("add",&co::EVar64Manager::add,"name#EVar");					
+				.add_method("add",&co::EVar64Manager::add,"name#EVar")
+				.add_method("get_name",&co::EVar64Manager::get_name,"index")
+				.add_method("get_param",&co::EVar64Manager::get_param,"index")
+				.add_method("len",&co::EVar64Manager::len,"");	
+				
+	reg.add_class_<co::VarDescriptor64>("VarDescriptor64", grp)
+				.add_constructor()
+				.add_method("add",&co::VarDescriptor64::add,"name#low#high");	
+				
+	
+
 /*
 	reg.add_class_<co::Evar<double>>("Evar_double", grp)
 				.add_constructor()

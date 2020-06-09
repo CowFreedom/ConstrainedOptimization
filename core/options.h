@@ -12,7 +12,8 @@ namespace co{
 	
 	/*! Usually used to indicate which optimizing algorithm should be used. Possible values are usually all optimizers supported by the plugin. */
 	enum class ConfigMethod{
-		Newton
+		Newton,
+		PSO
 	};
 
 	/*! Usually used to indicate the computation method within an optimizers. Is part of the template definition
@@ -68,30 +69,16 @@ namespace co{
 	@see NewtonOptions Class collecting configurations specific to the Newton optimizer.*/
 	class Options{
 		private:
-		ConfigMethod config_method;
 		ConfigMode config_mode;
-		ConfigOutput config_output;	
 		
 		public:
 		
-		void set_config_method(ConfigMethod cm){
-			config_method=cm;
-		}
 		void set_config_mode(ConfigMode cm){
 			config_mode=cm;
 		}
-		void set_config_output(ConfigOutput co){
-			config_output=co;
-		}
-		ConfigMethod get_config_method() const{
-			return config_method;
-		}
 		ConfigMode get_config_mode() const{
 			return config_mode;
-		}
-		ConfigOutput get_config_output() const{
-			return config_output;
-		}				
+		}			
 	};
 	
 	/*! This class collects different configuration enums. In contrast to the more general Options class, the enums collected
@@ -99,34 +86,73 @@ namespace co{
 	@see Options Class collecting general configuration information.*/
 	class NewtonOptions:public Options{
 		private:
-		ConfigEvaluation config_evaluation;
 		ConfigDerivatives config_derivatives;
-		ConfigComputation config_computation;
+		double stepsize_alpha=1.0; //stepsize lambda 
+		double stepsize_decay=0.7; // decay rate (see adadelta for details https://ruder.io/optimizing-gradient-descent/index.html#adadelta)
 		public:
-		
-		void set_config_evaluation(ConfigEvaluation ce){
-			config_evaluation=ce;
-		}
 		
 		void set_config_derivatives(ConfigDerivatives cd){
 			config_derivatives=cd;
 		}
 
-		void set_config_computation(ConfigComputation cc){
-			config_computation=cc;
-		}		
 		ConfigDerivatives get_config_derivatives() const {
 			return config_derivatives;
 		}
-		ConfigEvaluation get_config_evaluation() const{
-			return config_evaluation;
+		
+		void set_stepsize_alpha(double _alpha){
+			stepsize_alpha=_alpha;
 		}
-		ConfigComputation get_config_computation() const{
-			return config_computation;
+		void set_stepsize_decay(double _stepsize_decay){
+			stepsize_decay=_stepsize_decay;
+		}
+		
+		double get_stepsize_alpha() const{
+			
+			return stepsize_alpha;
+		}
+		double get_stepsize_decay() const{
+			
+			return stepsize_decay;
 		}
 		
 	};
 	
-	
+
+	/*! This class collects different configuration enums. In contrast to the more general Options class, the enums collected
+	are specific to the PSO optimizer.
+	@see Options Class collecting general configuration information.*/
+	class PSOOptions:public Options{
+		
+		private:
+		int max_iterations=200;
+		int n_groups; //number of groups
+		int n_particles; //number of particles
+		
+		public:
+		int get_max_iterations() const{
+			return max_iterations;
+		}
+		
+		int get_n_particles() const{
+			return n_particles;
+		}
+		
+		void set_n_particles(int _n_particles){
+			n_particles=_n_particles;
+		}
+		
+		int get_n_groups() const{
+			return n_groups;
+		}
+		
+		void set_n_groups(int _n_groups){
+			n_groups=_n_groups;
+		}
+		
+		void set_max_iterations(int _max_iterations){
+			max_iterations=_max_iterations;
+		}
+		
+	};	
 	
 }

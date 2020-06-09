@@ -40,8 +40,8 @@ namespace co{
 		/**  
 		 Creates a string that stores information about the current Newton iteration for the EFloat64 datatype.
 		 This information includes the values of the currently estimated parameters, error measures and 
-		 covariances. Because EFloat64's underlying value type is a double, 12 digits of precision are saved.
-		 Please note that this does not mean that all 12 digits are reliable. Look at the low and high error bounds of the datatype
+		 covariances. Because EFloat64's underlying value type is a double, 15 digits of precision are saved.
+		 Please note that this does not mean that all 15 digits are reliable. Look at the low and high error bounds of the datatype
 		 to get an estimate of its true value.
 		 @param[in] vars The status of the variables of the current Newton iteration.
 		 @param[in] J_T_J_inv_scaled Inverse of first order Hessian approximation multiplied by the standard deviation. Serves as approximation to Covariance Matrix.
@@ -52,7 +52,7 @@ namespace co{
 		template<>
 		std::string print_info<EFloat64>(const EVarManager<EFloat64>& vars,const std::vector<EFloat64>& J_T_J_inv_scaled, size_t iteration, EFloat64 squared_error){
 			std::ostringstream res;
-			res.precision(12); //dependent on type
+			res.precision(15); //dependent on type
 			
 			size_t m=vars.len();
 			const std::vector<EVar<EFloat64>>& params=vars.get_params();
@@ -85,7 +85,7 @@ namespace co{
 		class NewtonOptimizer{
 			
 			private:
-			Options options;
+			NewtonOptions options;
 			E& evaluator;
 			
 			template<class T>
@@ -156,23 +156,31 @@ namespace co{
 			
 			template<class T>
 			bool update_parameters_stepsize_smaller_var(const std::vector<T>& target_data,const std::vector<T>& target_times,const std::vector<T>& J, std::vector<T> d, std::vector<EVarManager<T>>& current_params, T& s_n,T& e_g2,std::string& stepsize_infos){
-				T alpha=T(1.0);
+				T alpha=T(options.get_stepsize_alpha());
 				T c=T(1.0);
 				size_t j_n=target_data.size();
 				size_t j_m=J.size()/j_n;
 				int n_threads=(NTHREADS_SUPPORTED-1>0)?(NTHREADS_SUPPORTED-1):1;
-				T scale=T(0.5);
-				T eps=T(1e-8);
+				T scale=T(0.7);
+				T eps=T(1e-10);
 			
 				std::vector<T> alphas(n_threads);
 				size_t iter=0;
 				std::cout<<"\n****Estimating stepsize****\n";
-				T lam=T(0.9);
+				T lam=T(options.get_stepsize_decay());
 				T d2=T(0.0);
 				for (int i=0;i<d.size();i++){
 					d2+=d[i]*d[i];
 				}
+				//In the first iteration, we do not have any previous descent magnitude to refer to
+				if (e_g2==T(0.0)){
+					e_g2=lam*d2;
+				}
  				e_g2=lam*e_g2+(T(1.0)-lam)*d2;
+				
+				int frac=120/n_threads;
+				int max_iter=(frac>=1)?frac:1;
+				
 				while (iter<10){
 					//std::vector<EVarManager<T>> evaluations=current_params;
 					std::vector<EVarManager<T>> evaluations;
@@ -200,7 +208,7 @@ namespace co{
 					}
 					std::vector<T> f_alphas(n_threads);
 					std::ostringstream output;
-					output.precision(12); //dependent on type
+					output.precision(15); //dependent on type
 					output<<"Old SE:"<<s_n<<"\n";
 					output<<"E[g2]="<<e_g2<<"\n";
 					output<<"g2="<<d2<<"\n";
@@ -272,7 +280,7 @@ namespace co{
 			/*! Creates the class.
 			@param[in] _options Configures the Newton Gauss optimizer internally, such as choosing the derivative evaluation type (e.g. Finite Differences) and line search method.
 			@param[in] _evaluator Steers how data is loaded and evaluated (e.g. parsed from file, given from within UG4) */
-			NewtonOptimizer(const Options& _options, E& _evaluator):options(_options), evaluator(_evaluator){
+			NewtonOptimizer(const NewtonOptions& _options, E& _evaluator):options(_options), evaluator(_evaluator){
 				
 			}
 
@@ -285,11 +293,11 @@ namespace co{
 				T sum=T(0.0);
 				
 				for (auto& x:res){
-					sum+=x.abs();
+					sum+=x*x;
 					//std::cout<<x<<"\n";
 					//std::cin.get();
 				}
-				std::cout<<"Has converged sum:"<<sum<<"\n";
+				std::cout<<"Squared L2 norm of descent direction:"<<sum<<"\n";
 				if (sum<=T(0.0001)){
 					std::cout<<"Has converged true!\n";
 					return true;
@@ -303,7 +311,7 @@ namespace co{
 			\return Code indicating success or failure of running the Newton procedure.
 			*/
 			template<class T>
-			ErrorCode run(const std::vector<EVarManager<T>>& initial_params){
+			ErrorCode run(const EVarManager<T>& initial_params, EVarManager<T>& estimated_parameters){
 				T delta=T(0.0001);
 				//std::cout<<"Newton Optimizer started\n";
 				//load target data
@@ -316,7 +324,8 @@ namespace co{
 				}
 				
 				
-				std::vector<EVarManager<T>> parameters=initial_params;
+				std::vector<EVarManager<T>> parameters;
+				parameters.push_back(initial_params);
 				//evaluate initial parameters
 				size_t j_n=target_data.size(); //height of jacobi matrix
 				size_t j_m=parameters[0].len(); //length of jacobi matrix
@@ -465,10 +474,12 @@ namespace co{
 				}
 
 			if (run_finished){	
-			evaluator.send_parameters(parameters[0], "These are the estimated parameters of the problem.");
-			return ErrorCode::NoError;
+				evaluator.send_parameters(parameters[0], "These are the estimated parameters of the problem.");
+				estimated_parameters=parameters[0];
+				return ErrorCode::NoError;
 			}
 			else{
+				estimated_parameters=parameters[0];
 				return ErrorCode::OptimizationError;
 			}
 			}
