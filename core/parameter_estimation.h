@@ -12,8 +12,8 @@
  
  *\subsection System Requirements
  *Due to the usage of OS specific functions for process generation, the plugin is not necessarily multiplatform.
- *In its current form, the package has been shown to work on Windows 10 and Linux Ubunto. On the former, two compilers were tested, GCC 9.2.0 and Visual Studio v16.3.10. It is assumed that the package also works for older compiler versions.
- *On the latter, only GCC was tested. If GCC is used, UG4 might have to be recompiled with the -pthread flag
+ *In its current form, the package has been shown to work on Windows 10, Linux Ubuntu and macOS Mojave 10.14.4. On Windows 10, two compilers were tested, GCC 9.2.0 and Visual Studio v16.3.10. It is assumed that the package also works for older compiler versions.
+ *On Linux Ubuntu only GCC was tested. If GCC is used, UG4 might have to be rebuilt with the -pthread flag. Using Clang might necessitates adding the -std=c++11 flag to the build process.
  * For a list of bugs and recommended features see the page issues.
  *
 
