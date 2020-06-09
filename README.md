@@ -78,13 +78,6 @@ the C compiler in the build process. Now rebuild UG4 as described on [the ughub 
 now be installed without any issues.
 
 
-    sudo apt-get install cmake
-
-If GCC is used, UG4 might have to be rebuilt with the -pthread flag. This is facilitates
-by adding -lp
-and clang might need the -std=c++11 flag.
-
-
 # Description
 The following algorithms are currently implemented:
 
@@ -93,7 +86,7 @@ The following algorithms are currently implemented:
 |Newton-Gauss|The Gauss Newton procedure minimizes functions that can be represented as a sum of squares.|
 |Particle Swarm Optimization|The Particle Swarm Optimization (PSO) algorithm minimizes any continuous function on a bounded domain.|
 
-The main feature of **Constrained Optimization** is the compartmentalization of problem formulation, solution finding and underlying computation mechanism.
+The main feature of **ConstrainedOptimization** is the compartmentalization of problem formulation, solution finding and underlying computation mechanism.
 A problem is formulated via child instantiations of the `Evaluation` class type, which includes details such as the objective function to be optimized or problem specific parsing details. 
 Solution finding algorithms are represented as classes such as `NewtonOptimizer`. Computational interaction with UG4 is abstracted away in instances
 of `ComputationMode`. Combined, this setup gives a flexible and modular platform that can be adapted for many problems at hand.
