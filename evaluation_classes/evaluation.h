@@ -20,7 +20,7 @@ namespace co{
 	BiogasEvaluation. It is templatized by the numeric datatype (like EFloat64) used by the problem and the way the objective function f(x) is evaluated by the system.
 	Before creating your own Evaluation child class, it should always be investigated if existing child classes like BiogasEvaluation represent the problem well enough.
 	When an existing evaluation child class does not represent a problem well, a new class inheriting from Evaluation should be created.*/
-	template<class T,ConfigComputation M>
+	template<class T,ConfigComputation M, ConfigOutput O>
 	class Evaluation{
 		public:
 		
@@ -38,7 +38,7 @@ namespace co{
 		 @param[in,out] v Vector containing variables managed by an EVarManager.
 		 @param[in,out] target Vector containing values of the target. These are usually time values which are needed to tailor the time values of the simulation to experimental data.
 		 \return Vector of vectors collecting evaluations for each variable pair in EVarManager.
-		@see BiogasEvaluation<T,ConfigComputation::Local> For a specific implementation.		 
+		@see BiogasEvaluation<T,ConfigComputation::Local,ConfigOutput::File> For a specific implementation.		 
 		*/
 		virtual std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& v, const std::vector<T>& target, ErrorCode& e, std::string message="")=0;
 		

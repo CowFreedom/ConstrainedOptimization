@@ -9,7 +9,7 @@ It also provides some brief notes concerning the installation of the plugin.
 
 * [Installation Notes](#installation)
 * [Description](#description)
-
+* [Example](#description)
 
 A sample problem will be added to the description.
     
@@ -90,3 +90,12 @@ The main feature of **ConstrainedOptimization** is the compartmentalization of p
 A problem is formulated via child instantiations of the `Evaluation` class type, which includes details such as the objective function to be optimized or problem specific parsing details. 
 Solution finding algorithms are represented as classes such as `NewtonOptimizer`. Computational interaction with UG4 is abstracted away in instances
 of `ComputationMode`. Combined, this setup gives a flexible and modular platform that can be adapted for many problems at hand.
+
+# Example
+
+## logistic_1
+Download the logistic_1 problem and put it into the 
+
+    ug4/apps
+
+folder.

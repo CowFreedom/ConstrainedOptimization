@@ -3,6 +3,7 @@
 #include "parameters.h"
 #include <string>
 
+
 int main(){
 
 	std::vector<std::string> names={"theta"};
@@ -11,11 +12,14 @@ int main(){
 
 	co::PSOOptions options;
 	options.set_max_iterations(20);
-	co::BiogasEvaluation<co::EFloat64,co::ConfigComputation::Local> evaluator(dir,"subset_target.lua", "subset_sim.lua", co::ConfigOutput::File);
-	co::ParticleSwarmOptimizer<co::BiogasEvaluation<co::EFloat64,co::ConfigComputation::Local>> pso(options,evaluator);
+	options.set_n_particles(12);
+	options.set_n_groups(2);
+	co::BiogasEvaluation<co::EFloat64,co::ConfigComputation::Local, co::ConfigOutput::File> evaluator(dir,"subset_target.lua", "subset_sim.lua");
+	co::ParticleSwarmOptimizer<co::BiogasEvaluation<co::EFloat64,co::ConfigComputation::Local, co::ConfigOutput::File>> pso(options,evaluator);
 	co::EVarManager<co::EFloat64> estimated_parameters;
 	pso.run(estimated_parameters,names,bounds);
 
 
+//	co::BiogasEvaluation<co::EFloat64,co::ConfigComputation::Local, co::ConfigOutput::Direct> evaluator();
 
 }

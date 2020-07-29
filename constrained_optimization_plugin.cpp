@@ -95,11 +95,11 @@ static void Common(Registry& reg, string grp)
 	*/				 
 //	The code below shows how a simple function can be registered
 	 reg.add_function("RunNewtonGauss_BiogasEval", co::RunNewtonGauss_BiogasEval,"call Function",
-	 				 "dir#EVarManager#estimated_parameters#stepsize_alpha", "Runs the Newton-Gauss algorithm with BiogasEvaluation<EFloat64, ConfigComputation::Local>. See manual for details.");	
+	 				 "dir#EVarManager#estimated_parameters#stepsize_alpha", "Runs the Newton-Gauss algorithm with BiogasEvaluation<EFloat64, ConfigComputation::Local, ConfigOutput::File>. See manual for details.");	
 
 //	The code below shows how a simple function can be registered
 	 reg.add_function("RunPSO_BiogasEval", co::RunPSO_BiogasEval,"call Function",
-	 				 "dir#var_descriptor#estimated_parameters#n_particles#n_groups#max_iterations", "Runs the Particle Swarm Optimization algorithm with BiogasEvaluation<EFloat64, ConfigComputation::Local>. See manual for details.");	
+	 				 "dir#var_descriptor#estimated_parameters#n_particles#n_groups#max_iterations", "Runs the Particle Swarm Optimization algorithm with BiogasEvaluation<EFloat64, ConfigComputation::Local, ConfigOutput::File>. See manual for details.");	
 
 //Registration of a class	
 	reg.add_class_<TestClass>("TestClass", grp)

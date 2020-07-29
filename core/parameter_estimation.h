@@ -93,11 +93,11 @@ namespace co{
 	}
 
 	bool RunNewtonGauss_BiogasEval(std::string dir,const EVarManager<EFloat64>& parameters, EVarManager<EFloat64>& estimated_parameters,double alpha){
-		BiogasEvaluation<EFloat64,ConfigComputation::Local> evaluator(dir,"subset_target.lua", "subset_sim.lua",ConfigOutput::File);
+		BiogasEvaluation<EFloat64,ConfigComputation::Local, ConfigOutput::File> evaluator(dir,"subset_target.lua", "subset_sim.lua");
 		NewtonOptions options;
 		options.set_stepsize_alpha(alpha);
 		options.set_stepsize_decay(0.9);
-		return run_newton_gauss<BiogasEvaluation<EFloat64,ConfigComputation::Local>, EFloat64>(evaluator, parameters,estimated_parameters,options) ;
+		return run_newton_gauss<BiogasEvaluation<EFloat64,ConfigComputation::Local, ConfigOutput::File>, EFloat64>(evaluator, parameters,estimated_parameters,options) ;
 	}
 	
 	template<class E, class T>
@@ -142,12 +142,12 @@ namespace co{
 	}
 
 	bool RunPSO_BiogasEval(std::string dir, const VarDescriptor64& var_descriptor,EVar64Manager& estimated_parameters,int n_particles, int n_groups, int max_iterations){
-		co::BiogasEvaluation<co::EFloat64,co::ConfigComputation::Local> evaluator(dir,"subset_target.lua", "subset_sim.lua", co::ConfigOutput::File);
+		co::BiogasEvaluation<co::EFloat64,co::ConfigComputation::Local, ConfigOutput::File> evaluator(dir,"subset_target.lua", "subset_sim.lua");
 		PSOOptions options;
 		options.set_max_iterations(max_iterations);
 		options.set_n_particles(n_particles);
 		options.set_n_groups(n_groups);
-		return run_pso<BiogasEvaluation<EFloat64,ConfigComputation::Local>, EFloat64>(evaluator,var_descriptor,estimated_parameters, options);
+		return run_pso<BiogasEvaluation<EFloat64,ConfigComputation::Local, ConfigOutput::File>, EFloat64>(evaluator,var_descriptor,estimated_parameters, options);
 
 	}
 	

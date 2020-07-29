@@ -43,7 +43,8 @@ namespace co{
 	used in subsequent calculations.
 	*/
 	enum class ConfigOutput{
-		File
+		File,
+		Direct
 	};
 
 	/*! Usually indicates if an optimizer like newton.h is run in Debug or Release mode.

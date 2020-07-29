@@ -22,10 +22,10 @@
 namespace co{
 
 	/*! This class represents how problems of the UG4 biogas_app kind are evaluated. This specific example servers as an interface. For an implementation of this
-	* interface see BiogasEvaluation<T,ConfigComputation::Local>.
+	* interface see BiogasEvaluation<T,ConfigComputation::Local,ConfigOutput::File>.
 	*/
-	template<class T,ConfigComputation M>
-	class BiogasEvaluation: public Evaluation<T,M>{
+	template<class T,ConfigComputation M, ConfigOutput O>
+	class BiogasEvaluation: public Evaluation<T,M,O>{
 		public:
 		const ConfigComputation computation_mode=M;
 		
@@ -45,17 +45,16 @@ namespace co{
 
 	/*! This class represents how problems of the UG4 biogas_app kind are evaluated. This class can be reused for other problems that behave "similar" (in the sense of data loading, interpolation and evaluation) to the 
 	* biogas_app problem (which are many).
-	* Because the ConfigComputation enum is set to Local, all function evaluations in computation_modes.h are local. Within the code
-	* the ConfigOutput is set to File, which means it assumes that function evaluations f(t) are written to disk and must be parsed in order to be used.*/
+	* Because the ConfigComputation enum is set to Local, all function evaluations in computation_modes.h are local. The template parameter
+	* ConfigOutput is set to File, which means it assumes that function evaluations f(t) are written to disk and must be parsed in order to be used.*/
 	template<class T>
-	class BiogasEvaluation<T,ConfigComputation::Local>: public Evaluation<T,ConfigComputation::Local>{
+	class BiogasEvaluation<T,ConfigComputation::Local, ConfigOutput::File>: public Evaluation<T,ConfigComputation::Local, ConfigOutput::File>{
 		
 		private:
 		//std::vector<T> timepoints; //This vector is only used to tailor the sim vector accordingly.
 		std::string table_dir;
 		std::string infile_name;
-		ConfigOutput config_output;
-		ComputationMode<ConfigComputation::Local,BiogasEvaluation<T,ConfigComputation::Local>,T> computer; //evaluates inputs according to the model formulation TODO: Change threadcount (last argument)
+		ComputationMode<ConfigComputation::Local,ConfigOutput::File,BiogasEvaluation<T,ConfigComputation::Local, ConfigOutput::File>,T> computer; //evaluates inputs according to the model formulation TODO: Change threadcount (last argument)
 		
 		public:
 		std::string outfile_name;
@@ -108,7 +107,7 @@ namespace co{
 			return sum;
 		}
 		*/
-		BiogasEvaluation(std::string _table_dir,  std::string _infile_name, std::string _outfile_name, ConfigOutput _config_output):table_dir(_table_dir),infile_name(_infile_name), outfile_name(_outfile_name),config_output(_config_output),computer(ComputationMode<ConfigComputation::Local,BiogasEvaluation<T,ConfigComputation::Local>,T>(this, _config_output,NTHREADS_SUPPORTED,_table_dir)){
+		BiogasEvaluation(std::string _table_dir,  std::string _infile_name, std::string _outfile_name):table_dir(_table_dir),infile_name(_infile_name), outfile_name(_outfile_name),computer(ComputationMode<ConfigComputation::Local,ConfigOutput::File,BiogasEvaluation<T,ConfigComputation::Local, ConfigOutput::File>,T>(this,NTHREADS_SUPPORTED,_table_dir)){
 			//computer=ComputationMode<ConfigComputation::Local,T>(ConfigOutput::File,4);
 			//std::cout<<"Pointer address outside at creation:"<<this<<"\n";
 		}
@@ -139,50 +138,25 @@ namespace co{
 		
 		/*Writes the Jacobi matrix to file. Jacobi is an NxM matrix*/
 		bool send_matrix(std::vector<T>& jacobi, size_t n,size_t m,std::string description="") const{			
-			if (config_output==ConfigOutput::File){
-				return send_matrix_to_file(jacobi, n,m,description);
-			}
-			else{
-				return false;
-			}
-		}
-		
-		bool send_matrix_to_file(std::vector<T>& jacobi, size_t n,size_t m,std::string description) const{
 			std::string path=computer.get_current_evaluation_path();
 			size_t iteration=computer.get_current_iteration()-1;
 			path+=std::string("/iteration_")+std::to_string(iteration)+"/";
 			Writer<T> w;
 			w.write_matrix(path,jacobi,n,m,description+".txt",description);	
 			return true;
-			
 		}
+		
 		
 		bool send_parameters(EVarManager<T>& params, std::string description="") const{
-			if (config_output==ConfigOutput::File){
-				return send_parameters_to_file(params, description);
-			}
-			else{
-				return false;
-			}
-			
-		}
-		
-		bool send_parameters_to_file(EVarManager<T>& params, std::string description) const {
 			std::string path=computer.get_current_evaluation_path();
 			size_t iteration=computer.get_current_iteration()-1;
 			Writer<T> w;
 			w.write(path,params,description);
-			return true;
+			return true;	
 		}
 		
+
 		bool send_info(std::string info, std::string description=""){
-			if (config_output==ConfigOutput::File){
-				return send_info_to_file(info, description);
-			}
-			return false;
-		}
-		
-		bool send_info_to_file(std::string info, std::string description){
 			std::string path=computer.get_current_evaluation_path();
 			size_t iteration=computer.get_current_iteration()-1;
 			path+=std::string("/iteration_")+std::to_string(iteration)+"/";
@@ -190,6 +164,7 @@ namespace co{
 			w.write_info(path,description+".txt",info);
 			return true;
 		}
+		
 		/*just copies parse_csv_table_times. Needed if ConfigComputation::File is set, so that computation_modes.h can parse the result
 		*/
 		ErrorCode parse(std::string& data_path, std::vector<T>& data){
@@ -374,4 +349,56 @@ namespace co{
 };
 
 
+	/*! This class represents how problems of the UG4 biogas_app kind are evaluated. This class can be reused for other problems that behave "similar" (in the sense of data loading, interpolation and evaluation) to the 
+	* biogas_app problem (which are many).
+	* Because the ConfigComputation enum is set to Local, all function evaluations in computation_modes.h are local. The template parameter
+	* ConfigOutput is set to Direct, which means it assumes that function evaluations f(t) of the problem formulation are invoked through C++ calls directly.*/
+	template<class T>
+	class BiogasEvaluation<T,ConfigComputation::Local, ConfigOutput::Direct>: public Evaluation<T,ConfigComputation::Local, ConfigOutput::Direct>{
+		
+		private:
+		ComputationMode<ConfigComputation::Local,ConfigOutput::File,BiogasEvaluation<T,ConfigComputation::Local, ConfigOutput::Direct>,T> computer; //evaluates inputs according to the model formulation TODO: Change threadcount (last argument)
+		
+		public:
+		std::vector<T> (&eval_function)(std::vector<T>&);
+		
+		std::vector<T> target_times;
+		BiogasEvaluation(){
+			
+		}
+		
+		BiogasEvaluation(std::vector<T>(&_eval_function)(std::vector<T>&)):eval_function(_eval_function){
+			
+		}
+			
+		std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& v, const std::vector<T>& target, ErrorCode& e,std::string message="") override{
+			
+			return computer.eval(v,e,message);
+		}
+		
+		ErrorCode load_target(std::vector<T>& t,std::vector<T>& d) {
+			return ErrorCode::NoError;
+		}
+		
+		std::vector<std::vector<T>> eval_specific(const std::vector<EVarManager<T>>& v,const std::vector<T>& _target_times,std::string folder_name, ErrorCode& e,std::string message=""){
+			return computer.eval(v,e,message);
+			
+		}
+		
+		virtual void r_i(const std::vector<T>& x, const std::vector<T>& y, std::vector<T>& result,int stride) override{	
+			for (size_t i=0;i<x.size();i++){
+				result[i+stride]=(y[i]-x[i]);
+			}			
+		}
+		
+		
+		virtual T s(const std::vector<T>& x, const std::vector<T>& y) override{
+			T sum=T(0.0);
+			for (size_t i=0;i<x.size();i++){
+				sum+=(y[i]-x[i])*(y[i]-x[i]);
+			}	
+			return sum;
+		}				
+		
+	};
 }
