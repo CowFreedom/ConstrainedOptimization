@@ -37,6 +37,8 @@ namespace co{
 		The template parameter T represents the numeric datatype (such as EFloat64) underlying the problem.
 		 @param[in,out] v Vector containing variables managed by an EVarManager.
 		 @param[in,out] target Vector containing values of the target. These are usually time values which are needed to tailor the time values of the simulation to experimental data.
+		 @param[in] e Error code that can be used to query if evaluation was successful
+		 @param[in] message message to be displayed (or written to file) during evaluation
 		 \return Vector of vectors collecting evaluations for each variable pair in EVarManager.
 		@see BiogasEvaluation<T,ConfigComputation::Local,ConfigOutput::File> For a specific implementation.		 
 		*/
@@ -47,7 +49,7 @@ namespace co{
 		the second codomain data (the function values resulting from f(t)). If the problem also includes spatial domain data x (like f(t,x)) a new function should probably
 		be created that also saves this spatial data. The template parameter T represents the numeric datatype (such as EFloat64) underlying the problem.
 		 @param[in,out] t Vector storing the time values of the problem.
-		 @param[in,out] d Vector representing 
+		 @param[in,out] d Vector representing data of the problem (everything but time column)
 		 \return Error enum indicating the success of the loading operation.
 		@see BiogasEvaluation<T,ConfigComputation::Local> For a specific implementation. 
 		*/

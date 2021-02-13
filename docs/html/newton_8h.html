@@ -194,7 +194,7 @@ template&lt;&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Creates a string that stores information about the current Newton iteration for the EFloat64 datatype. This information includes the values of the currently estimated parameters, error measures and covariances. Because EFloat64's underlying value type is a double, 12 digits of precision are saved. Please note that this does not mean that all 12 digits are reliable. Look at the low and high error bounds of the datatype to get an estimate of its true value. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Creates a string that stores information about the current Newton iteration for the EFloat64 datatype. This information includes the values of the currently estimated parameters, error measures and covariances. Because EFloat64's underlying value type is a double, 15 digits of precision are saved. Please note that this does not mean that all 15 digits are reliable. Look at the low and high error bounds of the datatype to get an estimate of its true value. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">vars</td><td>The status of the variables of the current Newton iteration. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">J_T_J_inv_scaled</td><td>Inverse of first order Hessian approximation multiplied by the standard deviation. Serves as approximation to Covariance Matrix. </td></tr>

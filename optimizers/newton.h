@@ -80,7 +80,7 @@ namespace co{
 			
 		}			
 		/*! This class represents an instance of the Newton Gauss algorithm. Instances of this class must be created if one wants to run the Newton Gauss algorithm.
-		Instances of evaluator.h steer the computation behavior while instances of co::Options internally configure the class.*/
+		Instances of the Evaluator class from evaluator.h steer the computation behavior while instances of co::Options internally configure the class.*/
 		template<class E>
 		class NewtonOptimizer{
 			
@@ -308,6 +308,7 @@ namespace co{
 			}
 			/*! Runs Gauss Newton's algorithm. Only this function has to be called to run the complete procedure.
 			@param[in] initial_params Initial parameters containing starting values for the procedure.
+			@param[in] estimated_parameters This will save the estimated parameters of the problem
 			\return Code indicating success or failure of running the Newton procedure.
 			*/
 			template<class T>
@@ -356,14 +357,6 @@ namespace co{
 					//evaluator.send_matrix(J_T_J,j_m,j_m, "jacobi_transpose_dot_jacobi");
 				
 					std::cout.precision(std::numeric_limits<double>::max_digits10);
-					/*
-					for (int i=0;i<j_m;i++){
-						for (int j=0;j<j_m;j++){
-							std::cout<<J_T_J[i*j_m+j].get_v()<<"   ";
-						}
-						std::cout<<"\n";
-					}
-					*/
 					
 					/*Optional start: Create inverse matrix to calculate covariance matrix*/
 					std::vector<T> J_T_J_inv(j_m*j_m);
@@ -387,67 +380,18 @@ namespace co{
 					co::mul::dgemm_nn(j_n,1,j_n,T(1.0),Qt.begin(),1,j_n,r_n.begin(),1,1,T(0.0),q1.begin(),1,1); 
 				//	std::cout<<"nach mult\n";
 					std::vector<T> res(j_m);
-					/*
-					std::cout<<"\nq1\n";
-					for (auto& x:q1){
-						std::cout<<x<<"   ";
-					}
-					
-
-					std::cout<<"\nQt=\n";
-					//transpose(Qt.begin(),Qt.begin(),j_n,j_n);
-					for (int i=0;i<j_n;i++){
-						for (int j=0;j<j_n;j++){
-							std::cout<<Qt[i*j_n+j].get_v()<<"   ";
-						}
-						std::cout<<"\n";
-					}
-					std::cout<<"\nR=\n";
-					for (int i=0;i<j_n;i++){
-						for (int j=0;j<j_m;j++){
-							std::cout<<R[i*j_m+j].get_v()<<"   ";
-						}
-						std::cout<<"\n";
-					}
-					
-					*/
 					
 					dgms<typename std::vector<T>::iterator,T>(q1.begin(), q1.begin(),j_m, 1, T(-1.0)); //q1=-q1
-					/*
-					std::cout<<"\nr_n\n";
-					for (auto& x:r_n){
-						std::cout<<x<<"   ";
-					}
-						std::cout<<"\n-q1\n";
-					for (auto& x:q1){
-						std::cout<<x<<"   ";
-					}
-					
-					*/
+
 					dc::backwards_substitution<T>(R.begin(),res.begin(), 1,q1.begin(), j_m);
-					/*
-					std::cout<<"\res\n";
-					for (auto& x:res){
-						std::cout<<x<<"   ";
-					}
-					
-					std::cout<<"Stop\n";
-					std::cin.get();
-					*/
-					/*std::cout<<"q1:\n";
-					
-					for (auto x:q1){
-						std::cout<<x<<"  ";
-					}
-					*/
+	
 					//Update parameters
 					//std::cout<<"Parameter adjustment\n";
 				
 					run_finished=has_converged<T>(res);
 						
 					//Update parameters only if run is still ongoing
-					
-						//remove here start
+
 					
 					//initialize adaptive step size
 

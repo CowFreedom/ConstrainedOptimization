@@ -18,8 +18,8 @@ A sample problem will be added to the description.
 The installation equals the standard process for adding UG4 plugins described on [the ughub GitHub page.](https://github.com/UG4/ughub)
 Due to the usage of OS specific functions for process generation, the plugin is not necessarily multiplatform. 
 In its current form, the package has been shown to work on Windows 10, Linux Ubuntu and macOS Mojave 10.14.4. 
-On Windows 10, two compilers were tested, GCC 9.2.0 and Visual Studio v16.3.10. 
-It is assumed that the package also works for older compiler versions. On Linux Ubuntu, 
+On Windows 10, two compilers were tested, GCC 9.3.0 and Visual Studio v16.3.10. 
+It is assumed that the package also works for older compiler versions that support C++17. On Linux Ubuntu, 
 only GCC was tested. On macOS Mojave the Clang compiler was used. GCC and Clang might require special flags
 set in the build process, which is explained below. The utilized Visual Studio compiler has not exhibited such necessities
 but older versions might. 
@@ -94,8 +94,4 @@ of `ComputationMode`. Combined, this setup gives a flexible and modular platform
 # Example
 
 ## logistic_1
-Download the logistic_1 problem and put it into the 
-
-    ug4/apps
-
-folder.
+A sample is included in the Examples folder. Open the main.cpp, replace the shown but with the current one, compile and run.

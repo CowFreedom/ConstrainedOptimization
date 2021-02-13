@@ -78,23 +78,23 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a3d769775c46bb81ce620a1d5d098b3d6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classco_1_1_newton_optimizer.html#a3d769775c46bb81ce620a1d5d098b3d6">NewtonOptimizer</a> (const <a class="el" href="classco_1_1_options.html">Options</a> &amp;_options, E &amp;_evaluator)</td></tr>
-<tr class="separator:a3d769775c46bb81ce620a1d5d098b3d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42854fedada9fa2228e5f09b59122218"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classco_1_1_newton_optimizer.html#a42854fedada9fa2228e5f09b59122218">NewtonOptimizer</a> (const <a class="el" href="classco_1_1_newton_options.html">NewtonOptions</a> &amp;_options, E &amp;_evaluator)</td></tr>
+<tr class="separator:a42854fedada9fa2228e5f09b59122218"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a46862053b21d9d7470fd501d50c3c7ed"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:a46862053b21d9d7470fd501d50c3c7ed"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classco_1_1_newton_optimizer.html#a46862053b21d9d7470fd501d50c3c7ed">has_converged</a> (const std::vector&lt; T &gt; &amp;res)</td></tr>
 <tr class="separator:a46862053b21d9d7470fd501d50c3c7ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abae85cd4850aa8465ca468e6ca38c28b"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
-<tr class="memitem:abae85cd4850aa8465ca468e6ca38c28b"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="options_8h.html#a3b446c9a001680777b38dc2783d4e47a">ErrorCode</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classco_1_1_newton_optimizer.html#abae85cd4850aa8465ca468e6ca38c28b">run</a> (const std::vector&lt; EVarManager&lt; T &gt;&gt; &amp;initial_params)</td></tr>
-<tr class="separator:abae85cd4850aa8465ca468e6ca38c28b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaff053e96eda8587a1e9311add7cd68d"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:aaff053e96eda8587a1e9311add7cd68d"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="options_8h.html#a3b446c9a001680777b38dc2783d4e47a">ErrorCode</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classco_1_1_newton_optimizer.html#aaff053e96eda8587a1e9311add7cd68d">run</a> (const EVarManager&lt; T &gt; &amp;initial_params, EVarManager&lt; T &gt; &amp;estimated_parameters)</td></tr>
+<tr class="separator:aaff053e96eda8587a1e9311add7cd68d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><h3>template&lt;class E&gt;<br />
 class co::NewtonOptimizer&lt; E &gt;</h3>
 
-<p>This class represents an instance of the Newton Gauss algorithm. Instances of this class must be created if one wants to run the Newton Gauss algorithm. Instances of evaluator.h steer the computation behavior while instances of <a class="el" href="classco_1_1_options.html">co::Options</a> internally configure the class. </p>
+<p>This class represents an instance of the Newton Gauss algorithm. Instances of this class must be created if one wants to run the Newton Gauss algorithm. Instances of the Evaluator class from evaluator.h steer the computation behavior while instances of <a class="el" href="classco_1_1_options.html">co::Options</a> internally configure the class. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a3d769775c46bb81ce620a1d5d098b3d6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3d769775c46bb81ce620a1d5d098b3d6">&#9670;&nbsp;</a></span>NewtonOptimizer()</h2>
+<a id="a42854fedada9fa2228e5f09b59122218"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42854fedada9fa2228e5f09b59122218">&#9670;&nbsp;</a></span>NewtonOptimizer()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -107,7 +107,7 @@ template&lt;class E &gt; </div>
         <tr>
           <td class="memname"><a class="el" href="classco_1_1_newton_optimizer.html">co::NewtonOptimizer</a>&lt; E &gt;::<a class="el" href="classco_1_1_newton_optimizer.html">NewtonOptimizer</a> </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="classco_1_1_options.html">Options</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classco_1_1_newton_options.html">NewtonOptions</a> &amp;&#160;</td>
           <td class="paramname"><em>_options</em>, </td>
         </tr>
         <tr>
@@ -176,8 +176,8 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
-<a id="abae85cd4850aa8465ca468e6ca38c28b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abae85cd4850aa8465ca468e6ca38c28b">&#9670;&nbsp;</a></span>run()</h2>
+<a id="aaff053e96eda8587a1e9311add7cd68d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaff053e96eda8587a1e9311add7cd68d">&#9670;&nbsp;</a></span>run()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -192,9 +192,19 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="memname"><a class="el" href="options_8h.html#a3b446c9a001680777b38dc2783d4e47a">ErrorCode</a> <a class="el" href="classco_1_1_newton_optimizer.html">co::NewtonOptimizer</a>&lt; E &gt;::run </td>
           <td>(</td>
-          <td class="paramtype">const std::vector&lt; EVarManager&lt; T &gt;&gt; &amp;&#160;</td>
-          <td class="paramname"><em>initial_params</em></td><td>)</td>
+          <td class="paramtype">const EVarManager&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>initial_params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">EVarManager&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>estimated_parameters</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -206,6 +216,7 @@ template&lt;class T &gt; </div>
 <p>Runs Gauss Newton's algorithm. Only this function has to be called to run the complete procedure. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">initial_params</td><td>Initial parameters containing starting values for the procedure. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">estimated_parameters</td><td>This will save the estimated parameters of the problem </td></tr>
   </table>
   </dd>
 </dl>

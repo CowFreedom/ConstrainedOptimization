@@ -12,6 +12,8 @@ Usage of std:: path: https://www.bfilipek.com/2017/08/cpp17-details-filesystem.h
 */
 
 namespace co{
+
+	namespace utility{
 	
 	/*Options that can be given to a parse instance*/
 	class ParseOptions{
@@ -190,7 +192,7 @@ namespace co{
 				        std::vector<double> v;
 						std::string filepath= table_dir+'/'+filename; //path to file
 						std::cout<<"File path:"<<filepath<<"\n";
-						ErrorCode file_error=co::parse_csv_specific(filepath,v," ",selected_cols);
+						ErrorCode file_error=co::utility::parse_csv_specific(filepath,v," ",selected_cols);
 						if (file_error!=ErrorCode::NoError){
 							return file_error;
 						}
@@ -220,7 +222,114 @@ namespace co{
 			//std::cout<<"Size JT:"<<joined_tables.size()<<"\n";
 			return ErrorCode::NoError;
 		}
-	
+		
+				/*Parses contents specified a table and saves them in data and times. As opposed to 
+		parse_csv_table, this time the first entry of the first datafile will be considered as the time vector.
+		Data will accordingly only consist of datapoints (e.g. Methane production) and the time vector only of the times.
+		The reason this is not in the parse.h file, is that other differential problems might have multiple variables (
+		as usual for PDE's). Therefore, this is implemented on a per-problem basis.
+		Datapath is the path of the data, if it differs from the paths in tabledir*/
+		template<class T>
+		ErrorCode parse_csv_table_times(std::string table_dir, std::string _outfile_name, std::vector<T>& data, std::vector<T>& times, std::string data_path="", int* _rows=0){
+			//std::cout<<"In Parse!\n";
+			std::string outfile_path=table_dir+'/'+_outfile_name; //use std filesystem later
+			//std::cout<<"Parse: Lua table path "<<outfile_path<<"\n";
+			std::ifstream file(outfile_path);
+			if (file.fail()){
+				std::cerr<<"Couldn't open parse input table at "<<outfile_path<<"\n";
+				return ErrorCode::ParseError;
+			}
+			std::stringstream buffer;
+			buffer << file.rdbuf();
+			std::string s=buffer.str();
+			
+			std::string file_dir=table_dir;
+			if (data_path!=""){
+				file_dir=data_path;
+			}
+			
+			bool inFileName=false;
+			bool inSelectedColumns=false;
+			std::string filename;
+			std::vector<std::vector<T>> files; //content of loaded .csv files
+			std::vector<int> cols; //columns per file
+			std::vector<int> selected_cols;
+			int rows;
+			int num_files=0; //counts the number of files opened
+			for (int i=0;i<s.size();i++){
+				if (inFileName){
+					if(s[i]!='\"'){
+						filename+=s[i];
+					}
+					else{
+						inFileName=false;
+					}
+				}
+				else if (s[i]=='\"'){
+					inFileName=true;
+				}
+				else if (inSelectedColumns){
+					char numbuf[3];
+					if (isdigit(s[i])){
+						numbuf[0]=s[i];
+					
+						if (isdigit(s[i+1])){
+							numbuf[1]=s[i+1];
+							numbuf[2]='\0';
+							i++;
+						}
+						else{
+							numbuf[1]='\0';
+						}
+						selected_cols.push_back(static_cast<int>(std::atof(numbuf)));
+					}
+					else if (s[i]==']'){
+						inSelectedColumns=false;		
+				        std::vector<T> v;
+						std::string filepath= file_dir+'/'+filename; //path to file
+						//std::cout<<"File path:"<<filepath<<"\n";
+						if(num_files==0){
+							std::vector<int> time_col;
+							time_col.push_back(selected_cols.front());
+							selected_cols.erase(selected_cols.begin());
+							co::utility::parse_csv_specific(filepath,times," ",time_col);
+							co::utility::parse_csv_specific(filepath,v," ",selected_cols);
+						}
+						else{
+							co::utility::parse_csv_specific(filepath,v," ",selected_cols);
+						}
+						
+						files.push_back(v);
+						cols.push_back(selected_cols.size());
+						rows=v.size()/selected_cols.size();
+						selected_cols.clear();
+						filename.clear();
+						num_files++;
+						
+						
+					}
+				}
+				else if (s[i]=='['){
+					inSelectedColumns=true;
+				}
+			
+			}
+			
+			/*Merge all loaded .csv files*/		
+			for(int i=0; i<rows;i++){
+				for (int j=0;j<files.size();j++){
+					for (int k=0;k<cols[j];k++){
+						data.push_back(files[j][i*cols[j]+k]);
+					}
+				}
+			}
+			if (_rows!=0){
+				*_rows=rows; //assign outside rows to rows
+			}
+			
+			return ErrorCode::NoError;
+		}
+	}
 }
 
 #endif

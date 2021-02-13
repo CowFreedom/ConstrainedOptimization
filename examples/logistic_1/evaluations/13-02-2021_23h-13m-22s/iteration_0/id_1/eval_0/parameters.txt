@@ -1,0 +1,4 @@
+--Evaluating derivative
+v_theta1=EVar64(value: EFloat64(value: 1,low: 1,high: 1),min: 0,max: 30)
+v_theta2=EVar64(value: EFloat64(value: 1.00001,low: 1.00001,high: 1.00001),min: 0,max: 10)
+v_theta3=EVar64(value: EFloat64(value: 1,low: 1,high: 1),min: 0,max: 30)

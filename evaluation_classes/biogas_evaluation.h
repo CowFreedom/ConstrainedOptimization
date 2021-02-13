@@ -18,6 +18,8 @@
 #include "../core/parse.h"
 #include "../core/computation_modes.h"
 #include "../core/filewriter.h"
+#include "../core/interpolation.h"
+
 
 namespace co{
 
@@ -188,92 +190,7 @@ namespace co{
 		as usual for PDE's). Therefore, this is implemented on a per-problem basis.
 		Datapath is the path of the data, if it differs from the paths in tabledir*/
 		ErrorCode parse_csv_table_times(std::string table_dir, std::string _outfile_name, std::vector<T>& data, std::vector<T>& times, std::string data_path="", int* _rows=0){
-			//std::cout<<"In Parse!\n";
-			std::string outfile_path=table_dir+'/'+_outfile_name; //use std filesystem later
-			//std::cout<<"Parse: Lua table path "<<outfile_path<<"\n";
-			std::ifstream file(outfile_path);
-			if (file.fail()){
-				std::cerr<<"Couldn't open parse input table at "<<outfile_path<<"\n";
-				return ErrorCode::ParseError;
-			}
-			std::stringstream buffer;
-			buffer << file.rdbuf();
-			std::string s=buffer.str();
-			
-			std::string file_dir=table_dir;
-			if (data_path!=""){
-				file_dir=data_path;
-			}
-			
-			bool inFileName=false;
-			bool inSelectedColumns=false;
-			std::string filename;
-			std::vector<std::vector<T>> files; //content of loaded .csv files
-			std::vector<int> cols; //columns per file
-			std::vector<int> selected_cols;
-			int rows;
-			int num_files=0; //counts the number of files opened
-			for (int i=0;i<s.size();i++){
-				if (inFileName){
-					if(s[i]!='\"'){
-						filename+=s[i];
-					}
-					else{
-						inFileName=false;
-					}
-				}
-				else if (s[i]=='\"'){
-					inFileName=true;
-				}
-				else if (inSelectedColumns){
-					if (isdigit(s[i])){
-						selected_cols.push_back(static_cast<int>(s[i]-'0'));
-					}
-					else if (s[i]==']'){
-						inSelectedColumns=false;		
-				        std::vector<T> v;
-						std::string filepath= file_dir+'/'+filename; //path to file
-						//std::cout<<"File path:"<<filepath<<"\n";
-						if(num_files==0){
-							std::vector<int> time_col;
-							time_col.push_back(selected_cols.front());
-							selected_cols.erase(selected_cols.begin());
-							co::parse_csv_specific(filepath,times," ",time_col);
-							co::parse_csv_specific(filepath,v," ",selected_cols);
-						}
-						else{
-							co::parse_csv_specific(filepath,v," ",selected_cols);
-						}
-						
-						files.push_back(v);
-						cols.push_back(selected_cols.size());
-						rows=v.size()/selected_cols.size();
-						selected_cols.clear();
-						filename.clear();
-						num_files++;
-						
-						
-					}
-				}
-				else if (s[i]=='['){
-					inSelectedColumns=true;
-				}
-			
-			}
-			
-			/*Merge all loaded .csv files*/		
-			for(int i=0; i<rows;i++){
-				for (int j=0;j<files.size();j++){
-					for (int k=0;k<cols[j];k++){
-						data.push_back(files[j][i*cols[j]+k]);
-					}
-				}
-			}
-			if (_rows!=0){
-				*_rows=rows; //assign outside rows to rows
-			}
-			
-			return ErrorCode::NoError;
+			return co::utility::parse_csv_table_times(table_dir,_outfile_name,data,times,data_path,_rows);
 		}
 		
 		/*Linearly interpolates source into target  and saves it into storage
@@ -282,68 +199,7 @@ namespace co{
 		cols: number of columns in source!*/
 		ErrorCode tailor_array(std::vector<T>& targettimes, std::vector<T>& sourcetimes, const std::vector<T>& source, std::vector<T>& storage, int cols){
 	
-			int saved_rows=0;
-			int j=0;
-			int nt=targettimes.size();
-			int ns=sourcetimes.size();
-			storage.resize(nt*cols);
-			int i=0;
-			int substract=0;
-			if (nt==ns){
-				//std::cout<<"ns==nt!";	
-				//std::cin.get();
-				T t1=sourcetimes[nt-2];
-				T t2=sourcetimes[nt-1];
-				T tc=targettimes[nt-1];
-				T t=(tc-t1)/(-t1+t2);
-				for (int k=0;k<cols;k++){
-				//std::cout<<"Bis hier: j: "<<j<<" saved_rows: "<<saved_rows<<" k:"<<k<<"\n";
-				storage[(nt-1)*cols+k]=source[(nt-2)*cols+k]*(T(1.0)-t)+source[(nt-1)*cols+k]*t;
-				}
-				substract=cols;
-			}
-			if (sourcetimes[0]>targettimes[0]){
-				sourcetimes[0]=targettimes[0];
-			}
-			else{
-				targettimes[0]=sourcetimes[0];
-			}
-			if(targettimes[nt-1]>sourcetimes[ns-1]){
-				std::cerr<<"Error: The target vector's last time value is higher than the source vectors last time value. This error is often caused by UG4 not finishing the computation. Check the most recent console_output.log in the respective evaluation folders.";
-				//std::cin.get();
-				return ErrorCode::ParseError;
-			}
-			//sourcetimes[0]=targettimes[0]; //remove later. dont do it
-			//std::cout<<"Bis hier!\n";
-			while((saved_rows*cols)<(nt-substract)*cols){
-				//	std::cout<<"sourcetime[j]: "<< sourcetimes[j]<<"sourcetime[j+1]"<<sourcetimes[j+1]<<"  targettimes[i]"<<targettimes[i]<<"\n";
-				//	std::cout<<"nt-substract:"<<nt-substract<<"\n";
-					if (sourcetimes[j]>sourcetimes[j+1]){
-						std::cout<<"Error: The sourcetimes vector is not monotonically increasing.\n";
-						return ErrorCode::ParseError;
-					}
-					
-					if ((sourcetimes[j]<=targettimes[i])&&(sourcetimes[j+1]>=targettimes[i])){
-						T t1=sourcetimes[j];
-						T t2=sourcetimes[j+1];
-						T tc=targettimes[i];
-						T t=(tc-t1)/(-t1+t2);
-						//std::cout<<"-t1:"<<-t1<<"  t2:"<<t2<<"    -t1+t2:"<<-t1+t2<<"    tc"<<tc<<"tc-t1:"<<tc-t1<<"\n";
-						for (int k=0;k<cols;k++){
-				//		std::cout<<"Bis hier: j: "<<j<<" saved_rows: "<<saved_rows<<" k:"<<k<<"t: "<<t<<"\n";
-				//		std::cout<<"n:"<<saved_rows*cols+k<<" value: "<<source[j*cols+k]*(T(1.0)-t)+source[(j+1)*cols+k]*t<<"\n";
-						storage[saved_rows*cols+k]=source[j*cols+k]*(T(1.0)-t)+source[(j+1)*cols+k]*t;
-						}
-		
-					saved_rows++;
-					i++;
-				}		
-				else{
-					j++;
-				}
-			}
-		
-			return ErrorCode::NoError;
+			return co::utility::tailor_array_linearly(targettimes, sourcetimes, source,storage,cols);
 		}		
 
 };

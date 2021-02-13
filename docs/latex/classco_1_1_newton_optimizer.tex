@@ -7,11 +7,11 @@
 \doxysubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\hyperlink{classco_1_1_newton_optimizer_a3d769775c46bb81ce620a1d5d098b3d6}{Newton\+Optimizer}} (const \mbox{\hyperlink{classco_1_1_options}{Options}} \&\+\_\+options, E \&\+\_\+evaluator)
+\mbox{\hyperlink{classco_1_1_newton_optimizer_a42854fedada9fa2228e5f09b59122218}{Newton\+Optimizer}} (const \mbox{\hyperlink{classco_1_1_newton_options}{Newton\+Options}} \&\+\_\+options, E \&\+\_\+evaluator)
 \item 
 {\footnotesize template$<$class T $>$ }\\bool \mbox{\hyperlink{classco_1_1_newton_optimizer_a46862053b21d9d7470fd501d50c3c7ed}{has\+\_\+converged}} (const std\+::vector$<$ T $>$ \&res)
 \item 
-{\footnotesize template$<$class T $>$ }\\\mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} \mbox{\hyperlink{classco_1_1_newton_optimizer_abae85cd4850aa8465ca468e6ca38c28b}{run}} (const std\+::vector$<$ E\+Var\+Manager$<$ T $>$$>$ \&initial\+\_\+params)
+{\footnotesize template$<$class T $>$ }\\\mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} \mbox{\hyperlink{classco_1_1_newton_optimizer_aaff053e96eda8587a1e9311add7cd68d}{run}} (const E\+Var\+Manager$<$ T $>$ \&initial\+\_\+params, E\+Var\+Manager$<$ T $>$ \&estimated\+\_\+parameters)
 \end{DoxyCompactItemize}
 
 
@@ -19,15 +19,15 @@
 \subsubsection*{template$<$class E$>$\newline
 class co\+::\+Newton\+Optimizer$<$ E $>$}
 
-This class represents an instance of the Newton Gauss algorithm. Instances of this class must be created if one wants to run the Newton Gauss algorithm. Instances of evaluator.\+h steer the computation behavior while instances of \mbox{\hyperlink{classco_1_1_options}{co\+::\+Options}} internally configure the class. 
+This class represents an instance of the Newton Gauss algorithm. Instances of this class must be created if one wants to run the Newton Gauss algorithm. Instances of the Evaluator class from evaluator.\+h steer the computation behavior while instances of \mbox{\hyperlink{classco_1_1_options}{co\+::\+Options}} internally configure the class. 
 
 \doxysubsection{Constructor \& Destructor Documentation}
-\mbox{\Hypertarget{classco_1_1_newton_optimizer_a3d769775c46bb81ce620a1d5d098b3d6}\label{classco_1_1_newton_optimizer_a3d769775c46bb81ce620a1d5d098b3d6}} 
+\mbox{\Hypertarget{classco_1_1_newton_optimizer_a42854fedada9fa2228e5f09b59122218}\label{classco_1_1_newton_optimizer_a42854fedada9fa2228e5f09b59122218}} 
 \index{co::NewtonOptimizer$<$ E $>$@{co::NewtonOptimizer$<$ E $>$}!NewtonOptimizer@{NewtonOptimizer}}
 \index{NewtonOptimizer@{NewtonOptimizer}!co::NewtonOptimizer$<$ E $>$@{co::NewtonOptimizer$<$ E $>$}}
 \doxysubsubsection{\texorpdfstring{NewtonOptimizer()}{NewtonOptimizer()}}
 {\footnotesize\ttfamily template$<$class E $>$ \\
-\mbox{\hyperlink{classco_1_1_newton_optimizer}{co\+::\+Newton\+Optimizer}}$<$ E $>$\+::\mbox{\hyperlink{classco_1_1_newton_optimizer}{Newton\+Optimizer}} (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classco_1_1_options}{Options}} \&}]{\+\_\+options,  }\item[{E \&}]{\+\_\+evaluator }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+\mbox{\hyperlink{classco_1_1_newton_optimizer}{co\+::\+Newton\+Optimizer}}$<$ E $>$\+::\mbox{\hyperlink{classco_1_1_newton_optimizer}{Newton\+Optimizer}} (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classco_1_1_newton_options}{Newton\+Options}} \&}]{\+\_\+options,  }\item[{E \&}]{\+\_\+evaluator }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
 
 Creates the class. 
 \begin{DoxyParams}[1]{Parameters}
@@ -55,17 +55,19 @@ Checks if the Newton iterations have converged to a root. This is equal to havin
 \begin{DoxyReturn}{Returns}
 A bool indicating if iterations have converged. 
 \end{DoxyReturn}
-\mbox{\Hypertarget{classco_1_1_newton_optimizer_abae85cd4850aa8465ca468e6ca38c28b}\label{classco_1_1_newton_optimizer_abae85cd4850aa8465ca468e6ca38c28b}} 
+\mbox{\Hypertarget{classco_1_1_newton_optimizer_aaff053e96eda8587a1e9311add7cd68d}\label{classco_1_1_newton_optimizer_aaff053e96eda8587a1e9311add7cd68d}} 
 \index{co::NewtonOptimizer$<$ E $>$@{co::NewtonOptimizer$<$ E $>$}!run@{run}}
 \index{run@{run}!co::NewtonOptimizer$<$ E $>$@{co::NewtonOptimizer$<$ E $>$}}
 \doxysubsubsection{\texorpdfstring{run()}{run()}}
 {\footnotesize\ttfamily template$<$class E $>$ \\
 template$<$class T $>$ \\
-\mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} \mbox{\hyperlink{classco_1_1_newton_optimizer}{co\+::\+Newton\+Optimizer}}$<$ E $>$\+::run (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ E\+Var\+Manager$<$ T $>$$>$ \&}]{initial\+\_\+params }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+\mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} \mbox{\hyperlink{classco_1_1_newton_optimizer}{co\+::\+Newton\+Optimizer}}$<$ E $>$\+::run (\begin{DoxyParamCaption}\item[{const E\+Var\+Manager$<$ T $>$ \&}]{initial\+\_\+params,  }\item[{E\+Var\+Manager$<$ T $>$ \&}]{estimated\+\_\+parameters }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
 
 Runs Gauss Newton\textquotesingle{}s algorithm. Only this function has to be called to run the complete procedure. 
 \begin{DoxyParams}[1]{Parameters}
 \mbox{\texttt{ in}}  & {\em initial\+\_\+params} & Initial parameters containing starting values for the procedure. \\
+\hline
+\mbox{\texttt{ in}}  & {\em estimated\+\_\+parameters} & This will save the estimated parameters of the problem \\
 \hline
 \end{DoxyParams}
 \begin{DoxyReturn}{Returns}

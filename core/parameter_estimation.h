@@ -8,11 +8,10 @@
  *------------- | -------------
  *newton.h  | The Gauss Newton procedure minimizes functions that can be represented as a sum of squares.
  *pso.h  | The Particle Swarm Optimization (PSO) algorithm minimizes any continuous function on a compact domain.
- * This package is under active development. This manual was created in June 2020 for version number 0.32.
+ * This package is under active development. This manual was created in February 2021 for version number 0.34.
  
  *\subsection System Requirements
- *Due to the usage of OS specific functions for process generation, the plugin is not necessarily multiplatform.
- *In its current form, the package has been shown to work on Windows 10, Linux Ubuntu and macOS Mojave 10.14.4. On Windows 10, two compilers were tested, GCC 9.2.0 and Visual Studio v16.3.10. It is assumed that the package also works for older compiler versions.
+ *In its current form, the package has been shown to work on Windows 10, Linux Ubuntu and macOS Mojave 10.14.4. On Windows 10, two compilers were tested, GCC 9.3.0 and Visual Studio v16.3.10. It is assumed that the package also works for older compiler versions that support C++17 features.
  *On Linux Ubuntu only GCC was tested. If GCC is used, UG4 might have to be rebuilt with the -pthread flag. Using Clang might necessitates adding the -std=c++11 flag to the build process.
  * For a list of bugs and recommended features see the page issues.
  *
@@ -36,19 +35,23 @@
 #include "../optimizers/pso.h"
 #include "efloat.h"
 #include "../evaluation_classes/biogas_evaluation.h"
+#include "../evaluation_classes/epidemics_evaluation.h"
 #include <typeinfo> //to dynamically check type
 //#include <filesystem>
 
-extern const float version_number=0.33; /*!< Version number of the project. Higher numbers indicated more up-to-date versions. Contrary to the version counting procedure in e.g. Rust, the version number's digits do not
+extern const float version_number=0.34; /*!< Version number of the project. Higher numbers indicated more up-to-date versions. Contrary to the version counting procedure in e.g. Rust, the version number's digits do not
 give an indication about the severity of the updates. This means, that version 1.0 does not necessarily amount to significant changes compared to version 0.1.*/
 
 namespace co{
 	
-	/*dir: directory where configuration files are
-	shell_command: command that shall be executed (e.g. ugshell -ex biogas_app/biogas.lua -p Test.lua)
-	E: Evaluation type
-	*/
 	
+	/*! Runs Gauss Newton's algorithm. Only this function has to be called to run the complete procedure.
+	@param[in] evaluator Evaluation type used for calculating the function evaluations
+	@param[in,out] parameters Parameters with their respective bounds and initial values
+	@param[in,out] estimated_parameters This will save the estimated parameters of the problem
+	@param[in] Options to configure the Newton-Gauss solver
+	\return Code indicating success or failure of running the Newton procedure.
+	*/
 	template<class E, class T>
 	bool run_newton_gauss(E& evaluator,const EVarManager<T>& parameters, EVarManager<T>& estimated_parameters,NewtonOptions options){
 	//	BiogasEvaluation<EFloat64,ConfigComputation::Local> evaluator(dir,"subset_target.lua", "subset_sim.lua",ConfigOutput::File);
