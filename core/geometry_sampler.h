@@ -63,14 +63,14 @@ namespace co{
 		for (int j=0;j<dim;j++){
 			res<<param_names[j]<<"\t";			
 		}
-		res<<"\n";
-		
+		res<<"Loss function value\n";
+
 		
 		for (int i=0;i<n;i++){
 			for (int j=0;j<dim;j++){
 				res<<F(position[i][j])<<"\t";			
 			}
-			res<<evaluator.s(evals[i], target_data)<<"\n";
+			res<<F(evaluator.s(evals[i], target_data))<<"\n";
 		}
 		evaluator.send_info(res.str(), "samples");
 		
