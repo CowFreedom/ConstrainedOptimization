@@ -60,6 +60,7 @@ namespace co{
 		
 		std::ostringstream res;
 		res.precision(12);
+		res<<"#";
 		for (int j=0;j<dim;j++){
 			res<<param_names[j]<<"\t";			
 		}
