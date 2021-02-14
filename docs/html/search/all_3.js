@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['has_5fconverged_17',['has_converged',['../classco_1_1_newton_optimizer.html#a46862053b21d9d7470fd501d50c3c7ed',1,'co::NewtonOptimizer']]]
+  ['geometry_5fsampler_2eh_17',['geometry_sampler.h',['../geometry__sampler_8h.html',1,'']]]
 ];

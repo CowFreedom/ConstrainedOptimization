@@ -1,10 +1,12 @@
-# Author: T S
+# Author: 
 
 # Name of your plugin and sources.
 set(pluginName	ConstrainedOptimization)
 set(SOURCES		constrained_optimization_plugin.cpp
 			)
 
+#set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_CXX_FLAGS"${CMAKE_CXX_FLAGS}-std=c++17")
 
 ################################################################################
 # The code below doesn't have to be changed (usually)

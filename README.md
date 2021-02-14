@@ -94,4 +94,4 @@ of `ComputationMode`. Combined, this setup gives a flexible and modular platform
 # Example
 
 ## logistic_1
-A sample is included in the Examples folder. Open the main.cpp, replace the shown but with the current one, compile and run.
+Samples are included in the documentation and the Examples folder.

@@ -429,6 +429,8 @@ namespace co{
 			}
 		
 		};
-		
+		/** \example newton_example.cpp
+		 * This is an example on how to use the Newton-Gauss solver.
+		 */		
 	
 }

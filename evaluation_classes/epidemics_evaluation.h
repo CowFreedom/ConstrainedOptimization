@@ -64,13 +64,14 @@ namespace co{
 			
 		}
 		
+		//This function generates the residual vector. If changed, the method "s" below has also be adjusted
 		virtual void r_i(const std::vector<T>& x, const std::vector<T>& y, std::vector<T>& result,int stride) override{	
 			for (size_t i=0;i<x.size();i++){
 				result[i+stride]=(y[i]-x[i]);
 			}			
 		}
 		
-		
+		//This function calculates the squared loss from the resiudals defined in the method r_i. If changed, r_i above has also be adjusted
 		virtual T s(const std::vector<T>& x, const std::vector<T>& y) override{
 			T sum=T(0.0);
 			for (size_t i=0;i<x.size();i++){
@@ -82,6 +83,7 @@ namespace co{
 		EpidemicsEvaluation(std::string _table_dir,  std::string _infile_name, std::string _outfile_name):table_dir(_table_dir),infile_name(_infile_name), outfile_name(_outfile_name),computer(ComputationMode<ConfigComputation::Local,ConfigOutput::File,EpidemicsEvaluation<T,ConfigComputation::Local, ConfigOutput::File>,T>(this,NTHREADS_SUPPORTED,_table_dir)){
 		}
 	
+		//This means the computation is optimized for a local machine and no PC cluster for example.
 		const ConfigComputation computation_mode=ConfigComputation::Local;
 		
 		virtual std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& v,const std::vector<T>& _target_times,ErrorCode& e, std::string message="") override{
@@ -95,6 +97,7 @@ namespace co{
 			return computer.eval_specific(v,folder_name,computer.get_current_iteration()-1,e,message);
 		};
 		
+		//This specifies how the target data is loaded
 		ErrorCode load_target(std::vector<T>& t,std::vector<T>& d) override{
 			ErrorCode ret=parse_csv_table_times(table_dir,infile_name,d,t); //TODO Remove function arguments 
 			return ret;
@@ -111,7 +114,7 @@ namespace co{
 			return true;
 		}
 		
-		
+		//Write the parameters to file
 		bool send_parameters(EVarManager<T>& params, std::string description="") const{
 			std::string path=computer.get_current_evaluation_path();
 			size_t iteration=computer.get_current_iteration()-1;
@@ -120,7 +123,7 @@ namespace co{
 			return true;	
 		}
 		
-
+		//Writes arbitrary information to file
 		bool send_info(std::string info, std::string description=""){
 			std::string path=computer.get_current_evaluation_path();
 			size_t iteration=computer.get_current_iteration()-1;
