@@ -31,9 +31,9 @@ namespace co{
 	fix: fixed columnnames
 	out: Container object that implements push_back
 	delimiter: delimiting string
-	ParseType: Type to be parsed*/
+	cols: Number of columns in the dataset*/
 	template<class T>
-	ErrorCode parse_csv(std::string filepath, std::vector<T>& out,std::string delimiter){
+	ErrorCode parse_csv(std::string filepath, std::vector<T>& out,std::string delimiter, int* _cols=nullptr){
 			std::ifstream file(filepath);
 			if (file.fail()){
 				std::cerr<<"Couldn't open  "<<filepath<<"\n";
@@ -43,8 +43,9 @@ namespace co{
 			//std::array<char,64> numbuf;
 			char numbuf[64];
 			bool in_digit=0;
-			
+			int cols=0;
 			while (std::getline(file,line)){
+				cols=0;
 				//Skip if line starts with a comment #
 				if (line.front()=='#'){
 					continue;
@@ -63,6 +64,7 @@ namespace co{
 							//out.push_back(std::atof(numbuf.begin()));
 							out.push_back(std::atof(numbuf));
 							bufsize=0;
+							cols++;
 						}
 					}
 					else{
@@ -73,10 +75,103 @@ namespace co{
 						}
 					}		
 				}	
-
+			}
+			if (_cols!=nullptr){
+				*_cols=cols;
 			}
 			return ErrorCode::NoError;	
 	}
+
+/*	fix: fixed columnnames
+	out: Container object that implements push_back
+	delimiter: delimiting string
+	cols: Number of columns in the dataset*/
+	template<class T, class C1, class C2>
+	ErrorCode parse_csv_names(std::string filepath, C1 out,C2 names, std::string delimiter, int* _cols=nullptr){
+			std::ifstream file(filepath);
+			if (file.fail()){
+				std::cerr<<"Couldn't open  "<<filepath<<"\n";
+				return ErrorCode::ParseError;
+			}
+			std::string line;
+			//std::array<char,64> numbuf;
+			char numbuf[64];
+			bool in_digit=0;
+			int cols=0;
+			bool names_parsed = false;
+			while (std::getline(file,line)){
+				if (names_parsed==false && line.front() != '#') {
+					return ErrorCode::ParseError;
+				}
+				//Parse name if comment starts with a #
+				if (line.front()=='#' && names_parsed==false){
+					names_parsed = true;
+					bool in_name = false;
+					std::string curr_name = "";
+					int i = 0;
+					int counter = 0;
+					for (auto& x:line){
+						counter++;
+						if (in_name) {
+							if (x == '\t' || x == ',' || counter == line.size()) {
+								in_name = false;
+								curr_name += x;
+								(*names).push_back(curr_name);
+								curr_name = "";
+								cols++;
+								i++;
+							}
+							else {
+								curr_name += x;
+							}
+						}
+						else if (x == '\n') {
+							break;
+						}
+						else if (x != '#' && x!=' ' && x!='\t') {
+							curr_name += x;
+							in_name = true;
+						}
+					}
+					continue;
+				}	
+
+				size_t bufsize=0;
+				line.push_back('\n'); //add last delimiter so that number parsing is correct
+				
+				for (auto& x: line){	
+					if (in_digit){
+						if (isdigit(x) || x == '.' || x == 'e' || x == '-' || x == '+'){
+							numbuf[bufsize]=x;
+							bufsize++;
+						}
+						else{
+							in_digit=false;
+							numbuf[bufsize]='\0';
+							//out.push_back(std::atof(numbuf.begin()));
+							(*out).push_back(std::atof(numbuf));
+							bufsize=0;
+						}
+					}
+					else{
+						if (isdigit(x) || x == '.' || x == '-' || x == '+'){
+							in_digit=true;
+							numbuf[bufsize]=x;
+							bufsize++;
+						}
+					}		
+				}	
+				
+			}
+			if (_cols!=nullptr){
+				*_cols=cols;
+			}
+
+			
+			return ErrorCode::NoError;	
+	}
+
+
 
 	/*Merges files in a given path. Merging is done sequentially in order of the input files.
 	in: path of the folder with files to be merged

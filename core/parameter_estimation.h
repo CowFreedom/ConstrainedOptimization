@@ -26,7 +26,7 @@
  * status of the end result. Useful if the optimizers can be selected and configured
  * based on user input.
  */
-
+#define NOMINMAX //of windows.h is included, this is needed to avoid generating conflicting min and max macros
 #pragma once
 #include<string>
 #include "options.h"
@@ -34,6 +34,7 @@
 #include "../optimizers/newton.h"
 #include "../optimizers/pso.h"
 #include "efloat.h"
+#include "parse.h"
 #include "../evaluation_classes/biogas_evaluation.h"
 #include "../evaluation_classes/epidemics_evaluation.h"
 #include "geometry_sampler.h"

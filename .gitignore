@@ -1,9 +1,9 @@
-.cproject
-.project
-.tags
-.tags_sorted_by_file
-.exe
-.out
+*.cproject
+*.project
+*.tags
+*.tags_sorted_by_file
+*.exe
+*.out
 Doxyfile
 latex/
 html/

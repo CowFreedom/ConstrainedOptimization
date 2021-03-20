@@ -396,7 +396,7 @@ namespace co{
 			for (int i=0;i<n_particles;i++){
 				indices[i]=particles[i].get_group_id();
 			}
-			
+			auto rng = std::default_random_engine{};
 			std::vector<T> global_minimum_position(n); //best position of all groups
 			
 			T previous_minimum_fitness=T(std::numeric_limits<double>::max());
@@ -545,7 +545,8 @@ namespace co{
 					//redraw_topology=true;
 					
 					//shuffle indices
-					std::random_shuffle(indices.begin(),indices.end());
+					std::shuffle(std::begin(indices), std::end(indices), rng);
+					//std::random_shuffle(indices.begin(),indices.end()); //old way of doing it
 					for (int i=0;i<n_particles;i++){
 						particles[i].set_group_id(indices[i]);
 					}

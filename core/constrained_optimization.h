@@ -9,7 +9,6 @@
 namespace co{
 	
 	const unsigned NTHREADS_SUPPORTED = std::thread::hardware_concurrency();
-	
 	constexpr double max_double=std::numeric_limits<double>::max();
 	constexpr double infinity=std::numeric_limits<double>::infinity();
 	constexpr double machine_epsilon=std::numeric_limits<double>::epsilon()*0.5;
