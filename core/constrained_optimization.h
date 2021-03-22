@@ -3,9 +3,6 @@
 #include <cstring>
 #include<thread>
 
-#include "parameters.h"
-
-
 namespace co{
 	
 	const unsigned NTHREADS_SUPPORTED = std::thread::hardware_concurrency();

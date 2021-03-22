@@ -324,9 +324,9 @@ namespace co{
 					return load_code;
 				}
 				
-				
 				std::vector<EVarManager<T>> parameters;
 				parameters.push_back(initial_params);
+
 				//evaluate initial parameters
 				size_t j_n=target_data.size(); //height of jacobi matrix
 				size_t j_m=parameters[0].len(); //length of jacobi matrix

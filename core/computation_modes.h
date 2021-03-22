@@ -211,7 +211,7 @@ BOOL CreateProcessInJob(HANDLE hJob,LPCTSTR lpApplicationName,LPTSTR lpCommandLi
 	
 		//Create file handle to redirect console output to file
 	//See https://stackoverflow.com/questions/7018228/how-do-i-redirect-output-to-a-file-with-createprocess
-	
+
 	
 	   SECURITY_ATTRIBUTES sa;
 		sa.nLength = sizeof(sa);
@@ -282,9 +282,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		create_directories(path,0);
 		
 		writer.write(path,*(start+i),message);
-		
-		
-		
+
 		//Create Job Object
 		HANDLE hJob = CreateJobObject(nullptr, nullptr);
 		JOBOBJECT_EXTENDED_LIMIT_INFORMATION info = { };
@@ -303,6 +301,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		LPSTR cmd=const_cast<LPSTR>(command.c_str());
 		LPSTR working_directory=const_cast<LPSTR>(path.c_str());
 		LPSTR log_path=const_cast<LPSTR>(log_path_string.c_str());
+
 		BOOL handle_inheritance=TRUE; //If it is false, the redirected output to console_output.log is not working
 		if (CreateProcessInJob(hJob,
 			NULL,
@@ -323,7 +322,6 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		CloseHandle(hJob);
 		//OSEvaluator os;
 		//os.spawn_process_and_wait_to_join(command, path, id);
-		
 		//Spawn process
 		
 	}
@@ -469,9 +467,10 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		std::vector<std::thread> t;//Create the threads
 		std::vector<size_t> evals_per_thread(n);
 		std::string folder_path=evaluation_path+"/iteration_"+std::to_string(_iter)+"/"+folder_name;
-		std::string shell_command="ugshell -ex "+table_directory+"/evaluate.lua";
+		std::string shell_command="ugshell -ex \""+table_directory+"/evaluate.lua\" ";
 		std::cout<<"Shell command: "<<shell_command<<"\n";
 		//std::cout<<"n ist:"<<n;
+
 		if (n<=thread_count){
 			t.resize(n);
 			for (auto& x: input){
@@ -508,12 +507,12 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		for (auto& x:t){
 			x.join();
 		}
+
 		//Parse results;
 		std::vector<std::vector<T>> result(n);
 		std::vector<int> rows(n);
 		//std::cout<<"Pointer address inside:"<<evaluation_class<<"\n";
 		//std::cout<<"Size targettimes inside:"<<(*evaluation_class).target_times.size()<<"\n";
-
 		int ids=0;
 		bool error_in_parsing=false;
 		for (int i=0;i<id;i++){

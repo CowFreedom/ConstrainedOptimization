@@ -1,11 +1,10 @@
 #pragma once
 #include <string>
 #include <utility>
-#include "constrained_optimization.h"
-#include "parameters.h"
 #include <algorithm>
+#include <iostream>
 #include<cmath>
-
+#include "constrained_optimization.h"
 
 namespace co{
 
@@ -291,8 +290,7 @@ namespace co{
 				return os;
 			}
 		
-
-			
+		
 		explicit operator double() const{
 				return val;	
 			}
