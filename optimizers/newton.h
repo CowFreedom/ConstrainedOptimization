@@ -15,6 +15,7 @@
 #include <numeric>
 #include <sstream>
 #include <iomanip>
+#include <vector>
 
 namespace co{
  
@@ -142,6 +143,7 @@ namespace co{
 					//std::cin.get();
 					if (f_alpha<=f_sum1){
 						current_params=evaluations;
+						saved_losses_in_past_iteration.push_back((double)s_n);
 						std::cout<<"Done wolfing\n";
 						return true;
 					}
@@ -231,6 +233,7 @@ namespace co{
 					std::cout<<output.str();
 					if (f_alpha<=c*s_n){
 						s_n=f_alpha;
+						saved_losses_in_past_iteration.push_back((double)s_n);
 						std::vector<EVarManager<T>> res;
 						res.push_back(evaluations[best_alpha]);
 						current_params=res;
@@ -313,6 +316,7 @@ namespace co{
 			*/
 			template<class T>
 			ErrorCode run(const EVarManager<T>& initial_params, EVarManager<T>& estimated_parameters){
+				saved_losses_in_past_iteration=std::vector<double>();
 				T delta=T(0.0001);
 				//std::cout<<"Newton Optimizer started\n";
 				//load target data
@@ -426,6 +430,12 @@ namespace co{
 				estimated_parameters=parameters[0];
 				return ErrorCode::OptimizationError;
 			}
+			}
+			
+			std::vector<double> saved_losses_in_past_iteration;
+			
+			std::vector<double> get_saved_losses_in_past_iteration_as_double() const{
+				return saved_losses_in_past_iteration;
 			}
 		
 		};
