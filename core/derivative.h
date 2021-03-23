@@ -18,7 +18,7 @@ namespace co{
 		void(*f)(const std::vector<F>&,const std::vector<F>&,std::vector<F>& result,int stride);
 		F(*s)(const std::vector<F>&,const std::vector<F>&);
 		public:
-		Derivative(void(*_f)(const std::vector<F>&,const std::vector<F>&,std::vector<F>& result,int stride),F(*_s)(const std::vector<F>&,const std::vector<F>&)):f(_f),s(_s),delta(F(0.00001)){}
+		Derivative(void(*_f)(const std::vector<F>&,const std::vector<F>&,std::vector<F>& result,int stride),F(*_s)(const std::vector<F>&,const std::vector<F>&)):f(_f),s(_s),delta(F(0.000001)){}
 		Derivative(void(*_f)(const std::vector<F>&,const std::vector<F>&,std::vector<F>& result,int stride),F(*_s)(const std::vector<F>&,const std::vector<F>&), F _delta): delta(_delta), f(_f),s(_s){}
 		
 		

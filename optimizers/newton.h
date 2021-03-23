@@ -279,6 +279,8 @@ namespace co{
 				return res;
 			}
 			
+			double convergence_threshold = 0.0001;
+			
 			public:
 			/*! Creates the class.
 			@param[in] _options Configures the Newton Gauss optimizer internally, such as choosing the derivative evaluation type (e.g. Finite Differences) and line search method.
@@ -301,7 +303,7 @@ namespace co{
 					//std::cin.get();
 				}
 				std::cout<<"Squared L2 norm of descent direction:"<<sum<<"\n";
-				if (sum<=T(0.0001)){
+				if (sum<=T(convergence_threshold)){
 					std::cout<<"Has converged true!\n";
 					return true;
 				}
@@ -437,6 +439,14 @@ namespace co{
 			std::vector<double> get_saved_losses_in_past_iteration_as_double() const{
 				return saved_losses_in_past_iteration;
 			}
+			
+			double get_convergence_threshold() const{
+				return convergence_threshold;
+			}
+			
+			void set_convergence_threshold(double input) {
+				convergence_threshold = input ;
+			} 
 		
 		};
 		/** \example newton_example.cpp
