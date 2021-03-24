@@ -52,7 +52,7 @@ namespace co{
 				personal_best_position=initial_position;
 				
 				personal_best_fitness=evaluator.s(target_data,initial_value);
-			//	std::cout<<"initial eval "<<personal_best_fitness<<"\n";
+				std::cout<<"initial eval "<<personal_best_fitness<<"\n";
 				/*
 				
 				std::cout<<"\n";
@@ -347,6 +347,8 @@ namespace co{
 				}
 			}
 			
+			
+			
 			if (f_min<=T(0.1)){
 				return true;
 			}
@@ -354,6 +356,7 @@ namespace co{
 				std::cout<<"Minimum error in this run is :"<<f_min<<"\n";
 				return false;
 			}
+			
 		}
 		
 		
@@ -377,6 +380,7 @@ namespace co{
 			size_t n=param_names.size();
 			std::vector<Particle<T>> particles;
 			
+			saved_losses_in_past_iteration = std::vector<double>();
 			std::vector<T> target_data;
 			std::vector<T> target_times;
 			ErrorCode load_code=evaluator.load_target(target_times,target_data); //load target vector
@@ -564,7 +568,7 @@ namespace co{
 				}
 					
 				}
-				
+				saved_losses_in_past_iteration.push_back((double)minimum_fitness);
 				previous_minimum_fitness=minimum_fitness;
 			
 			}
@@ -584,6 +588,12 @@ namespace co{
 			std::cout<<"Particle Swarm Optimization finished\n";
 			return ErrorCode::NoError;
 		}
+		
+		std::vector<double> saved_losses_in_past_iteration;
+			
+			std::vector<double> get_saved_losses_in_past_iteration_as_double() const{
+				return saved_losses_in_past_iteration;
+			}
 		
 	};
 	
