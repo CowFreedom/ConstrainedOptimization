@@ -588,7 +588,80 @@ namespace co {
 			
 		}
 		
-		
+		template<class T>
+		void qr(T A, int n, int m, T q, T r) {
+			int t = 0;
+			if (m < (n - 1)) {
+				t = m;
+			}
+			else {
+				t = n - 1;
+			}
+
+			std::vector<double> rs(n * m);
+			std::copy(A, A + n * m, rs.begin());
+			//initialize matrices
+			int _n = n;
+			int _m = m;
+
+			std::vector<double> qs_prev(n * n);
+			for (int i = 0; i < t; i++) {
+				std::vector<double> u(n);
+
+
+				//Initialize Qs
+				std::vector<double> qs(n * n);
+
+				for (int i = 0; i < n; i++) {
+					qs[i + i * n] = double(1.0);
+				}
+				//copy ith column and calculate norm
+				double alpha = double(0.0);
+				for (int j = 0; j < _n; j++) {
+					u[j] = rs[i * m + i + j * m];
+					alpha += u[j] * u[j];
+				}
+
+				//Set sign of alpha
+				alpha = std::sqrt(alpha);
+				if (u[0] > 0) {
+					alpha *= double(-1.0);
+				}
+				//std::cout<<"alpha:"<<alpha<<"\n";
+				u[0] = u[0] - alpha;
+				//compute squared norm of u
+				double norm = double(0.0);
+				for (int j = 0; j < _n; j++) {
+					norm += u[j] * u[j];
+				}
+
+				for (int j = 0; j < _n; j++) {
+					for (int k = 0; k < _n; k++) {
+						//qs[i*(n*m)+i*n+i+j*n+k]-=(2.0*u[j]*u[k])/norm;	
+						qs[i * n + i + j * n + k] -= (double(2.0) * u[j] * u[k]) / norm;
+					}
+				}
+
+				//Update rs
+				co::mul::dgemm_nn(n, m, n, double(1.0), qs.begin(), 1, n, rs.begin(), 1, m, double(0.0), rs.begin(), 1, m);
+
+				//Update qs
+
+				if (i > 0) {
+					co::mul::dgemm_nn(n, n, n, double(1.0), qs.begin(), 1, n, qs_prev.begin(), 1, n, double(0.0), qs_prev.begin(), 1, n);
+				}
+				else {
+
+					qs_prev = qs;
+				}
+				_n--;
+				_m--;
+			}
+			//Return Q^T
+			std::copy(qs_prev.begin(), qs_prev.begin() + n * n, q);
+			std::copy(rs.begin(), rs.begin() + n * m, r);
+
+		}
 
 		
 		/*Solves Ax=b
