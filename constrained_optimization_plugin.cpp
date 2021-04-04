@@ -102,9 +102,7 @@ static void Common(Registry& reg, string grp)
 	 				 "dir#var_descriptor#estimated_parameters#n_particles#n_groups#max_iterations", "Runs the Particle Swarm Optimization algorithm with BiogasEvaluation<EFloat64, ConfigComputation::Local, ConfigOutput::File>. See manual for details.");	
 
 //Registration of a class	
-	reg.add_class_<TestClass>("TestClass", grp)
-				.add_constructor<void(*)(std::string,double)>();	
-				
+
 	reg.add_class_<co::EFloat64>("EFloat64", grp)
 				.add_constructor<void(*)(double)>()
 				.add_method("print",&co::EFloat64::print);	
