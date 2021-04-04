@@ -60,6 +60,7 @@ namespace co{
 		public:
 		std::string outfile_name;
 		std::vector<T> target_times;
+		std::vector<T> target_positions;
 		EpidemicsPDEEvaluation(){
 			
 		}
@@ -99,7 +100,10 @@ namespace co{
 		
 		//This specifies how the target data is loaded
 		ErrorCode load_target(std::vector<T>& t,std::vector<T>& d) override{
-			ErrorCode ret=parse_csv_table_times(table_dir,infile_name,d,t); //TODO Remove function arguments 
+			if (target_positions.size()>=1){
+				target_positions=std::vector<T>();
+			}
+			ErrorCode ret=co::utility::parse_csv_table_times_pde(table_dir,infile_name,d,target_positions,t); //TODO Remove function arguments 
 			return ret;
 			
 		}
@@ -139,12 +143,15 @@ namespace co{
 						
 			std::vector<T> times;
 			std::vector<T> raw_data;
+			std::vector<T> sim_positions;
 			int rows;
-			ErrorCode ret=parse_csv_table_times(table_dir,outfile_name,raw_data, times, data_path, &rows);
+			ErrorCode ret=co::utility::parse_csv_table_times_pde(table_dir,outfile_name,raw_data,target_positions,times,data_path,&rows);
 			int cols=raw_data.size()/rows;
+			std::vector<T> interpolated_data;
+			co::utility::planar_grid_to_world(target_positions, sim_positions, raw_data, interpolated_data, cols);
 			//If parsing was successful, linearly interpolate data to target times
 			if (ret==ErrorCode::NoError){
-				ret=tailor_array(target_times,times,raw_data,data,cols);
+				ret=tailor_array(target_times,times,interpolated_data,data,cols);
 			}
 			return ret;
 		}
