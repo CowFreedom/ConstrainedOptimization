@@ -424,6 +424,242 @@ namespace co{
 			
 			return ErrorCode::NoError;
 		}
+
+	template<class T>
+	ErrorCode parse_csv_specific_pde(std::string filepath, std::vector<T>& out, std::vector<T>& positions, std::vector<T>& times, std::string delimiter, std::vector<int> cols){
+			std::ifstream file(filepath);
+			if (file.fail()){
+				std::cerr<<"Couldn't open  "<<filepath<<"\n";
+				return ErrorCode::ParseError;
+			}
+
+			std::string line;
+			//std::array<char,64> numbuf;
+			char numbuf[64];
+			bool in_digit=0;
+			size_t line_number=0;
+			
+			while (std::getline(file,line)){
+				//Skip if line starts with a comment #
+				if (line.front()=='#'){
+					continue;
+				}	
+				size_t bufsize=0;
+				line.push_back('\n'); //add last delimiter so that number parsing is correct
+				size_t current_col=0;
+				int i=0;
+				for (auto& x: line){
+					int iter=0;
+					if (in_digit){
+						if (isdigit(x) || x == '.' || x == 'e' || x == '-' || x == '+'){
+							numbuf[bufsize]=x;
+							bufsize++;
+						}
+						else{
+							in_digit=false;
+							if (i<cols.size()){
+								if (cols[i]==current_col){
+								numbuf[bufsize]='\0';
+								if (i==0){
+									times.push_back(std::atof(numbuf));
+								}
+								else if(i==1 || i==2){
+									positions.push_back(std::atof(numbuf));
+								}
+								else{
+									out.push_back(T(std::atof(numbuf)));									
+								}
+								bufsize=0;
+								iter++;
+								i++;
+							}
+								
+							}
+							
+							bufsize=0;
+							current_col++;
+							
+						}
+					}
+					else{
+						if (isdigit(x) || x == '.' || x == '-' || x == '+'){
+							in_digit=true;
+							numbuf[bufsize]=x;
+							bufsize++;
+						}
+					}		
+				}	
+				
+				line_number++;
+			}
+			
+			return ErrorCode::NoError;	
+	}
+	
+	template<class T>
+	ErrorCode parse_csv_specific_pde(std::string filepath, std::vector<T>& out, std::string delimiter, std::vector<int> cols){
+			std::ifstream file(filepath);
+			if (file.fail()){
+				std::cerr<<"Couldn't open  "<<filepath<<"\n";
+				return ErrorCode::ParseError;
+			}
+
+			std::string line;
+			//std::array<char,64> numbuf;
+			char numbuf[64];
+			bool in_digit=0;
+			size_t line_number=0;
+			
+			while (std::getline(file,line)){
+				//Skip if line starts with a comment #
+				if (line.front()=='#'){
+					continue;
+				}	
+				size_t bufsize=0;
+				line.push_back('\n'); //add last delimiter so that number parsing is correct
+				size_t current_col=0;
+				int i=0;
+				for (auto& x: line){
+					int iter=0;
+					if (in_digit){
+						if (isdigit(x) || x == '.' || x == 'e' || x == '-' || x == '+'){
+							numbuf[bufsize]=x;
+							bufsize++;
+						}
+						else{
+							in_digit=false;
+							if (i<cols.size()){
+								if (cols[i]==current_col){
+								numbuf[bufsize]='\0';
+								out.push_back(T(std::atof(numbuf)));																
+								bufsize=0;
+								iter++;
+								i++;
+							}
+								
+							}
+							
+							bufsize=0;
+							current_col++;
+							
+						}
+					}
+					else{
+						if (isdigit(x) || x == '.' || x == '-' || x == '+'){
+							in_digit=true;
+							numbuf[bufsize]=x;
+							bufsize++;
+						}
+					}		
+				}	
+				
+				line_number++;
+			}
+			
+			return ErrorCode::NoError;	
+	}	
+	
+		template<class T>
+		ErrorCode parse_csv_table_times_pde(std::string table_dir, std::string _outfile_name, std::vector<T>& data, std::vector<T>& positions,std::vector<T>& times, std::string data_path="", int* _rows=0){
+			//std::cout<<"In Parse!\n";
+			std::string outfile_path=table_dir+'/'+_outfile_name; //use std filesystem later
+
+			std::ifstream file(outfile_path);
+			if (file.fail()){
+				std::cerr<<"Couldn't open parse input table at "<<outfile_path<<"\n";
+				return ErrorCode::ParseError;
+			}
+			std::stringstream buffer;
+			buffer << file.rdbuf();
+			std::string s=buffer.str();
+			
+			std::string file_dir=table_dir;
+			if (data_path!=""){
+				file_dir=data_path;
+			}
+
+			bool inFileName=false;
+			bool inSelectedColumns=false;
+			std::string filename;
+			std::vector<std::vector<T>> files; //content of loaded .csv files
+			std::vector<int> cols; //columns per file
+			std::vector<int> selected_cols;
+			int rows;
+			int num_files=0; //counts the number of files opened
+			for (int i=0;i<s.size();i++){
+				if (inFileName){
+					if(s[i]!='\"'){
+						filename+=s[i];
+					}
+					else{
+						inFileName=false;
+					}
+				}
+				else if (s[i]=='\"'){
+					inFileName=true;
+				}
+				else if (inSelectedColumns){
+
+					if (isdigit(s[i])){
+						char* numbuf=new char[1000000];						
+						int counter=0;
+						
+						while(isdigit(s[i])){
+							numbuf[counter]=s[i];
+							i++;
+						}	
+						i--;
+						numbuf[i]='\0';
+						selected_cols.push_back(static_cast<int>(std::atof(numbuf)));
+						delete[] numbuf;
+					
+					}
+					else if (s[i]==']'){
+						inSelectedColumns=false;		
+				        std::vector<T> v1;
+						std::string filepath= file_dir+'/'+filename; //path to file
+						//std::cout<<"File path:"<<filepath<<"\n";
+						if(num_files==0){
+							co::utility::parse_csv_specific_pde(filepath,v1,positions,times," ",selected_cols);
+							selected_cols.erase(selected_cols.begin());//erase first three elements
+							selected_cols.erase(selected_cols.begin());
+							selected_cols.erase(selected_cols.begin());
+						}
+						else{
+							std::vector<T> v2;
+							std::vector<T> v3;
+							co::utility::parse_csv_specific_pde(filepath,v1," ",selected_cols);
+						}
+						files.push_back(v1);
+						cols.push_back(selected_cols.size());
+						rows=v1.size()/selected_cols.size();
+						selected_cols.clear();
+						filename.clear();
+						num_files++;	
+					}
+				}
+				else if (s[i]=='['){
+					inSelectedColumns=true;
+				}
+			
+			}
+			
+			/*Merge all loaded .csv files*/		
+			for(int i=0; i<rows;i++){
+				for (int j=0;j<files.size();j++){
+					for (int k=0;k<cols[j];k++){
+						data.push_back(files[j][i*cols[j]+k]);
+					}
+				}
+			}
+			if (_rows!=0){
+				*_rows=rows; //assign outside rows to rows
+			}
+			
+			return ErrorCode::NoError;
+		}
+
+
 	}
 }
 

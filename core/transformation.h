@@ -495,8 +495,6 @@ namespace co {
 			int _m=m;
 			
 			
-			
-			
 
 			std::vector<F> qs_prev(n*n);
 			for (int i=0;i<t;i++){
@@ -603,7 +601,6 @@ namespace co {
 			//initialize matrices
 			int _n = n;
 			int _m = m;
-
 			std::vector<double> qs_prev(n * n);
 			for (int i = 0; i < t; i++) {
 				std::vector<double> u(n);

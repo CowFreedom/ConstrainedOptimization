@@ -37,6 +37,7 @@
 #include "parse.h"
 #include "../evaluation_classes/biogas_evaluation.h"
 #include "../evaluation_classes/epidemics_evaluation.h"
+#include "../evaluation_classes/epidemics_pde_evaluation.h"
 #include "geometry_sampler.h"
 #include <typeinfo> //to dynamically check type
 //#include <filesystem>
