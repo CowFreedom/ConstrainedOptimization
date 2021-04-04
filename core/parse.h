@@ -626,8 +626,6 @@ namespace co{
 							selected_cols.erase(selected_cols.begin());
 						}
 						else{
-							std::vector<T> v2;
-							std::vector<T> v3;
 							co::utility::parse_csv_specific_pde(filepath,v1," ",selected_cols);
 						}
 						files.push_back(v1);
@@ -645,8 +643,8 @@ namespace co{
 			}
 			
 			/*Merge all loaded .csv files*/		
-			for(int i=0; i<rows;i++){
-				for (int j=0;j<files.size();j++){
+			for(int j=0;j<files.size();j++){
+				for (int i=0;i<rows;i++){
 					for (int k=0;k<cols[j];k++){
 						data.push_back(files[j][i*cols[j]+k]);
 					}
