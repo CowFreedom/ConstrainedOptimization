@@ -567,7 +567,7 @@ namespace co{
 	}	
 	
 		template<class T>
-		ErrorCode parse_csv_table_times_pde(std::string table_dir, std::string _outfile_name, std::vector<T>& data, std::vector<T>& positions,std::vector<T>& times, std::string data_path="", int* _rows=0){
+		ErrorCode parse_csv_table_times_pde(std::string table_dir, std::string _outfile_name, std::vector<T>& data, std::vector<T>& positions,std::vector<T>& times, std::vector<int>& _selected_columns, std::string data_path="", int* _rows=0){
 			//std::cout<<"In Parse!\n";
 			std::string outfile_path=table_dir+'/'+_outfile_name; //use std filesystem later
 
@@ -666,7 +666,7 @@ namespace co{
 			if (_rows!=0){
 				*_rows=rows; //assign outside rows to rows
 			}
-			
+			_selected_columns=selected_cols;
 			return ErrorCode::NoError;
 		}
 		

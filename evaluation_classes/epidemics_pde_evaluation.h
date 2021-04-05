@@ -61,6 +61,7 @@ namespace co{
 		std::string outfile_name;
 		std::vector<T> target_times;
 		std::vector<T> target_positions;
+		std::vector<int> target_selected_columns;
 		EpidemicsPDEEvaluation(){
 			
 		}
@@ -103,7 +104,7 @@ namespace co{
 			if (target_positions.size()>=1){
 				target_positions=std::vector<T>();
 			}
-			ErrorCode ret=co::utility::parse_csv_table_times_pde(table_dir,infile_name,d,target_positions,t); //TODO Remove function arguments 
+			ErrorCode ret=co::utility::parse_csv_table_times_pde(table_dir,infile_name,d,target_positions,t,target_selected_columns); //TODO Remove function arguments 
 			return ret;
 			
 		}
@@ -144,8 +145,9 @@ namespace co{
 			std::vector<T> times;
 			std::vector<T> raw_data;
 			std::vector<T> sim_positions;
+			std::vector<int> temp;
 			int rows;
-			ErrorCode ret=co::utility::parse_csv_table_times_pde(table_dir,outfile_name,raw_data,target_positions,times,data_path,&rows);
+			ErrorCode ret=co::utility::parse_csv_table_times_pde(table_dir,outfile_name,raw_data,target_positions,times,temp,data_path,&rows);
 			int cols=raw_data.size()/rows;
 			std::vector<T> interpolated_data;
 			std::string path=computer.get_current_evaluation_path();
