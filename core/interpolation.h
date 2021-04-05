@@ -79,9 +79,10 @@ namespace co{
 		/*Interpolates the simulation grid world coordinates to the target world coordinates (i.e. experimental data world coordinates).
 		Interpolation is very simple (and not even triangular) so use only if grid is relatively dense compared to real world data*/
 		template<class T>
-		ErrorCode planar_grid_to_world(std::vector<T> world_position_target, std::vector<T> world_position_grid, std::vector<T> griddata, std::vector<T>& storage, int dim_data){
+		ErrorCode planar_grid_to_world(std::vector<T> world_position_target, std::vector<T> world_position_grid, std::vector<T> griddata, std::vector<T>& storage, int dim_data, int dim_time){
 			int nDatapoints=0.5*world_position_target.size();
-			int points_per_dimension=griddata.size()/dim_data;
+			int points_per_dimension=griddata.size()/(dim_time*dim_data);
+			std::vector<int> min_indices;
 			for (int i=0;i<world_position_target.size();i+=2){
 				T wx=world_position_target[i];
 				T wy=world_position_target[i+1];
@@ -91,18 +92,28 @@ namespace co{
 				size_t current_index=1;
 				T current_distance=(wx-gx)*(wx-gx)+(wy-gy)*(wy-gy);
 				T min_distance=current_distance;
-				for (int j=2;j<0.5*world_position_grid.size();j+=2){
+				for (int j=2;j<world_position_grid.size();j+=2){
 					gx=world_position_grid[j];
 					gy=world_position_grid[j+1];
 					current_distance=(wx-gx)*(wx-gx)+(wy-gy)*(wy-gy);
 					if ((double)current_distance<(double)min_distance){
 						min_index=current_index;
+						min_distance=current_distance;
 					}
+					current_index++;
 				}
-				for (int j=0;j<dim_data;j++){
-					storage.push_back(griddata[min_index+j*dim_data]);
-				}
+				min_indices.push_back(min_index);
+					
 			}
+				for(int i=0;i<dim_time;i++){
+					for (int k= 0;k<min_indices.size();k++){
+						for (int j=0;j<dim_data;j++){
+							//std::cout<<min_indices[k]+j*points_per_dimension+i*(griddata.size()/dim_time)<<"\t";
+							storage.push_back(griddata[min_indices[k]+j*points_per_dimension+i*(griddata.size()/dim_time)]);
+						}
+					}
+					
+				}
 			return ErrorCode::NoError;
 		}
 	}

@@ -507,7 +507,7 @@ namespace co{
 							if (i<cols.size()){
 								if (cols[i]==current_col){
 								numbuf[bufsize]='\0';
-								if (i==0){
+								if (current_col==0){
 									if ((first_row_finished==false)){
 									times.push_back(std::atof(numbuf));
 									first_row_finished=true;
@@ -516,7 +516,7 @@ namespace co{
 										;
 									}
 								}
-								else if(i==1 || i==2){
+								else if(current_col==1 || current_col==2){
 									positions.push_back(std::atof(numbuf));
 								}
 								else{
@@ -530,6 +530,7 @@ namespace co{
 							}
 							
 							bufsize=0;
+							
 							current_col++;
 							
 						}

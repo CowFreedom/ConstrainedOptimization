@@ -141,7 +141,7 @@ namespace co{
 		/*just copies parse_csv_table_times. Needed if ConfigComputation::File is set, so that computation_modes.h can parse the result
 		*/
 		ErrorCode parse(std::string& data_path, std::vector<T>& data){
-						
+			/*			
 			std::vector<T> times;
 			std::vector<T> raw_data;
 			std::vector<T> sim_positions;
@@ -153,14 +153,64 @@ namespace co{
 			std::string path=computer.get_current_evaluation_path();
 			size_t iteration=computer.get_current_iteration()-1;
 			co::utility::parse_csv(path+=std::string("/iteration_")+std::to_string(iteration)+"/"+"gridmapping_"+"outfile_name", sim_positions,"\t");
+*/
+			//ErrorCode ret=co::utility::parse_csv(path+=std::string("/iteration_")+std::to_string(iteration)+"/"+"output0.txt", std::vector<T>& tmp,std::string delimiter, int* _cols=nullptr)
+
+			//Parsing of simulated_data
+			double current_time=0;
+			double successor_time=0;
+			int i=0;
+			int index=0;
+
+			//collected sim data 
+			std::vector<double> sim_data;
+			//tmp vector
+			std::vector<double> parsed_sim_times;
+			while (true){
+					std::string path = "output"+std::to_string(i)+".txt";
+					std::string path_successor="output"+std::to_string(i+1)+".txt";
+					std::ifstream file(path_successor);
+					std::vector<double> tmp;
 				
-			co::utility::planar_grid_to_world(target_positions, sim_positions, raw_data, interpolated_data, cols);
+					//If file does not exist, exist loop
+					if (file.fail()){
+						break;
+					}
+
+					co::utility::parse_pde_time(path, current_time, "\t");
+					co::utility::parse_pde_time(path_successor, successor_time, "\t");
+					i++;
+					std::cout<<"\n\nCurrent time of simulated data: "<<current_time<< "  The successor time is:"<<successor_time<<"\n";	
+					
+					if ((current_time <=times[index]) && (successor_time > times[index])){
+						parsed_sim_times.push_back(current_time);
+						
+						co::utility::parse_csv(path,tmp,"\t");
+
+						int offset=grid_world_coordinates.size() / 2;
+
+						for (int i = 0; i<selected_columns.size()-3;i++){
+							for(int j=0;j<offset;j++){
+								//std::cout<<j+offset*(selected_columns[i+3]-3)<<"\n";
+								sim_data.push_back(tmp[j+offset*(selected_columns[i+3]-3)]);
+							}
+						}
+						
+						index++;
+					}
+			}
+
+				std::vector<double> filtered_data;
+				co::utility::planar_grid_to_world(positions, grid_world_coordinates , sim_data, filtered_data, selected_columns.size()-3,parsed_sim_times.size());
+
+
+			//co::utility::planar_grid_to_world(target_positions, sim_positions, raw_data, interpolated_data, cols);
 			//If parsing was successful, linearly interpolate data to target times
 			if (ret==ErrorCode::NoError){
-				ret=tailor_array(target_times,times,interpolated_data,data,cols);
+				ret=tailor_array(target_times,times,filtered_data,data,cols);
 			}
 			return ret;
-		}
+}
 		
 		/*Parses contents specified a table and saves them in data and times. As opposed to 
 		parse_csv_table, this time the first entry of the first datafile will be considered as the time vector.
