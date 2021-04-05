@@ -81,6 +81,52 @@ namespace co{
 			}
 			return ErrorCode::NoError;	
 	}
+	
+	template<class T>
+	ErrorCode parse_pde_time(std::string filepath, T& time, std::string delimiter){
+			std::ifstream file(filepath);
+			if (file.fail()){
+				std::cerr<<"Couldn't open  "<<filepath<<"\n";
+				return ErrorCode::ParseError;
+			}
+			std::string line;
+			//std::array<char,64> numbuf;
+			char numbuf[64];
+			bool in_digit=0;
+			int cols=0;
+			int bufsize=0;
+			while (std::getline(file,line)){
+				cols=0;
+				//Skip if line starts with a comment #
+				
+				line.push_back('\n'); //add last delimiter so that number parsing is correct
+				for (auto& x: line){	
+					if (in_digit){
+						if (isdigit(x) || x == '.' || x == 'e' || x == '-' || x == '+'){
+							numbuf[bufsize]=x;
+							bufsize++;
+						}
+						else{
+							in_digit=false;
+							numbuf[bufsize]='\0';
+							//out.push_back(std::atof(numbuf.begin()));
+							time=std::atof(numbuf);
+							bufsize=0;
+							return ErrorCode::NoError;
+						}
+					}
+					else{
+						if (isdigit(x) || x == '.' || x == '-' || x == '+'){
+							in_digit=true;
+							numbuf[bufsize]=x;
+							bufsize++;
+						}
+					}		
+				}	
+			}
+				std::cerr<<"Could not find a column indicating current time\n";
+				return ErrorCode::ParseError;
+	}
 
 /*	fix: fixed columnnames
 	out: Container object that implements push_back
