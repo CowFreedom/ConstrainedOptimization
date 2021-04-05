@@ -148,6 +148,10 @@ namespace co{
 			ErrorCode ret=co::utility::parse_csv_table_times_pde(table_dir,outfile_name,raw_data,target_positions,times,data_path,&rows);
 			int cols=raw_data.size()/rows;
 			std::vector<T> interpolated_data;
+			std::string path=computer.get_current_evaluation_path();
+			size_t iteration=computer.get_current_iteration()-1;
+			co::utility::parse_csv(path+=std::string("/iteration_")+std::to_string(iteration)+"/"+"gridmapping_"+"outfile_name", sim_positions,"\t");
+				
 			co::utility::planar_grid_to_world(target_positions, sim_positions, raw_data, interpolated_data, cols);
 			//If parsing was successful, linearly interpolate data to target times
 			if (ret==ErrorCode::NoError){

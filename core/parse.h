@@ -438,7 +438,8 @@ namespace co{
 			char numbuf[64];
 			bool in_digit=0;
 			size_t line_number=0;
-			
+			bool first_row_finished=false;
+				
 			while (std::getline(file,line)){
 				//Skip if line starts with a comment #
 				if (line.front()=='#'){
@@ -461,7 +462,13 @@ namespace co{
 								if (cols[i]==current_col){
 								numbuf[bufsize]='\0';
 								if (i==0){
+									if ((first_row_finished==false)){
 									times.push_back(std::atof(numbuf));
+									first_row_finished=true;
+									}
+									else{
+										;
+									}
 								}
 								else if(i==1 || i==2){
 									positions.push_back(std::atof(numbuf));
@@ -586,6 +593,8 @@ namespace co{
 			std::vector<int> selected_cols;
 			int rows;
 			int num_files=0; //counts the number of files opened
+			bool already_parsed_selected_columns=false;
+			bool got_filename=false;
 			for (int i=0;i<s.size();i++){
 				if (inFileName){
 					if(s[i]!='\"'){
@@ -593,14 +602,14 @@ namespace co{
 					}
 					else{
 						inFileName=false;
+						got_filename=true;
 					}
 				}
 				else if (s[i]=='\"'){
 					inFileName=true;
 				}
-				else if (inSelectedColumns){
-
-					if (isdigit(s[i])){
+				else if (inSelectedColumns || got_filename){
+					if (isdigit(s[i]) &&(already_parsed_selected_columns == false)){
 						char* numbuf=new char[1000000];						
 						int counter=0;
 						
@@ -614,26 +623,30 @@ namespace co{
 						delete[] numbuf;
 					
 					}
-					else if (s[i]==']'){
+					else if (s[i]==']' || already_parsed_selected_columns){
 						inSelectedColumns=false;		
 				        std::vector<T> v1;
 						std::string filepath= file_dir+'/'+filename; //path to file
 						//std::cout<<"File path:"<<filepath<<"\n";
 						if(num_files==0){
+							already_parsed_selected_columns=true;
 							co::utility::parse_csv_specific_pde(filepath,v1,positions,times," ",selected_cols);
-							selected_cols.erase(selected_cols.begin());//erase first three elements
-							selected_cols.erase(selected_cols.begin());
-							selected_cols.erase(selected_cols.begin());
+							//selected_cols.erase(selected_cols.begin()+1);//erase first three elements
+							//selected_cols.erase(selected_cols.begin()+1);
+
 						}
 						else{
-							co::utility::parse_csv_specific_pde(filepath,v1," ",selected_cols);
+							std::vector<T> temp;
+							co::utility::parse_csv_specific_pde(filepath,v1,temp,times," ",selected_cols);
 						}
 						files.push_back(v1);
-						cols.push_back(selected_cols.size());
-						rows=v1.size()/selected_cols.size();
-						selected_cols.clear();
+						cols.push_back(selected_cols.size()-3);
+						rows=v1.size()/(selected_cols.size()-3);
+
+						//selected_cols.clear();
 						filename.clear();
-						num_files++;	
+						num_files++;
+						got_filename=false;								
 					}
 				}
 				else if (s[i]=='['){
