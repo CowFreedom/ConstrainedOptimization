@@ -612,111 +612,173 @@ namespace co{
 			
 			return ErrorCode::NoError;	
 	}	
-	
-		template<class T>
-		ErrorCode parse_csv_table_times_pde(std::string table_dir, std::string _outfile_name, std::vector<T>& data, std::vector<T>& positions,std::vector<T>& times, std::vector<int>& _selected_columns, std::string data_path="", int* _rows=0){
-			//std::cout<<"In Parse!\n";
-			std::string outfile_path=table_dir+'/'+_outfile_name; //use std filesystem later
+		
+			template<class T>
+			ErrorCode parse_csv_table_times_pde(std::string table_dir, std::string _outfile_name, std::vector<T>& data, std::vector<T>& positions,std::vector<T>& times, std::vector<int>& _selected_columns, std::string data_path="", int* _rows=0){
+				//std::cout<<"In Parse!\n";
+				std::string outfile_path=table_dir+'/'+_outfile_name; //use std filesystem later
 
-			std::ifstream file(outfile_path);
-			if (file.fail()){
-				std::cerr<<"Couldn't open parse input table at "<<outfile_path<<"\n";
-				return ErrorCode::ParseError;
-			}
-			std::stringstream buffer;
-			buffer << file.rdbuf();
-			std::string s=buffer.str();
-			
-			std::string file_dir=table_dir;
-			if (data_path!=""){
-				file_dir=data_path;
-			}
-
-			bool inFileName=false;
-			bool inSelectedColumns=false;
-			std::string filename;
-			std::vector<std::vector<T>> files; //content of loaded .csv files
-			std::vector<int> cols; //columns per file
-			std::vector<int> selected_cols;
-			int rows;
-			int num_files=0; //counts the number of files opened
-			bool already_parsed_selected_columns=false;
-			bool got_filename=false;
-			for (int i=0;i<s.size();i++){
-				if (inFileName){
-					if(s[i]!='\"'){
-						filename+=s[i];
-					}
-					else{
-						inFileName=false;
-						got_filename=true;
-					}
+				std::ifstream file(outfile_path);
+				if (file.fail()){
+					std::cerr<<"Couldn't open parse input table at "<<outfile_path<<"\n";
+					return ErrorCode::ParseError;
 				}
-				else if (s[i]=='\"'){
-					inFileName=true;
+				std::stringstream buffer;
+				buffer << file.rdbuf();
+				std::string s=buffer.str();
+				
+				std::string file_dir=table_dir;
+				if (data_path!=""){
+					file_dir=data_path;
 				}
-				else if (inSelectedColumns || got_filename){
-					if (isdigit(s[i]) &&(already_parsed_selected_columns == false)){
-						char* numbuf=new char[1000000];						
-						int counter=0;
-						
-						while(isdigit(s[i])){
-							numbuf[counter]=s[i];
-							i++;
-						}	
-						i--;
-						numbuf[i]='\0';
-						selected_cols.push_back(static_cast<int>(std::atof(numbuf)));
-						delete[] numbuf;
-					
-					}
-					else if (s[i]==']' || already_parsed_selected_columns){
-						inSelectedColumns=false;		
-				        std::vector<T> v1;
-						std::string filepath= file_dir+'/'+filename; //path to file
-						//std::cout<<"File path:"<<filepath<<"\n";
-						if(num_files==0){
-							already_parsed_selected_columns=true;
-							co::utility::parse_csv_specific_pde(filepath,v1,positions,times," ",selected_cols);
-							//selected_cols.erase(selected_cols.begin()+1);//erase first three elements
-							//selected_cols.erase(selected_cols.begin()+1);
 
+				bool inFileName=false;
+				bool inSelectedColumns=false;
+				std::string filename;
+				std::vector<std::vector<T>> files; //content of loaded .csv files
+				std::vector<int> cols; //columns per file
+				std::vector<int> selected_cols;
+				int rows;
+				int num_files=0; //counts the number of files opened
+				bool already_parsed_selected_columns=false;
+				bool got_filename=false;
+				for (int i=0;i<s.size();i++){
+					if (inFileName){
+						if(s[i]!='\"'){
+							filename+=s[i];
 						}
 						else{
-							std::vector<T> temp;
-							co::utility::parse_csv_specific_pde(filepath,v1,temp,times," ",selected_cols);
+							inFileName=false;
+							got_filename=true;
 						}
-						files.push_back(v1);
-						cols.push_back(selected_cols.size()-3);
-						rows=v1.size()/(selected_cols.size()-3);
+					}
+					else if (s[i]=='\"'){
+						inFileName=true;
+					}
+					else if (inSelectedColumns || got_filename){
+						if (isdigit(s[i]) &&(already_parsed_selected_columns == false)){
+							char* numbuf=new char[1000000];						
+							int counter=0;
+							
+							while(isdigit(s[i])){
+								numbuf[counter]=s[i];
+								i++;
+							}	
+							i--;
+							numbuf[i]='\0';
+							selected_cols.push_back(static_cast<int>(std::atof(numbuf)));
+							delete[] numbuf;
+						
+						}
+						else if (s[i]==']' || already_parsed_selected_columns){
+							inSelectedColumns=false;		
+							std::vector<T> v1;
+							std::string filepath= file_dir+'/'+filename; //path to file
+							//std::cout<<"File path:"<<filepath<<"\n";
+							if(num_files==0){
+								already_parsed_selected_columns=true;
+								co::utility::parse_csv_specific_pde(filepath,v1,positions,times," ",selected_cols);
+								//selected_cols.erase(selected_cols.begin()+1);//erase first three elements
+								//selected_cols.erase(selected_cols.begin()+1);
 
-						//selected_cols.clear();
-						filename.clear();
-						num_files++;
-						got_filename=false;								
+							}
+							else{
+								std::vector<T> temp;
+								co::utility::parse_csv_specific_pde(filepath,v1,temp,times," ",selected_cols);
+							}
+							files.push_back(v1);
+							cols.push_back(selected_cols.size()-3);
+							rows=v1.size()/(selected_cols.size()-3);
+
+							//selected_cols.clear();
+							filename.clear();
+							num_files++;
+							got_filename=false;								
+						}
+					}
+					else if (s[i]=='['){
+						inSelectedColumns=true;
+					}
+				
+				}
+				
+				/*Merge all loaded .csv files*/		
+				for(int j=0;j<files.size();j++){
+					for (int i=0;i<rows;i++){
+						for (int k=0;k<cols[j];k++){
+							data.push_back(files[j][i*cols[j]+k]);
+						}
 					}
 				}
-				else if (s[i]=='['){
-					inSelectedColumns=true;
+				if (_rows!=0){
+					*_rows=rows; //assign outside rows to rows
 				}
-			
+				_selected_columns=selected_cols;
+				return ErrorCode::NoError;
 			}
-			
-			/*Merge all loaded .csv files*/		
-			for(int j=0;j<files.size();j++){
-				for (int i=0;i<rows;i++){
-					for (int k=0;k<cols[j];k++){
-						data.push_back(files[j][i*cols[j]+k]);
-					}
-				}
-			}
-			if (_rows!=0){
-				*_rows=rows; //assign outside rows to rows
-			}
-			_selected_columns=selected_cols;
-			return ErrorCode::NoError;
-		}
 		
+			/*Parses a csv and a table specifying the dimensions. Mainly used for rectangular grid data in pde problems*/
+
+			ErrorCode parse_table_dim_pde(std::string table_dir, std::string _outfile_name, std::vector<int>& _selected_dimensions, std::vector<std::string>& filenames){
+				//std::cout<<"In Parse!\n";
+				std::string outfile_path=table_dir+'/'+_outfile_name; //use std filesystem later
+
+				std::ifstream file(outfile_path);
+				if (file.fail()){
+					std::cerr<<"Couldn't open parse input table at "<<outfile_path<<"\n";
+					return ErrorCode::ParseError;
+				}
+				std::stringstream buffer;
+				buffer << file.rdbuf();
+				std::string s=buffer.str();
+				bool inFileName=false;
+				bool inSelectedColumns=false;
+				std::string filename;
+				std::vector<int> selected_dimensions;
+
+				for (int i=0;i<s.size();i++){
+					if (inFileName){
+						if(s[i]!='\"'){
+							filename+=s[i];
+						}
+						else{
+							inFileName=false;
+							filenames.push_back(filename);
+						}
+					}
+					else if (s[i]=='\"'){
+						inFileName=true;
+					}
+					else if (inSelectedColumns){
+						if (isdigit(s[i])){
+							char* numbuf=new char[1000000];						
+							int counter=0;
+							
+							while(isdigit(s[i])){
+								numbuf[counter]=s[i];
+								i++;
+							}	
+							i--;
+							numbuf[i]='\0';
+							selected_dimensions.push_back(static_cast<int>(std::atof(numbuf)));
+							delete[] numbuf;
+						
+						}
+						else if (s[i]==']'){
+							inSelectedColumns=false;		
+							//selected_dimensions.clear();
+							filename.clear();
+						}
+					}
+					else if (s[i]=='['){
+						inSelectedColumns=true;
+					}
+				
+				}
+
+				_selected_dimensions=selected_dimensions;
+				return ErrorCode::NoError;
+			}
 
 
 

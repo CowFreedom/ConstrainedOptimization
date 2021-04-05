@@ -55,6 +55,8 @@ namespace co{
 		private:
 		std::string table_dir;
 		std::string infile_name;
+		std::vector<std::string> filenames;
+		std::vector<int> sim_selected_dimensions;
 		ComputationMode<ConfigComputation::Local,ConfigOutput::File,EpidemicsPDEEvaluation<T,ConfigComputation::Local, ConfigOutput::File>,T> computer; //evaluates inputs according to the model formulation TODO: Change threadcount (last argument)
 		
 		public:
@@ -105,6 +107,7 @@ namespace co{
 				target_positions=std::vector<T>();
 			}
 			ErrorCode ret=co::utility::parse_csv_table_times_pde(table_dir,infile_name,d,target_positions,t,target_selected_columns); //TODO Remove function arguments 
+			co::utility::parse_table_dim_pde(table_dir,outfile_name, sim_selected_dimensions, filenames);
 			return ret;
 			
 		}
@@ -163,9 +166,12 @@ namespace co{
 			int index=0;
 
 			//collected sim data 
-			std::vector<double> sim_data;
+			std::vector<T> sim_data;
 			//tmp vector
-			std::vector<double> parsed_sim_times;
+			std::vector<T> parsed_sim_times;
+			std::vector<T> grid_world_coordinates;
+			co::utility::parse_csv("gridmapping_output.txt", grid_world_coordinates,"\t");			
+			
 			while (true){
 					std::string path = "output"+std::to_string(i)+".txt";
 					std::string path_successor="output"+std::to_string(i+1)+".txt";
@@ -182,17 +188,17 @@ namespace co{
 					i++;
 					std::cout<<"\n\nCurrent time of simulated data: "<<current_time<< "  The successor time is:"<<successor_time<<"\n";	
 					
-					if ((current_time <=times[index]) && (successor_time > times[index])){
+					if ((current_time <= (double)target_times[index]) && (successor_time > (double)target_times[index])){
 						parsed_sim_times.push_back(current_time);
 						
 						co::utility::parse_csv(path,tmp,"\t");
 
 						int offset=grid_world_coordinates.size() / 2;
 
-						for (int i = 0; i<selected_columns.size()-3;i++){
+						for (int i = 0; i<target_selected_columns.size()-3;i++){
 							for(int j=0;j<offset;j++){
 								//std::cout<<j+offset*(selected_columns[i+3]-3)<<"\n";
-								sim_data.push_back(tmp[j+offset*(selected_columns[i+3]-3)]);
+								sim_data.push_back(tmp[j+offset*(sim_selected_dimensions[i+3])]);
 							}
 						}
 						
@@ -200,15 +206,14 @@ namespace co{
 					}
 			}
 
-				std::vector<double> filtered_data;
-				co::utility::planar_grid_to_world(positions, grid_world_coordinates , sim_data, filtered_data, selected_columns.size()-3,parsed_sim_times.size());
+				std::vector<T> filtered_data;
+				co::utility::planar_grid_to_world(target_positions, grid_world_coordinates , sim_data, filtered_data, target_selected_columns.size()-3,parsed_sim_times.size());
 
 
 			//co::utility::planar_grid_to_world(target_positions, sim_positions, raw_data, interpolated_data, cols);
 			//If parsing was successful, linearly interpolate data to target times
-			if (ret==ErrorCode::NoError){
-				ret=tailor_array(target_times,times,filtered_data,data,cols);
-			}
+			ErrorCode ret=tailor_array(target_times,parsed_sim_times,filtered_data,data,target_selected_columns.size()-3);
+		
 			return ret;
 }
 		
