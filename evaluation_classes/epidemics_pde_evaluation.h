@@ -172,7 +172,7 @@ namespace co{
 			//tmp vector
 			std::vector<T> parsed_sim_times;
 			std::vector<T> grid_world_coordinates;
-			co::utility::parse_csv("gridmapping_output.txt", grid_world_coordinates,"\t");	
+			co::utility::parse_csv(data_path+"gridmapping_"+sim_filenames[0]+".txt", grid_world_coordinates,"\t");	
 
 
 			while (true){
@@ -212,12 +212,21 @@ namespace co{
 
 				std::vector<T> filtered_data;
 				co::utility::planar_grid_to_world(target_positions, grid_world_coordinates , sim_data, filtered_data, target_selected_columns.size()-3,parsed_sim_times.size());
-
-
+/*
+			for (auto& x: filtered_data){
+				std::cout<<(double)x<<"\t";
+			}
+			std::cout<<"\n\n";
+*/
 			//co::utility::planar_grid_to_world(target_positions, sim_positions, raw_data, interpolated_data, cols);
 			//If parsing was successful, linearly interpolate data to target times
 			ErrorCode ret=tailor_array(target_times,parsed_sim_times,filtered_data,data,points_per_timestep);
-		
+/*			for (auto& x: data){
+				std::cout<<(double)x<<"\t";
+			}
+			std::cout<<"\n\n";
+			std::cin.get();
+*/			
 			return ret;
 }
 		

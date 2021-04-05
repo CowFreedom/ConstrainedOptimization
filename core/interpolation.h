@@ -26,11 +26,12 @@ namespace co{
 				T t2=sourcetimes[nt-1];
 				T tc=targettimes[nt-1];
 				T t=(tc-t1)/(-t1+t2);
+										
 				for (int k=0;k<cols;k++){
 				//std::cout<<"Bis hier: j: "<<j<<" saved_rows: "<<saved_rows<<" k:"<<k<<"\n";
 				storage[(nt-1)*cols+k]=source[(nt-2)*cols+k]*(T(1.0)-t)+source[(nt-1)*cols+k]*t;
 				}
-				substract=cols;
+				substract=1; //war vorher: substract=cols
 			}
 			if (sourcetimes[0]>targettimes[0]){
 				sourcetimes[0]=targettimes[0];
@@ -52,7 +53,7 @@ namespace co{
 						std::cout<<"Error: The sourcetimes vector is not monotonically increasing.\n";
 						return ErrorCode::ParseError;
 					}
-					
+				
 					if ((sourcetimes[j]<=targettimes[i])&&(sourcetimes[j+1]>=targettimes[i])){
 						T t1=sourcetimes[j];
 						T t2=sourcetimes[j+1];
