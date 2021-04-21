@@ -10,9 +10,9 @@ file()
 
 
 --Retrieve parameter values
-v_theta1=parameters.theta1:get_value_as_double()
-v_theta2=parameters.theta2:get_value_as_double()
-v_theta3=parameters.theta3:get_value_as_double()
+v_theta1=parameters.v_theta1:get_value_as_double()
+v_theta2=parameters.v_theta2:get_value_as_double()
+v_theta3=parameters.v_theta3:get_value_as_double()
 
 
 -----------------------------------------------------------------
