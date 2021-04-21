@@ -85,6 +85,8 @@ The following algorithms are currently implemented:
 |---|---|
 |Newton-Gauss|The Gauss Newton procedure minimizes functions that can be represented as a sum of squares.|
 |Particle Swarm Optimization|The Particle Swarm Optimization (PSO) algorithm minimizes any continuous function on a bounded domain.|
+|Geometry Sampler|The geometry sampler samples points from an arbitrary loss function.|
+
 
 The main feature of **ConstrainedOptimization** is the compartmentalization of problem formulation, solution finding and underlying computation mechanism.
 A problem is formulated via child instantiations of the `Evaluation` class type, which includes details such as the objective function to be optimized or problem specific parsing details. 
@@ -94,4 +96,5 @@ of `ComputationMode`. Combined, this setup gives a flexible and modular platform
 # Example
 
 ## logistic_1
-Samples are included in the documentation and the Examples folder.
+Samples are included in the documentation and the Examples folder. A thorough and detailed
+manual can also be found there.

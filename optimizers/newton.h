@@ -280,13 +280,20 @@ namespace co{
 			}
 			
 			double convergence_threshold = 0.0001;
-			
+			double fd_step_size=0.0000001;
 			public:
 			/*! Creates the class.
 			@param[in] _options Configures the Newton Gauss optimizer internally, such as choosing the derivative evaluation type (e.g. Finite Differences) and line search method.
 			@param[in] _evaluator Steers how data is loaded and evaluated (e.g. parsed from file, given from within UG4) */
 			NewtonOptimizer(const NewtonOptions& _options, E& _evaluator):options(_options), evaluator(_evaluator){
 				
+			}
+			
+			/*! Changes the finite difference step size used for the computation of the derivative
+			@param[in] val new step size value for the finite difference scheme
+			*/			
+			void change_derivative_step_size(double val){
+				fd_step_size=val;
 			}
 
 			/*! Checks if the Newton iterations have converged to a root. This is equal to having a descent direction whose magnitude is close to zero.
@@ -345,7 +352,7 @@ namespace co{
 					std::cout<<"Newton: Starting iteration "<<iter<<"\n";
 					std::vector<T> r_n;
 					T s_n;
-					Derivative<ConfigDerivatives::FiniteDifferences,T> deriv(ls::err1,ls::mse); //change the finite differences into something agnostic
+					Derivative<ConfigDerivatives::FiniteDifferences,T> deriv(ls::err1,ls::mse,T(fd_step_size)); //change the finite differences into something agnostic
 					ErrorCode eval_error;
 					std::vector<T> J=deriv.get_jacobian(parameters, target_times,target_data,r_n,s_n,evaluator,eval_error);
 					if(eval_error!=ErrorCode::NoError){

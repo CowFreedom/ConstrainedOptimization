@@ -3,7 +3,11 @@
 #if defined(__clang__)
 	#include <x86intrin.h> //SIMD for gcc/clang
 #elif defined(__GNUC__) || defined(__GNUG__)
-	#include <x86intrin.h> //SIMD for gcc/clang
+	#if  defined(__x86_64__)
+		#include <x86intrin.h> //SIMD for gcc/clang
+	#elif !defined(__x86_64_)
+		#define NON_X86
+	#endif
 #elif defined(_MSC_VER)
 	#include<immintrin.h> //AVX, AVX2, FMA for VS
 #endif
@@ -148,16 +152,11 @@ namespace co {
 			}
 		}
 		
+#ifndef NON_X86
 		//A is in column major form and B is in row major form (i.e. A was packed by the function pack_A and B by pack_B)
 		template<class T>
 		void dgemm_micro_kernel(size_t kc, double alpha, const double* A, const double* B, double beta, T C, size_t stride_row_c, int stride_col_c) {
-			/*std::cout<<"zu multiplizierende Matrizen:\n";
-								std::cout<<"_A=\n";
-								printmat(A,MR,KC);
-								std::cout<<"\n _B=\n";
-								printmat(B,KC,NR);
-
-								*/
+								
 								//std::array<F,MR*NR> AB;	//buffer for result AB
 			double AB[MR * NR];
 			
@@ -221,7 +220,8 @@ namespace co {
 			}
 
 		}
-
+#endif
+		
 		//A is in column major form and B is in row major form (i.e. A was packed by the function pack_A and B by pack_B)
 		template<class T, class F>
 		void dgemm_micro_kernel(size_t kc, F alpha, const F* A, const F* B, F beta, T C, size_t stride_row_c, int stride_col_c) {
