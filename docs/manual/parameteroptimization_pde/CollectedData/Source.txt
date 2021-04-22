@@ -1,0 +1,10 @@
+Data collected from :
+
+https://github.com/jgehrcke/covid-19-germany-gae
+
+
+Steps: 
+-Acquire data for the respective time periods and cities. 
+-First column of the .csv or .txt files must be "time".
+-First line (i.e. Column headers) must start with a "#".
+-Data must be comma separated.
