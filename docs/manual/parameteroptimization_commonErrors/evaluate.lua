@@ -34,6 +34,7 @@ init_exposed=7
 init_infected=0
 init_recovered=0
 init_deaths=72
+
 theta=0.001002
 qq=1
 pp=1
