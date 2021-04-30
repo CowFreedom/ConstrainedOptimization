@@ -70,21 +70,21 @@ end
 if problem.expert.reactionParams.k_dec==nil then
 	print("Fall C1")
 	problem.expert.reactionParams.k_dec={}
-	problem.expert.reactionParams.k_dec["MO_acetoM"]=parameters.k_dec:get_value_as_double()
-	problem.expert.reactionParams.k_dec["MO_hydroM"]=parameters.k_dec:get_value_as_double()
-	problem.expert.reactionParams.k_dec["MO_ButyricValeric"]=parameters.k_dec:get_value_as_double()
-	problem.expert.reactionParams.k_dec["MO_Propionic"]=parameters.k_dec:get_value_as_double()
-	problem.expert.reactionParams.k_dec["MO_AcidoMS"]=parameters.k_dec:get_value_as_double()
-	problem.expert.reactionParams.k_dec["MO_AcidoAA"]=parameters.k_dec:get_value_as_double()
-	problem.expert.reactionParams.k_dec["MO_AcidoLCFA"]=parameters.k_dec:get_value_as_double()
+	problem.expert.reactionParams.k_dec["MO_acetoM"]=parameters.k_dec_MO_acetoM:get_value_as_double()
+	problem.expert.reactionParams.k_dec["MO_hydroM"]=parameters.k_dec_MO_hydroM:get_value_as_double()
+	problem.expert.reactionParams.k_dec["MO_ButyricValeric"]=parameters.k_dec_MO_ButyricValeric:get_value_as_double()
+	problem.expert.reactionParams.k_dec["MO_Propionic"]=parameters.k_dec_MO_Propionic:get_value_as_double()
+	problem.expert.reactionParams.k_dec["MO_AcidoMS"]=parameters.k_dec_MO_AcidoMS:get_value_as_double()
+	problem.expert.reactionParams.k_dec["MO_AcidoAA"]=parameters.k_dec_MO_AcidoAA:get_value_as_double()
+	problem.expert.reactionParams.k_dec["MO_AcidoLCFA"]=parameters.k_dec_MO_AcidoLCFA:get_value_as_double()
 else
-	problem.expert.reactionParams.k_dec["MO_acetoM"]=parameters.k_dec:get_value_as_double()
-	problem.expert.reactionParams.k_dec["MO_hydroM"]=parameters.k_dec:get_value_as_double()
-	problem.expert.reactionParams.k_dec["MO_ButyricValeric"]=parameters.k_dec:get_value_as_double()
-	problem.expert.reactionParams.k_dec["MO_Propionic"]=parameters.k_dec:get_value_as_double()
-	problem.expert.reactionParams.k_dec["MO_AcidoMS"]=parameters.k_dec:get_value_as_double()
-	problem.expert.reactionParams.k_dec["MO_AcidoAA"]=parameters.k_dec:get_value_as_double()
-	problem.expert.reactionParams.k_dec["MO_AcidoLCFA"]=parameters.k_dec:get_value_as_double()
+	problem.expert.reactionParams.k_dec["MO_acetoM"]=parameters.k_dec_MO_acetoM:get_value_as_double()
+	problem.expert.reactionParams.k_dec["MO_hydroM"]=parameters.k_dec_MO_hydroM:get_value_as_double()
+	problem.expert.reactionParams.k_dec["MO_ButyricValeric"]=parameters.k_dec_MO_ButyricValeric:get_value_as_double()
+	problem.expert.reactionParams.k_dec["MO_Propionic"]=parameters.k_dec_MO_Propionic:get_value_as_double()
+	problem.expert.reactionParams.k_dec["MO_AcidoMS"]=parameters.k_dec_MO_AcidoMS:get_value_as_double()
+	problem.expert.reactionParams.k_dec["MO_AcidoAA"]=parameters.k_dec_MO_AcidoAA:get_value_as_double()
+	problem.expert.reactionParams.k_dec["MO_AcidoLCFA"]=parameters.k_dec_MO_AcidoLCFA:get_value_as_double()
 end
 
 -- Execute main script

@@ -52,7 +52,7 @@ namespace co{
 				personal_best_position=initial_position;
 				
 				personal_best_fitness=evaluator.s(target_data,initial_value);
-				std::cout<<"initial eval "<<personal_best_fitness<<"\n";
+				std::cout<<"initial eval TEST "<<personal_best_fitness<<"\n";
 				/*
 				
 				std::cout<<"\n";
