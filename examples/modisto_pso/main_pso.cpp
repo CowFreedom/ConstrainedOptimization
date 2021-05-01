@@ -1,6 +1,6 @@
 #include<iostream>
-#include "../core/parameter_estimation.h"
-#include "../core/parameters.h"
+#include "../../core/parameter_estimation.h"
+#include "../../core/parameters.h"
 #include <string>
 #include <filesystem>
 
@@ -12,7 +12,7 @@ int main(int argc, char *argv[]){
 	std::string dir=std::filesystem::current_path();;
 	
 
-	std::vector<co::EFloat64> bounds= {co::EFloat64(1e-6),co::EFloat64(0.5),co::EFloat64(0.1),co::EFloat64(0.5)};
+	std::vector<co::EFloat64> bounds= {co::EFloat64(0.001),co::EFloat64(0.2),co::EFloat64(0.38),co::EFloat64(0.48)};
 	for(int i = 0; i<14;i+=2){
 		bounds.push_back(co::EFloat64(1e-06));
 		bounds.push_back(co::EFloat64(1e-01));
