@@ -2,6 +2,7 @@
 #include "../../core/parameter_estimation.h"
 #include "../../core/parameters.h"
 #include <string>
+#include<filesystem>
 
 
 
@@ -18,7 +19,7 @@ int main(){
 	co::NewtonOptions options;
 	options.set_stepsize_alpha(1);
 	
-	std::string dir ="your_path/logistic_1/";
+	std::string dir=std::filesystem::current_path().string();
 	co::BiogasEvaluation<co::EFloat64,co::ConfigComputation::Local,co::ConfigOutput::File> evaluator(dir, "subset_target.lua","subset_sim.lua");
 	co::EVarManager<co::EFloat64> estimated_vars;
 	co::NewtonOptimizer<decltype(evaluator)> solver(options,evaluator);

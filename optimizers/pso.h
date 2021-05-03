@@ -19,6 +19,7 @@
 #include <numeric>
 #include <cmath>
 #include <limits>
+#include <stdexcept>
 
 namespace co{
 
@@ -366,6 +367,10 @@ namespace co{
 			@param[in] _options Configures the Newton Gauss optimizer internally, such as choosing the derivative evaluation type (e.g. Finite Differences) and line search method.
 			@param[in] _evaluator Steers how data is loaded and evaluated (e.g. parsed from file, given from within UG4) */
 		ParticleSwarmOptimizer(const PSOOptions& _options, E& _evaluator):options(_options), evaluator(_evaluator){
+				if(n_particles <=0 || n_groups <= 0 || options.get_max_iterations() <= 0){
+					throw std::invalid_argument( "Number of Particles or Number of Groups or Max. Iterations is invalid");
+
+				}
 				n_particles=options.get_n_particles();
 				n_groups=options.get_n_groups();
 		}

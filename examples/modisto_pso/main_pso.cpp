@@ -9,7 +9,7 @@ int main(int argc, char *argv[]){
 	std::vector<std::string> names={"K_s_aceto_Methanogenesis","k_m_aceto_Methanogenesis","k_dec_MO_acetoM","k_dec_MO_hydroM","k_dec_MO_ButyricValeric","k_dec_MO_Propionic","k_dec_MO_AcidoMS","k_dec_MO_AcidoAA","k_dec_MO_AcidoLCFA"};
 		
 	//std::string dir="/home/devanshr/Programs/ug4/plugins/ConstrainedOptimization/examples/testreactor_pso/";
-	std::string dir=std::filesystem::current_path();;
+	std::string dir=std::filesystem::current_path().string();
 	
 
 	std::vector<co::EFloat64> bounds= {co::EFloat64(0.001),co::EFloat64(0.2),co::EFloat64(0.38),co::EFloat64(0.48)};
