@@ -2,8 +2,7 @@
 #include "../../core/parameter_estimation.h"
 #include "../../core/parameters.h"
 #include <string>
-#include<filesystem>
-
+#include <filesystem>
 
 
 int main(int argc, char *argv[]){
@@ -18,7 +17,8 @@ int main(int argc, char *argv[]){
 
 	co::NewtonOptions options;
 	options.set_stepsize_alpha(1);
-	std::string dir=std::filesystem::current_path().string();
+	std::string dir = std::string dir="/home/devanshr/Programs/ug4/plugins/ConstrainedOptimization/examples/testreactor_newton/";;
+	//std::string dir=std::filesystem::current_path();
 	co::BiogasEvaluation<co::EFloat64,co::ConfigComputation::Local,co::ConfigOutput::File> evaluator(dir, "subset_target.lua","subset_sim.lua");
 	co::EVarManager<co::EFloat64> estimated_vars;
 	co::NewtonOptimizer<decltype(evaluator)> solver(options,evaluator);

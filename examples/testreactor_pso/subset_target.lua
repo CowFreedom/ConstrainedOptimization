@@ -1,6 +1,6 @@
 outputFiles = {
     NormvolumeCumulative={
-      filename="expData/expDigestate_mesophil.txt",
+      filename="expData/experimental_data.txt",
       selected_columns=[0,1],
     },
   }

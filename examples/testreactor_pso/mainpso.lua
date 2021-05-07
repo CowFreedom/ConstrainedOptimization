@@ -8,9 +8,8 @@ manager=VarDescriptor64()
 --the optimization procedure
 
 manager:add("k_m_aceto_Methanogenesis",EFloat64(1e-6),EFloat64(0.5))
-manager:add("k_dec",EFloat64(4e-8),EFloat64(8e-4))
 manager:add("K_s_aceto_Methanogenesis",EFloat64(0.1),EFloat64(0.5))
-
+manager:add("k_dec",EFloat64(8e-04),EFloat64(0.1))
 
 --When the estimation is finished, new parameter values can be accessed
 --from Lua via this container
@@ -20,7 +19,7 @@ estimated_parameters=EVar64Manager()
 n_particles=12
 n_groups=2
 max_iterations=20 --maximum iterations of the PSO algorithm if no convergence is reached beforehand
-RunPSO_BiogasEval("/home/tscheidemann/ug4/apps/modisto_pso",manager,estimated_parameters,n_particles,n_groups,max_iterations)
+RunPSO_BiogasEval("/home/devanshr/Programs/ug4/plugins/ConstrainedOptimization/examples/testreactor_pso",manager,estimated_parameters,n_particles,n_groups,max_iterations)
 
 --[[Generate a lua table with the parameters.
 Note: The paramters are converted to double which means they lose

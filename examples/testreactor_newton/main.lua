@@ -21,7 +21,7 @@ estimated_parameters=EVar64Manager()
 
 --Running Newton Gauss
 stepsize_alpha=1.0 --Hyperparameter of the adaptive stepsize calculation. See AdaDelta for details. The second hyperparamater (squared gradient decay rate) can be set by directly interfacing with the C++ code
-RunNewtonGauss_BiogasEval("/home/tscheidemann/ug4/apps/modisto_newton",manager,estimated_parameters,stepsize_alpha)
+RunNewtonGauss_BiogasEval("/home/devanshr/Programs/ug4/plugins/ConstrainedOptimization/examples/testreactor_newton/",manager,estimated_parameters,stepsize_alpha)
 
 --[[Generate a lua table with the parameters.
 Note: The paramters are converted to double which means they lose
