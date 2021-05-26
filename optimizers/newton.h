@@ -109,7 +109,11 @@ namespace co{
 						//std::cout<<"d["<<i<<"]:"<<d[i]<<"\n";
 					}
 
-					evaluations[0].update_parameters_cut(current_res);	
+					bool update_error=evaluations[0].update_parameters_cut(current_res);	
+					if(update_error==false){
+						std::cerr<<"The parameters could not be updated. This is often caused if the Jacobian is has columns filled with zero. Check your Jacobi matrix in the evaluation folder\n";
+						return false;
+					}
 					ErrorCode eval_error;
 					std::vector<std::vector<T>> evals=evaluator.eval_specific(evaluations, target_times,"wolfe_condition_evaluations/", eval_error,"Wolfe Condition evaluation");
 					if(eval_error!=ErrorCode::NoError){
@@ -198,7 +202,12 @@ namespace co{
 							current_res[i]=params[i].val+factor*d[i];
 						//std::cout<<"d["<<i<<"]:"<<d[i]<<"\n";
 						}
-						evaluations[i].update_parameters_cut(current_res);	
+						bool update_err=evaluations[i].update_parameters_cut(current_res);	
+						
+						if(update_err==false){
+							std::cerr<<"The parameters could not be updated. This is often caused if the Jacobian is has columns filled with zero. Check your Jacobi matrix in the evaluation folder\n";
+							return false;
+						}
 						alpha=scale*alpha;
 					}
 					

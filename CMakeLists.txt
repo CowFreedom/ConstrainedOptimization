@@ -5,8 +5,11 @@ set(pluginName	ConstrainedOptimization)
 set(SOURCES		constrained_optimization_plugin.cpp
 			)
 
-#set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_FLAGS"${CMAKE_CXX_FLAGS}-std=c++17")
+# COMPILER specific flags
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	add_cxx_flag("-pthread")
+	add_cxx_flag("-std=c++17")
+endif()
 
 ################################################################################
 # The code below doesn't have to be changed (usually)

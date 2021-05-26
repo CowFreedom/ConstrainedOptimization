@@ -179,7 +179,6 @@ namespace co{
 						}
 						else{
 							std::cerr<<"Error: Cannot update parameters, as the range of the updated parameters exceed the domain of the variables.\n";
-							std::cin.get();
 							return false;
 						}
 						
@@ -216,12 +215,14 @@ namespace co{
 								}
 								
 								else{
-									std::cerr<<"Error: Cannot update parameters\n";
+									std::cerr<<"Error: Cannot update parameters. The value of the new parameter is\n";
 									std::cout<<new_params[i].get_v();
-									std::cin.get();
+									std::cerr<<"\n";
+									return false;
+
 								}
 								
-								return false;
+								return true;
 							}
 							
 						}
