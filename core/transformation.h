@@ -12,6 +12,8 @@
 	#include<immintrin.h> //AVX, AVX2, FMA for VS
 #endif
 
+
+
 #include<cmath>
 #include "efloat.h"
 
@@ -131,10 +133,9 @@ namespace co {
 			for (size_t i = 0; i < q; i++) {
 				pack_KXnr(kc, B, buffer, stride_rows, stride_cols);
 				//std::cout << "i:" <<  << "\n";
-				if (i < q - 1) {
-					B += NR;
-					buffer += kc * NR;
-				}
+				
+				B += NR*stride_rows;
+				buffer += kc * NR;
 
 			}
 			if (r != 0) {
@@ -534,10 +535,11 @@ namespace co {
 			
 				for (int j=0;j<_n;j++){
 					for (int k=0;k<_n;k++){
-						//qs[i*(n*m)+i*n+i+j*n+k]-=(2.0*u[j]*u[k])/norm;	
+						//qs[i*(n*m)+i*n+i+j*n+k]-=(2.0*u[j]*u[k])/norm;
 						qs[i*n+i+j*n+k]-=(F(2.0)*u[j]*u[k])/norm;	
 					}
 				}
+			
 				
 				
 				
@@ -595,13 +597,16 @@ namespace co {
 			else {
 				t = n - 1;
 			}
-
+			
 			std::vector<double> rs(n * m);
 			std::copy(A, A + n * m, rs.begin());
+		
 			//initialize matrices
 			int _n = n;
 			int _m = m;
 			std::vector<double> qs_prev(n * n);
+			std::vector<double> qs_prev_temp(n*n);
+			std::vector<double> rs_temp(m*n,-4);
 			for (int i = 0; i < t; i++) {
 				std::vector<double> u(n);
 
@@ -612,6 +617,7 @@ namespace co {
 				for (int i = 0; i < n; i++) {
 					qs[i + i * n] = double(1.0);
 				}
+				
 				//copy ith column and calculate norm
 				double alpha = double(0.0);
 				for (int j = 0; j < _n; j++) {
@@ -631,24 +637,43 @@ namespace co {
 				for (int j = 0; j < _n; j++) {
 					norm += u[j] * u[j];
 				}
+			
+			/*	if (_n<400){
+				
+				for (int j=n-3;j<n;j++){
+					for (int k=m-3;k<t;k++){	
+					std::cout<< rs[k+ j * m]<<"  ";
+				}
+				std::cout<<"\n";
+								
+				}
+					std::cin.get();
+				}
+				*/
+				
+				if (norm==0){
+					std::cout<<"NQR:orm zero!!\n";
+					
+				}
+				else{
 
-				for (int j = 0; j < _n; j++) {
-					for (int k = 0; k < _n; k++) {
-						//qs[i*(n*m)+i*n+i+j*n+k]-=(2.0*u[j]*u[k])/norm;	
-						qs[i * n + i + j * n + k] -= (double(2.0) * u[j] * u[k]) / norm;
+					for (int j = 0; j < _n; j++) {
+						for (int k = 0; k < _n; k++) {	
+							qs[i * n + i + j * n + k] -= (double(2.0) * u[j] * u[k]) / norm;
+						}
 					}
 				}
 
 				//Update rs
-				co::mul::dgemm_nn(n, m, n, double(1.0), qs.begin(), 1, n, rs.begin(), 1, m, double(0.0), rs.begin(), 1, m);
-
+				co::mul::dgemm_nn(n, m, n, double(1.0), qs.begin(), 1, n, rs.begin(), 1, m, double(0.0), rs_temp.begin(), 1, m);
+				rs=rs_temp;
 				//Update qs
 
 				if (i > 0) {
-					co::mul::dgemm_nn(n, n, n, double(1.0), qs.begin(), 1, n, qs_prev.begin(), 1, n, double(0.0), qs_prev.begin(), 1, n);
+					co::mul::dgemm_nn(n, n, n, double(1.0), qs.begin(), 1, n, qs_prev.begin(), 1, n, double(0.0), qs_prev_temp.begin(), 1, n);
+					qs_prev=qs_prev_temp;
 				}
 				else {
-
 					qs_prev = qs;
 				}
 				_n--;
