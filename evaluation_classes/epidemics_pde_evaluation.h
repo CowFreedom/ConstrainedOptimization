@@ -173,27 +173,32 @@ namespace co{
 			std::vector<T> parsed_sim_times;
 			std::vector<T> grid_world_coordinates;
 			co::utility::parse_csv(data_path+"gridmapping_"+sim_filenames[0]+".txt", grid_world_coordinates,"\t");	
-
+			bool saveNext=false;
 
 			while (true){
 				std::string path = data_path+sim_filenames[0]+std::to_string(i)+".txt";
 				std::string path_successor=data_path+sim_filenames[0]+std::to_string(i+1)+".txt";
 				std::ifstream file(path_successor);
 				std::vector<double> tmp;
-						
+				
+				co::utility::parse_pde_time(path, current_time, "\t");
+					
 				//If file does not exist, exist loop
 				if (file.fail()){
 					break;
 				}
+				else if (target_times.size()<=index){
+					break;
+					
+				}
 	
-				co::utility::parse_pde_time(path, current_time, "\t");
+			
 				co::utility::parse_pde_time(path_successor, successor_time, "\t");
+				
 				i++;
 				//std::cout<<"\n\nCurrent time of simulated data: "<<current_time<< "  The successor time is:"<<successor_time<<"\n";	
-				
-				if ((current_time <= (double)target_times[index]) && (successor_time > (double)target_times[index])){
+				if (saveNext || ((current_time <= (double)target_times[index]) && (successor_time >= (double)target_times[index]))){
 					parsed_sim_times.push_back(current_time);
-										
 					co::utility::parse_csv(path,tmp,"\t");
 					int offset=grid_world_coordinates.size() / 2;
 		
@@ -204,10 +209,37 @@ namespace co{
 							
 						}
 					}
-						
-					index++;
+					
+					if (saveNext && !((current_time <= (double)target_times[index]) && (successor_time >= (double)target_times[index]))){
+						saveNext=false;
+					}
+					else
+						saveNext=true;
+					}
+					
+					if (current_time>=(double)target_times[index]){
+						index++;
+					}
+					
 				}
-			}
+				if(index<(target_times.size())){
+					if (current_time>=(double)target_times[target_times.size()-1]){
+						std::string path = data_path+sim_filenames[0]+std::to_string(i)+".txt";
+						std::vector<double> tmp;
+						parsed_sim_times.push_back(current_time);
+				
+						co::utility::parse_csv(path,tmp,"\t");
+						int offset=grid_world_coordinates.size() / 2;
+			
+						for (int i = 0; i<target_selected_columns.size()-3;i++){
+							for(int j=0;j<offset;j++){
+								sim_data.push_back(tmp[j+offset*(sim_selected_dimensions[i])]);
+
+							}
+						}
+					}
+				}
+			
 			
 
 				std::vector<T> filtered_data;
