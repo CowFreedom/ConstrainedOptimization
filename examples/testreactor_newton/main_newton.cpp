@@ -7,7 +7,7 @@
 
 int main(int argc, char *argv[]){
 	co::EVar64Manager initial_vars;
-	co::EVar64 v1(co::EFloat64(0.4268),co::EFloat64(1e-6),co::EFloat64(1.0);
+	co::EVar64 v1(co::EFloat64(0.4268),co::EFloat64(1e-6),co::EFloat64(1.0));
 	co::EVar64 v2(co::EFloat64(8.3E-04),co::EFloat64(1e-8),co::EFloat64(0.7));
 	co::EVar64 v3(co::EFloat64(0.141),co::EFloat64(1e-8),co::EFloat64(0.7));
 
