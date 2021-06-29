@@ -92,8 +92,11 @@ namespace co{
 		const ConfigComputation computation_mode=ConfigComputation::Local;
 		
 		virtual std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& v,const std::vector<T>& _target_times,ErrorCode& e, std::string message="") override{
+			std::cout << "evaluator eval debug print1" << std::endl;
 			target_times=_target_times;
+			std::cout << "evaluator eval debug print2" << std::endl;
 			return computer.eval(v,e,message);
+			std::cout << "evaluator eval debug print3" << std::endl;
 		};
 		
 		std::vector<std::vector<T>> eval_specific(const std::vector<EVarManager<T>>& v,const std::vector<T>& _target_times, std::string folder_name,ErrorCode& e, std::string message=""){
