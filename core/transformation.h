@@ -3,11 +3,11 @@
 #if defined(__clang__)
 	#include <x86intrin.h> //SIMD for gcc/clang
 #elif defined(__GNUC__) || defined(__GNUG__)
-//	#if  defined(__x86_64__)
-//		#include <x86intrin.h> //SIMD for gcc/clang
-//	#elif !defined(__x86_64_)
+	#if  defined(__x86_64__)
+		#include <x86intrin.h> //SIMD for gcc/clang
+	#elif !defined(__x86_64_)
 		#define NON_X86
-//	#endif
+	#endif
 #elif defined(_MSC_VER)
 	#include<immintrin.h> //AVX, AVX2, FMA for VS
 #endif
