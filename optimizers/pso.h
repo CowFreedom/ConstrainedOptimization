@@ -21,6 +21,11 @@
 #include <limits>
 #include <stdexcept>
 
+
+#ifndef DEBUG
+	#define DEBUG 0
+#endif
+
 namespace co{
 
 		
@@ -271,15 +276,21 @@ namespace co{
 		template<class T>
 		ErrorCode initialize_positions(const std::vector<std::string> param_names, const std::vector<T>& bounds, const std::vector<T>& target_times, const std::vector<T>& target_data, std::vector<Particle<T>>& particles
 		,std::vector<std::vector<int>>& groups, std::vector<T>& local_best_fitness, std::vector<std::vector<T>>& local_best_position){
-			std::cout << "initialize_positions debug print1" << std::endl;
+			#if(DEBUG)
+				std::cout << "initialize_positions debug print1" << std::endl;
+			#endif
 			int n=param_names.size();
-			std::cout << "initialize_positions debug print2" << std::endl;
+			#if(DEBUG)
+				std::cout << "initialize_positions debug print2" << std::endl;
+			#endif
 			std::vector<EVarManager<T>> evaluations(n_particles);
 			std::random_device rd;  //Will be used to obtain a seed for the random number engine
 			std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
 			std::vector<std::vector<T>> initial_position(n_particles);
 			//std::cout<<"n:"<<n<<"\n";
-			std::cout << "initialize_positions debug print3 pre for" << std::endl;
+			#if(DEBUG)
+				std::cout << "initialize_positions debug print3 pre for" << std::endl;
+			#endif
 			for (int i=0;i<n_particles;i++){
 				for (int j=0;j<n;j++){
 		
@@ -293,19 +304,28 @@ namespace co{
 				}
 			}
 
-			std::cout << "initialize_positions debug print3 post for" << std::endl;
-
-			std::cout << "initialize_positions debug print3.1" << std::endl;
+			#if(DEBUG)
+				std::cout << "initialize_positions debug print3 post for" << std::endl;
+				std::cout << "initialize_positions debug print3.1" << std::endl;
+			#endif
 			ErrorCode e;
-			std::cout << "initialize_positions debug print3.2" << std::endl;
+			#if(DEBUG)
+				std::cout << "initialize_positions debug print3.2" << std::endl;
+			#endif
 			std::vector<Particle<T>> _particles;
-			std::cout << "initialize_positions debug print3.3" << std::endl;
+			#if(DEBUG)
+				std::cout << "initialize_positions debug print3.3" << std::endl;
+			#endif
 			std::vector<std::vector<T>> evals=evaluator.eval(evaluations, target_times, e,"Initializing Particles");
-			std::cout << "initialize_positions debug print3.4" << std::endl;
+			#if(DEBUG)
+				std::cout << "initialize_positions debug print3.4" << std::endl;
+			#endif
 			
 			evaluator.send_matrix(evals[n_particles-1],evals[n_particles-1].size(),1, "loaded_data");
 						
-			std::cout << "initialize_positions debug print4 pre if" << std::endl;
+			#if(DEBUG)
+				std::cout << "initialize_positions debug print4 pre if" << std::endl;
+			#endif
 
 			if (e==ErrorCode::NoError){
 				for (int i=0; i<n_particles;i++){
@@ -320,7 +340,9 @@ namespace co{
 				return e;
 			}
 
-			std::cout << "initialize_positions debug print4 pre for" << std::endl;
+			#if(DEBUG)
+				std::cout << "initialize_positions debug print4 pre for" << std::endl;
+			#endif
 
 			std::uniform_int_distribution<int> dist(0,n_groups-1);
 			for (int i=0;i<n_particles;i++){
@@ -329,7 +351,9 @@ namespace co{
 				_particles[i].set_group_id(id);
 			}
 			
-			std::cout << "initialize_positions debug print4 post for" << std::endl;
+			#if(DEBUG)
+				std::cout << "initialize_positions debug print4 post for" << std::endl;
+			#endif
 
 			std::vector<T> p_min(n_groups,T(std::numeric_limits<double>::max()));
 			std::vector<std::vector<T>> lp_pos(n_groups);//local_best_position
@@ -337,7 +361,9 @@ namespace co{
 			//std::cout<<"lp_pos size: "<<lp_pos.size();
 			//initialize local fitness
 
-			std::cout << "initialize_positions debug print5 pre for" << std::endl;
+			#if(DEBUG)
+				std::cout << "initialize_positions debug print5 pre for" << std::endl;
+			#endif
 
 			for (int i=0;i<n_particles;i++){
 				int group_id=_particles[i].get_group_id();
@@ -349,7 +375,9 @@ namespace co{
 				}
 			}
 
-			std::cout << "initialize_positions debug print5 post for" << std::endl;
+			#if(DEBUG)
+				std::cout << "initialize_positions debug print5 post for" << std::endl;
+			#endif
 
 			local_best_fitness=p_min;
 			local_best_position=lp_pos;
@@ -404,7 +432,9 @@ namespace co{
 		*/
 		template<class T>
 		ErrorCode run(EVarManager<T>& estimated_params, const std::vector<std::string>& param_names, const std::vector<T>& bounds){
-			std::cout << "PSO run debug print1" << std::endl;
+			#if(DEBUG)
+				std::cout << "PSO run debug print1" << std::endl;
+			#endif
 			int max_iterations=options.get_max_iterations();
 			size_t n=param_names.size();
 			std::vector<Particle<T>> particles;
@@ -414,36 +444,54 @@ namespace co{
 			std::vector<T> target_times;
 			ErrorCode load_code=evaluator.load_target(target_times,target_data); //load target vector
 
-			std::cout << "PSO run debug print2 pre if" << std::endl;
+			#if(DEBUG)
+				std::cout << "PSO run debug print2 pre if" << std::endl;
+			#endif
 			
 			if (load_code!=ErrorCode::NoError){
 				std::cerr<<"Error loading target data!\n";
 				return load_code;
 			}
 
-			std::cout << "PSO run debug print2 post if" << std::endl;
+			#if(DEBUG)
+				std::cout << "PSO run debug print2 post if" << std::endl;
+			#endif
 
 			std::vector<T> local_fitness(n_groups,T(std::numeric_limits<double>::max()));
-			std::cout << "PSO run debug print2.1" << std::endl;
+			#if(DEBUG)
+				std::cout << "PSO run debug print2.1" << std::endl;
+			#endif
 			std::vector<int> best_id(n_groups,-1); //ids of the most successful particle in each group
-			std::cout << "PSO run debug print2.2" << std::endl;
+			#if(DEBUG)
+				std::cout << "PSO run debug print2.2" << std::endl;
+			#endif
 			std::vector<std::vector<T>> local_best_position(n_groups);
-			std::cout << "PSO run debug print2.3" << std::endl;
+			#if(DEBUG)
+				std::cout << "PSO run debug print2.3" << std::endl;
+			#endif
 			std::vector<std::vector<int>> groups; //groups with respective group ids
-			std::cout << "PSO run debug print2.4" << std::endl;
+			#if(DEBUG)
+				std::cout << "PSO run debug print2.4" << std::endl;
+			#endif
 			initialize_positions(param_names,bounds,target_times,target_data, particles,groups,local_fitness,local_best_position);
-			std::cout << "PSO run debug print2.5" << std::endl;
+			#if(DEBUG)
+				std::cout << "PSO run debug print2.5" << std::endl;
+			#endif
 
 			int iter=0;
 			std::vector<int> indices(n_particles);
 
-			std::cout << "PSO run debug print3 pre for" << std::endl;
+			#if(DEBUG)
+				std::cout << "PSO run debug print3 pre for" << std::endl;
+			#endif
 			
 			for (int i=0;i<n_particles;i++){
 				indices[i]=particles[i].get_group_id();
 			}
 
-			std::cout << "PSO run debug print3 post for" << std::endl;
+			#if(DEBUG)
+				std::cout << "PSO run debug print3 post for" << std::endl;
+			#endif
 
 			auto rng = std::default_random_engine{};
 			std::vector<T> global_minimum_position(n); //best position of all groups
@@ -452,7 +500,9 @@ namespace co{
 			bool redraw_topology=false;
 			bool schranke=has_converged(local_fitness);
 			
-			std::cout << "PSO run debug print4 pre while" << std::endl;
+			#if(DEBUG)
+				std::cout << "PSO run debug print4 pre while" << std::endl;
+			#endif
 			
 			while (iter<max_iterations && schranke==false){
 				std::cout<<"Starting Particle Swarm Optimization iteration "<<iter<<"\n";
@@ -619,21 +669,29 @@ namespace co{
 			
 			}
 			
-			std::cout << "PSO run debug print4 post where" << std::endl;
+			#if(DEBUG)
+				std::cout << "PSO run debug print4 post where" << std::endl;
+			#endif
 
 			EVarManager<T> parameters;
 			
-			std::cout << "PSO run debug print5 pre for" << std::endl;
+			#if(DEBUG)
+				std::cout << "PSO run debug print5 pre for" << std::endl;
+			#endif
 
 			for (int i=0; i<n;i++){
 				parameters.add(param_names[i],EVar<T>(global_minimum_position[i],bounds[2*i],bounds[(2*i)+1]));
 			}
 
-			std::cout << "PSO run debug print5 post for" << std::endl;
+			#if(DEBUG)
+				std::cout << "PSO run debug print5 post for" << std::endl;
+			#endif
 
 			estimated_params=parameters;
 			
-			std::cout << "PSO run debug print6 pre if" << std::endl;
+			#if(DEBUG)
+				std::cout << "PSO run debug print6 pre if" << std::endl;
+			#endif
 
 			if (schranke){
 				evaluator.send_parameters(parameters, "These are the estimated parameters of the problem.");

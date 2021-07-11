@@ -49,6 +49,12 @@
 #include <thread>
 //#include <filesystem>
 
+#ifndef DEBUG
+	#define DEBUG 0
+#endif
+
+
+
 namespace co{
 			
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
@@ -470,7 +476,9 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		std::string shell_command="ugshell -ex \""+table_directory+"/evaluate.lua\" ";
 		std::cout<<"Shell command: "<<shell_command<<"\n";
 		//std::cout<<"n ist:"<<n;
-		std::cout << "schedule_and_eval_file debug print1, post Shell command:, pre if" << std::endl;
+		#if(DEBUG)
+			std::cout << "schedule_and_eval_file debug print1, post Shell command:, pre if" << std::endl;
+		#endif
 		if (n<=thread_count){
 			t.resize(n);
 			for (auto& x: input){
@@ -501,14 +509,18 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 			}
 			
 		}
-		std::cout << "schedule_and_eval_file debug print2, post if" << std::endl;
+		#if(DEBUG)
+			std::cout << "schedule_and_eval_file debug print2, post if" << std::endl;
+		#endif
 		//	std::cout<<"bis hier\n";
 		//Wait for all threads to finish
 		//std::cout<<"Waiting on join\n";
 		for (auto& x:t){
 			x.join(); // ERROR cause?
 		}
-		std::cout << "schedule_and_eval_file debug print3, post for, pre for" << std::endl;
+		#if(DEBUG)
+			std::cout << "schedule_and_eval_file debug print3, post for, pre for" << std::endl;
+		#endif
 
 		//Parse results;
 		std::vector<std::vector<T>> result(n);
@@ -518,18 +530,26 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		int ids=0;
 		bool error_in_parsing=false;
 		for (int i=0;i<id;i++){
-			std::cout << "schedule_and_eval_file debug print3.1, in for i = " << i << std::endl;
+			#if(DEBUG)
+				std::cout << "schedule_and_eval_file debug print3.1, in for i = " << i << std::endl;
+			#endif
 			if (error_codes[ids]!=ErrorCode::NoError && error_in_parsing==false){
 				std::cerr<<"Error computing at least one evaluation (id"<<i<<")\n";
 				e=error_codes[ids];
 				break;
 			}
 				for (int j=0;j<evals_per_thread[i];j++){
-					std::cout << "schedule_and_eval_file debug print3.2, in for2 j = " << j << std::endl;
+					#if(DEBUG)
+						std::cout << "schedule_and_eval_file debug print3.2, in for2 j = " << j << std::endl;
+					#endif
 					std::string data_path=folder_path+"id_"+std::to_string(i)+"/eval_"+std::to_string(j)+"/";
-					std::cout << "schedule_and_eval_file debug print3.3, pre dref evalutaion_class" << j << std::endl;
+					#if(DEBUG)
+						std::cout << "schedule_and_eval_file debug print3.3, pre dref evalutaion_class" << j << std::endl;
+					#endif
 					e=(*evaluation_class).parse(data_path,result[ids]);	
-					std::cout << "schedule_and_eval_file debug print3.4, pre dref evalutaion_class" << j << std::endl;
+					#if(DEBUG)
+						std::cout << "schedule_and_eval_file debug print3.4, pre dref evalutaion_class" << j << std::endl;
+					#endif
 					if (e!=ErrorCode::NoError){
 						std::cerr<<"Error parsing at least one computed evaluation (id "<<i<<")\n";
 						error_in_parsing=true;
@@ -539,12 +559,16 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 					ids++;
 				}
 		}	
-		std::cout << "schedule_and_eval_file debug print4, post for, pre if" << std::endl;
+		#if(DEBUG)
+			std::cout << "schedule_and_eval_file debug print4, post for, pre if" << std::endl;
+		#endif
 
 		if(increase_iter==true){
 			iter++;
 		}
-		std::cout << "schedule_and_eval_file debug print4, post if, pre return" << std::endl;
+		#if(DEBUG)
+			std::cout << "schedule_and_eval_file debug print4, post if, pre return" << std::endl;
+		#endif
 		
 		return result;
 		

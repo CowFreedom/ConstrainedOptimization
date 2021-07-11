@@ -21,6 +21,11 @@
 #include "../core/interpolation.h"
 
 
+#ifndef DEBUG
+	#define DEBUG 0
+#endif
+
+
 namespace co{
 
 	/*! This class represents how problems of the UG4 epidemics_app kind are evaluated. This specific example servers as an interface. For an implementation of this
@@ -92,18 +97,23 @@ namespace co{
 		const ConfigComputation computation_mode=ConfigComputation::Local;
 		
 		virtual std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& v,const std::vector<T>& _target_times,ErrorCode& e, std::string message="") override{
-			std::cout << "evaluator eval debug print1" << std::endl;
+		
+			#if(DEBUG)	
+				std::cout << "evaluator eval debug print1" << std::endl;
+			#endif
 			target_times=_target_times;
-			std::cout << "evaluator eval debug print2" << std::endl;
+			#if(DEBUG)	
+				std::cout << "evaluator eval debug print2" << std::endl;
+			#endif
 
-			//std::cout << "evaluator eval debug print2 _target_times = ";
-		        //for(int i=0; i<_target_times.size(); i++){std::cout << _target_times[i] << " ";}
-			//std::cout << std::endl;
-
-			std::cout << "evaluator eval debug print2 calling computer.eval" << std::endl;
+			#if(DEBUG)	
+				std::cout << "evaluator eval debug print2 calling computer.eval" << std::endl;
+			#endif
 
 			return computer.eval(v,e,message);
-			std::cout << "evaluator eval debug print3" << std::endl;
+			#if(DEBUG)	
+				std::cout << "evaluator eval debug print3" << std::endl;
+			#endif
 		};
 		
 		std::vector<std::vector<T>> eval_specific(const std::vector<EVarManager<T>>& v,const std::vector<T>& _target_times, std::string folder_name,ErrorCode& e, std::string message=""){
@@ -176,17 +186,25 @@ namespace co{
 			double successor_time=0;
 			int i=0;
 			int index=0;
-			std::cout << "ErrorCode debug print1, past initialization" << std::endl;
+			#if(DEBUG)	
+				std::cout << "ErrorCode debug print1, past initialization" << std::endl;
+			#endif
 			//collected sim data 
 			std::vector<T> sim_data;
 			//tmp vector
 			std::vector<T> parsed_sim_times;
 			std::vector<T> grid_world_coordinates;
-			std::cout << "ErrorCode debug print1.1, pre utility::parse_csv call" << std::endl;
+			#if(DEBUG)	
+				std::cout << "ErrorCode debug print1.1, pre utility::parse_csv call" << std::endl;
+			#endif
 			co::utility::parse_csv(data_path+"gridmapping_"+sim_filenames[0]+".txt", grid_world_coordinates,"\t");	
-			std::cout << "ErrorCode debug print1.2, post utility::parse_csv call" << std::endl;
+			#if(DEBUG)	
+				std::cout << "ErrorCode debug print1.2, post utility::parse_csv call" << std::endl;
+			#endif
 			bool saveNext=false;
-			std::cout << "ErrorCode debug print2, pre while" << std::endl;
+			#if(DEBUG)	
+				std::cout << "ErrorCode debug print2, pre while" << std::endl;
+			#endif
 
 			while (true){
 				std::string path = data_path+sim_filenames[0]+std::to_string(i)+".txt";
@@ -197,7 +215,9 @@ namespace co{
 				co::utility::parse_pde_time(path, current_time, "\t");
 					
 				//If file does not exist, exist loop
-				std::cout << "ErrorCode debug print2.1, pre if1" << std::endl;
+				#if(DEBUG)	
+					std::cout << "ErrorCode debug print2.1, pre if1" << std::endl;
+				#endif
 				if (file.fail()){
 					break;
 				}
@@ -211,7 +231,9 @@ namespace co{
 				
 				i++;
 				//std::cout<<"\n\nCurrent time of simulated data: "<<current_time<< "  The successor time is:"<<successor_time<<"\n";	
-				std::cout << "ErrorCode debug print2.2, pre if2" << std::endl;
+				#if(DEBUG)	
+					std::cout << "ErrorCode debug print2.2, pre if2" << std::endl;
+				#endif
 				if (saveNext || ((current_time <= (double)target_times[index]) && (successor_time >= (double)target_times[index]))){
 					parsed_sim_times.push_back(current_time);
 					co::utility::parse_csv(path,tmp,"\t");
@@ -231,14 +253,18 @@ namespace co{
 					else
 						saveNext=true;
 					}
-					std::cout << "ErrorCode debug print2.3, pre if3" << std::endl;
+					#if(DEBUG)	
+						std::cout << "ErrorCode debug print2.3, pre if3" << std::endl;
+					#endif
 					
 					if (current_time>=(double)target_times[index]){
 						index++;
 					}
 					
 				}
-				std::cout << "ErrorCode debug print3, post while" << std::endl;
+				#if(DEBUG)	
+					std::cout << "ErrorCode debug print3, post while" << std::endl;
+				#endif
 				if(index<(target_times.size())){
 					if (current_time>=(double)target_times[target_times.size()-1]){
 						std::string path = data_path+sim_filenames[0]+std::to_string(i)+".txt";
