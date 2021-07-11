@@ -95,6 +95,13 @@ namespace co{
 			std::cout << "evaluator eval debug print1" << std::endl;
 			target_times=_target_times;
 			std::cout << "evaluator eval debug print2" << std::endl;
+
+			//std::cout << "evaluator eval debug print2 _target_times = ";
+		        //for(int i=0; i<_target_times.size(); i++){std::cout << _target_times[i] << " ";}
+			//std::cout << std::endl;
+
+			std::cout << "evaluator eval debug print2 calling computer.eval" << std::endl;
+
 			return computer.eval(v,e,message);
 			std::cout << "evaluator eval debug print3" << std::endl;
 		};
@@ -169,14 +176,17 @@ namespace co{
 			double successor_time=0;
 			int i=0;
 			int index=0;
-
+			std::cout << "ErrorCode debug print1, past initialization" << std::endl;
 			//collected sim data 
 			std::vector<T> sim_data;
 			//tmp vector
 			std::vector<T> parsed_sim_times;
 			std::vector<T> grid_world_coordinates;
+			std::cout << "ErrorCode debug print1.1, pre utility::parse_csv call" << std::endl;
 			co::utility::parse_csv(data_path+"gridmapping_"+sim_filenames[0]+".txt", grid_world_coordinates,"\t");	
+			std::cout << "ErrorCode debug print1.2, post utility::parse_csv call" << std::endl;
 			bool saveNext=false;
+			std::cout << "ErrorCode debug print2, pre while" << std::endl;
 
 			while (true){
 				std::string path = data_path+sim_filenames[0]+std::to_string(i)+".txt";
@@ -187,6 +197,7 @@ namespace co{
 				co::utility::parse_pde_time(path, current_time, "\t");
 					
 				//If file does not exist, exist loop
+				std::cout << "ErrorCode debug print2.1, pre if1" << std::endl;
 				if (file.fail()){
 					break;
 				}
@@ -200,6 +211,7 @@ namespace co{
 				
 				i++;
 				//std::cout<<"\n\nCurrent time of simulated data: "<<current_time<< "  The successor time is:"<<successor_time<<"\n";	
+				std::cout << "ErrorCode debug print2.2, pre if2" << std::endl;
 				if (saveNext || ((current_time <= (double)target_times[index]) && (successor_time >= (double)target_times[index]))){
 					parsed_sim_times.push_back(current_time);
 					co::utility::parse_csv(path,tmp,"\t");
@@ -219,12 +231,14 @@ namespace co{
 					else
 						saveNext=true;
 					}
+					std::cout << "ErrorCode debug print2.3, pre if3" << std::endl;
 					
 					if (current_time>=(double)target_times[index]){
 						index++;
 					}
 					
 				}
+				std::cout << "ErrorCode debug print3, post while" << std::endl;
 				if(index<(target_times.size())){
 					if (current_time>=(double)target_times[target_times.size()-1]){
 						std::string path = data_path+sim_filenames[0]+std::to_string(i)+".txt";

@@ -470,7 +470,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		std::string shell_command="ugshell -ex \""+table_directory+"/evaluate.lua\" ";
 		std::cout<<"Shell command: "<<shell_command<<"\n";
 		//std::cout<<"n ist:"<<n;
-
+		std::cout << "schedule_and_eval_file debug print1, post Shell command:, pre if" << std::endl;
 		if (n<=thread_count){
 			t.resize(n);
 			for (auto& x: input){
@@ -501,12 +501,14 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 			}
 			
 		}
+		std::cout << "schedule_and_eval_file debug print2, post if" << std::endl;
 		//	std::cout<<"bis hier\n";
 		//Wait for all threads to finish
 		//std::cout<<"Waiting on join\n";
 		for (auto& x:t){
-			x.join();
+			x.join(); // ERROR cause?
 		}
+		std::cout << "schedule_and_eval_file debug print3, post for, pre for" << std::endl;
 
 		//Parse results;
 		std::vector<std::vector<T>> result(n);
@@ -516,14 +518,18 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		int ids=0;
 		bool error_in_parsing=false;
 		for (int i=0;i<id;i++){
+			std::cout << "schedule_and_eval_file debug print3.1, in for i = " << i << std::endl;
 			if (error_codes[ids]!=ErrorCode::NoError && error_in_parsing==false){
 				std::cerr<<"Error computing at least one evaluation (id"<<i<<")\n";
 				e=error_codes[ids];
 				break;
 			}
 				for (int j=0;j<evals_per_thread[i];j++){
+					std::cout << "schedule_and_eval_file debug print3.2, in for2 j = " << j << std::endl;
 					std::string data_path=folder_path+"id_"+std::to_string(i)+"/eval_"+std::to_string(j)+"/";
+					std::cout << "schedule_and_eval_file debug print3.3, pre dref evalutaion_class" << j << std::endl;
 					e=(*evaluation_class).parse(data_path,result[ids]);	
+					std::cout << "schedule_and_eval_file debug print3.4, pre dref evalutaion_class" << j << std::endl;
 					if (e!=ErrorCode::NoError){
 						std::cerr<<"Error parsing at least one computed evaluation (id "<<i<<")\n";
 						error_in_parsing=true;
@@ -533,10 +539,12 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 					ids++;
 				}
 		}	
+		std::cout << "schedule_and_eval_file debug print4, post for, pre if" << std::endl;
 
 		if(increase_iter==true){
 			iter++;
 		}
+		std::cout << "schedule_and_eval_file debug print4, post if, pre return" << std::endl;
 		
 		return result;
 		
