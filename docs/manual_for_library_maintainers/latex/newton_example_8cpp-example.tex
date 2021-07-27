@@ -1,0 +1,34 @@
+\hypertarget{newton_example_8cpp-example}{}\doxysection{newton\+\_\+example.\+cpp}
+This is an example on how to use the Newton-\/\+Gauss solver.
+
+
+\begin{DoxyCodeInclude}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include<iostream>}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include "{}<your path to>}/core/parameter\_estimation.h\textcolor{stringliteral}{"{}}}
+\DoxyCodeLine{\textcolor{stringliteral}{\#include "{}}<your path to>/core/parameters.h\textcolor{stringliteral}{"{}}}
+\DoxyCodeLine{\textcolor{stringliteral}{\#include <string>}}
+\DoxyCodeLine{\textcolor{stringliteral}{}}
+\DoxyCodeLine{\textcolor{stringliteral}{}}
+\DoxyCodeLine{\textcolor{stringliteral}{}}
+\DoxyCodeLine{\textcolor{stringliteral}{int main()\{}}
+\DoxyCodeLine{\textcolor{stringliteral}{    co::EVar64Manager initial\_vars;}}
+\DoxyCodeLine{\textcolor{stringliteral}{    co::EVar64 theta1(co::EFloat64(1),co::EFloat64(0),co::EFloat64(30));}}
+\DoxyCodeLine{\textcolor{stringliteral}{    co::EVar64 theta2(co::EFloat64(1),co::EFloat64(0),co::EFloat64(10));}}
+\DoxyCodeLine{\textcolor{stringliteral}{    co::EVar64 theta3(co::EFloat64(1),co::EFloat64(0),co::EFloat64(30));}}
+\DoxyCodeLine{\textcolor{stringliteral}{}}
+\DoxyCodeLine{\textcolor{stringliteral}{    initial\_vars.add("{}}v\_theta1\textcolor{stringliteral}{"{},theta1);}}
+\DoxyCodeLine{\textcolor{stringliteral}{    initial\_vars.add("{}}v\_theta2\textcolor{stringliteral}{"{},theta2);}}
+\DoxyCodeLine{\textcolor{stringliteral}{    initial\_vars.add("{}}v\_theta3\textcolor{stringliteral}{"{},theta3);}}
+\DoxyCodeLine{\textcolor{stringliteral}{}}
+\DoxyCodeLine{\textcolor{stringliteral}{    co::NewtonOptions options;}}
+\DoxyCodeLine{\textcolor{stringliteral}{    options.set\_stepsize\_alpha(1);}}
+\DoxyCodeLine{\textcolor{stringliteral}{    std::string dir ="{}}your path to your evaluation.lua file\textcolor{stringliteral}{"{};}}
+\DoxyCodeLine{\textcolor{stringliteral}{    co::BiogasEvaluation<co::EFloat64,co::ConfigComputation::Local,co::ConfigOutput::File> evaluator(dir, "{}}subset\_target.lua\textcolor{stringliteral}{"{},"{}}subset\_sim.lua\textcolor{stringliteral}{"{});}}
+\DoxyCodeLine{\textcolor{stringliteral}{    co::EVarManager<co::EFloat64> estimated\_vars;}}
+\DoxyCodeLine{\textcolor{stringliteral}{    co::NewtonOptimizer<decltype(evaluator)> solver(options,evaluator);}}
+\DoxyCodeLine{\textcolor{stringliteral}{}}
+\DoxyCodeLine{\textcolor{stringliteral}{    solver.run(initial\_vars,estimated\_vars);}}
+\DoxyCodeLine{\textcolor{stringliteral}{\}}}
+
+\end{DoxyCodeInclude}
+ 

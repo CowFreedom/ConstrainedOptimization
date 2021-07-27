@@ -1,0 +1,41 @@
+\hypertarget{geometry__sampler_8h}{}\doxysection{core/geometry\+\_\+sampler.h File Reference}
+\label{geometry__sampler_8h}\index{core/geometry\_sampler.h@{core/geometry\_sampler.h}}
+{\ttfamily \#include \char`\"{}options.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}parameters.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}efloat.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}../evaluation\+\_\+classes/evaluation.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$random$>$}\newline
+{\ttfamily \#include $<$sstream$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$class F , class E $>$ }\\Error\+Code \mbox{\hyperlink{geometry__sampler_8h_abe07ed18e6f276609f98d2a75e72a692}{co\+::sample\+\_\+loss\+\_\+geometry}} (E \&evaluator, const std\+::vector$<$ std\+::string $>$ \&param\+\_\+names, const std\+::vector$<$ F $>$ \&bounds, size\+\_\+t n)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Functions defined here sample points from other functions. Useful to visualize loss functions for example. 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{geometry__sampler_8h_abe07ed18e6f276609f98d2a75e72a692}\label{geometry__sampler_8h_abe07ed18e6f276609f98d2a75e72a692}} 
+\index{geometry\_sampler.h@{geometry\_sampler.h}!sample\_loss\_geometry@{sample\_loss\_geometry}}
+\index{sample\_loss\_geometry@{sample\_loss\_geometry}!geometry\_sampler.h@{geometry\_sampler.h}}
+\doxysubsubsection{\texorpdfstring{sample\_loss\_geometry()}{sample\_loss\_geometry()}}
+{\footnotesize\ttfamily template$<$class F , class E $>$ \\
+Error\+Code co\+::sample\+\_\+loss\+\_\+geometry (\begin{DoxyParamCaption}\item[{E \&}]{evaluator,  }\item[{const std\+::vector$<$ std\+::string $>$ \&}]{param\+\_\+names,  }\item[{const std\+::vector$<$ F $>$ \&}]{bounds,  }\item[{size\+\_\+t}]{n }\end{DoxyParamCaption})}
+
+Samples points from the loss function of an evaluation class and saves these results to file. Loss function must only satisfy continuity in the specified sample interval. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em evaluator} & Evaluation type used for calculating the function evaluations \\
+\hline
+\mbox{\texttt{ in}}  & {\em param\+\_\+names} & sets parameters names \\
+\hline
+\mbox{\texttt{ in}}  & {\em bounds} & configures parameter bounds \\
+\hline
+\mbox{\texttt{ in}}  & {\em n} & number of samples thrown \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Code indicating success or failure of sampling from the loss function 
+\end{DoxyReturn}

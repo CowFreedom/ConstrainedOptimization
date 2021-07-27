@@ -1,0 +1,16 @@
+\hypertarget{index_intro_sec}{}\doxysection{Overview}\label{index_intro_sec}
+The Constrained Optimization Plugin is a package consisting of various algorithms capable of optimizing functions with bounded domain. The following algorithms are currently implemented\+: \tabulinesep=1mm
+\begin{longtabu}spread 0pt [c]{*{2}{|X[-1]}|}
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ File   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Description    }\\\cline{1-2}
+\endfirsthead
+\hline
+\endfoot
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ File   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Description    }\\\cline{1-2}
+\endhead
+\mbox{\hyperlink{newton_8h}{newton.\+h}}   &The Gauss Newton procedure minimizes functions that can be represented as a sum of squares.    \\\cline{1-2}
+\mbox{\hyperlink{pso_8h}{pso.\+h}}   &The Particle Swarm Optimization (PSO) algorithm minimizes any continuous function on a compact domain.   \\\cline{1-2}
+\end{longtabu}
+This package is under active development. This manual was created in February 2021 for version number 0.\+34.\hypertarget{index_System}{}\doxysubsection{Requirements}\label{index_System}
+In its current form, the package has been shown to work on Windows 10, Linux Ubuntu and mac\+OS Mojave 10.\+14.\+4. On Windows 10, two compilers were tested, GCC 9.\+3.\+0 and Visual Studio v16.\+3.\+10. It is assumed that the package also works for older compiler versions that support C++17 features. On Linux Ubuntu only GCC was tested. If GCC is used, UG4 might have to be rebuilt with the -\/pthread flag. Using Clang might necessitates adding the -\/std=c++11 flag to the build process. For a list of bugs and recommended features see the page issues. 

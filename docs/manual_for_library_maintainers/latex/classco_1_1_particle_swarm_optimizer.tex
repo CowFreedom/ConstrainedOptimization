@@ -1,0 +1,59 @@
+\hypertarget{classco_1_1_particle_swarm_optimizer}{}\doxysection{co\+::Particle\+Swarm\+Optimizer$<$ E $>$ Class Template Reference}
+\label{classco_1_1_particle_swarm_optimizer}\index{co::ParticleSwarmOptimizer$<$ E $>$@{co::ParticleSwarmOptimizer$<$ E $>$}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classco_1_1_particle_swarm_optimizer_a499c71aa92c8b9f474738d7a8ad5c0a1}{Particle\+Swarm\+Optimizer}} (const \mbox{\hyperlink{classco_1_1_p_s_o_options}{PSOOptions}} \&\+\_\+options, E \&\+\_\+evaluator)
+\item 
+{\footnotesize template$<$class T $>$ }\\\mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} \mbox{\hyperlink{classco_1_1_particle_swarm_optimizer_ad46e6048f0e46af1f89ae600ebcb0dec}{run}} (EVar\+Manager$<$ T $>$ \&estimated\+\_\+params, const std\+::vector$<$ std\+::string $>$ \&param\+\_\+names, const std\+::vector$<$ T $>$ \&bounds)
+\item 
+\mbox{\Hypertarget{classco_1_1_particle_swarm_optimizer_a97bd05fa0329609effb152532aa0e3e8}\label{classco_1_1_particle_swarm_optimizer_a97bd05fa0329609effb152532aa0e3e8}} 
+std\+::vector$<$ double $>$ {\bfseries get\+\_\+saved\+\_\+losses\+\_\+in\+\_\+past\+\_\+iteration\+\_\+as\+\_\+double} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classco_1_1_particle_swarm_optimizer_a20bd5f80feef013a2f12623189f7c900}\label{classco_1_1_particle_swarm_optimizer_a20bd5f80feef013a2f12623189f7c900}} 
+std\+::vector$<$ double $>$ {\bfseries saved\+\_\+losses\+\_\+in\+\_\+past\+\_\+iteration}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classco_1_1_particle_swarm_optimizer_a499c71aa92c8b9f474738d7a8ad5c0a1}\label{classco_1_1_particle_swarm_optimizer_a499c71aa92c8b9f474738d7a8ad5c0a1}} 
+\index{co::ParticleSwarmOptimizer$<$ E $>$@{co::ParticleSwarmOptimizer$<$ E $>$}!ParticleSwarmOptimizer@{ParticleSwarmOptimizer}}
+\index{ParticleSwarmOptimizer@{ParticleSwarmOptimizer}!co::ParticleSwarmOptimizer$<$ E $>$@{co::ParticleSwarmOptimizer$<$ E $>$}}
+\doxysubsubsection{\texorpdfstring{ParticleSwarmOptimizer()}{ParticleSwarmOptimizer()}}
+{\footnotesize\ttfamily template$<$class E $>$ \\
+\mbox{\hyperlink{classco_1_1_particle_swarm_optimizer}{co\+::\+Particle\+Swarm\+Optimizer}}$<$ E $>$\+::\mbox{\hyperlink{classco_1_1_particle_swarm_optimizer}{Particle\+Swarm\+Optimizer}} (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classco_1_1_p_s_o_options}{PSOOptions}} \&}]{\+\_\+options,  }\item[{E \&}]{\+\_\+evaluator }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Creates the class. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em \+\_\+options} & Configures the Newton Gauss optimizer internally, such as choosing the derivative evaluation type (e.\+g. Finite Differences) and line search method. \\
+\hline
+\mbox{\texttt{ in}}  & {\em \+\_\+evaluator} & Steers how data is loaded and evaluated (e.\+g. parsed from file, given from within UG4) \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classco_1_1_particle_swarm_optimizer_ad46e6048f0e46af1f89ae600ebcb0dec}\label{classco_1_1_particle_swarm_optimizer_ad46e6048f0e46af1f89ae600ebcb0dec}} 
+\index{co::ParticleSwarmOptimizer$<$ E $>$@{co::ParticleSwarmOptimizer$<$ E $>$}!run@{run}}
+\index{run@{run}!co::ParticleSwarmOptimizer$<$ E $>$@{co::ParticleSwarmOptimizer$<$ E $>$}}
+\doxysubsubsection{\texorpdfstring{run()}{run()}}
+{\footnotesize\ttfamily template$<$class E $>$ \\
+template$<$class T $>$ \\
+\mbox{\hyperlink{options_8h_a3b446c9a001680777b38dc2783d4e47a}{Error\+Code}} \mbox{\hyperlink{classco_1_1_particle_swarm_optimizer}{co\+::\+Particle\+Swarm\+Optimizer}}$<$ E $>$\+::run (\begin{DoxyParamCaption}\item[{EVar\+Manager$<$ T $>$ \&}]{estimated\+\_\+params,  }\item[{const std\+::vector$<$ std\+::string $>$ \&}]{param\+\_\+names,  }\item[{const std\+::vector$<$ T $>$ \&}]{bounds }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Runs the Particle Swarm Optimization algorithm. Only this function has to be called to run the complete procedure. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em initial\+\_\+params} & Initial parameters containing names and bounds of the parameters \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Code indicating success or failure of running the Particle Swarm Optimization procedure. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+optimizers/\mbox{\hyperlink{pso_8h}{pso.\+h}}\end{DoxyCompactItemize}

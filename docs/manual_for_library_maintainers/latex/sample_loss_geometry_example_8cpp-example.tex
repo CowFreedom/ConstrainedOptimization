@@ -1,0 +1,31 @@
+\hypertarget{sample_loss_geometry_example_8cpp-example}{}\doxysection{sample\+\_\+loss\+\_\+geometry\+\_\+example.\+cpp}
+This is an example on how to use this function in conjunction with an Evaluation instance.
+
+
+\begin{DoxyCodeInclude}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include<iostream>}}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include "{}<your path to>}/core/parameter\_estimation.h\textcolor{stringliteral}{"{}}}
+\DoxyCodeLine{\textcolor{stringliteral}{\#include "{}}<your path to>/core/parameters.h\textcolor{stringliteral}{"{}}}
+\DoxyCodeLine{\textcolor{stringliteral}{\#include <string>}}
+\DoxyCodeLine{\textcolor{stringliteral}{}}
+\DoxyCodeLine{\textcolor{stringliteral}{}}
+\DoxyCodeLine{\textcolor{stringliteral}{}}
+\DoxyCodeLine{\textcolor{stringliteral}{int main()\{}}
+\DoxyCodeLine{\textcolor{stringliteral}{    //Define evaluation type}}
+\DoxyCodeLine{\textcolor{stringliteral}{    std::string dir ="{}}your path to evaluation.lua file\textcolor{stringliteral}{"{};}}
+\DoxyCodeLine{\textcolor{stringliteral}{    co::BiogasEvaluation<co::EFloat64,co::ConfigComputation::Local,co::ConfigOutput::File> evaluator(dir, "{}}subset\_target.lua\textcolor{stringliteral}{"{},"{}}subset\_sim.lua\textcolor{stringliteral}{"{});}}
+\DoxyCodeLine{\textcolor{stringliteral}{    }}
+\DoxyCodeLine{\textcolor{stringliteral}{    //Set parameter names}}
+\DoxyCodeLine{\textcolor{stringliteral}{    std::vector<std::string> param\_names=\{"{}}theta1\textcolor{stringliteral}{"{},"{}}theta2\textcolor{stringliteral}{"{},"{}}theta3\textcolor{stringliteral}{"{}\};}}
+\DoxyCodeLine{\textcolor{stringliteral}{    }}
+\DoxyCodeLine{\textcolor{stringliteral}{    //Set parameter bounds (sequentially, low, high, low, high etc.)}}
+\DoxyCodeLine{\textcolor{stringliteral}{    std::vector<double> bounds=\{0,10,0,5,0,20\};}}
+\DoxyCodeLine{\textcolor{stringliteral}{    }}
+\DoxyCodeLine{\textcolor{stringliteral}{    int n=20; //number of samples}}
+\DoxyCodeLine{\textcolor{stringliteral}{    }}
+\DoxyCodeLine{\textcolor{stringliteral}{    //Call sampler (which writes results to file in the evaluations folder)}}
+\DoxyCodeLine{\textcolor{stringliteral}{    co::sample\_loss\_geometry(evaluator,param\_names,bounds, n);}}
+\DoxyCodeLine{\textcolor{stringliteral}{\}}}
+
+\end{DoxyCodeInclude}
+ 

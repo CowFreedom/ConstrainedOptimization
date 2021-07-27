@@ -1,0 +1,31 @@
+\hypertarget{pso_8h}{}\doxysection{optimizers/pso.h File Reference}
+\label{pso_8h}\index{optimizers/pso.h@{optimizers/pso.h}}
+{\ttfamily \#include \char`\"{}../core/options.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}../core/parameters.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}../core/constrained\+\_\+optimization.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}../core/transformation.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}../core/derivative.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}loss\+\_\+functions.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$iomanip$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$random$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$numeric$>$}\newline
+{\ttfamily \#include $<$cmath$>$}\newline
+{\ttfamily \#include $<$limits$>$}\newline
+{\ttfamily \#include $<$stdexcept$>$}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classco_1_1_particle_swarm_optimizer}{co\+::\+Particle\+Swarm\+Optimizer$<$ E $>$}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{pso_8h_ad72dbcf6d0153db1b8d8a58001feed83}\label{pso_8h_ad72dbcf6d0153db1b8d8a58001feed83}} 
+\#define {\bfseries DEBUG}~0
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+The Particle Swarm Optimization (PSO) procedure minimizes functions. An explanation can be found in \char`\"{}\+Parameter Estimation in Ordinary Differential Equations Modeling via Particle Swarm Optimization\char`\"{} by Devin Akman et al. The algorithm scales well to multiple processing cores and is a useful precursor to find initial values for the Gauss Newton algorithm. 
