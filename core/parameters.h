@@ -253,8 +253,15 @@ namespace co{
 				return params;
 			}
 			
+			bool contains(std::string name){
+				for (auto& x: names){
+					if (x==name){
+						return true;
+					}
+				}
+			}
 
-			EVar<EFloat64>& get_param(int i){
+			const EVar<EFloat64>& get_param(int i) const{
 				return params[i];
 			}	
 			std::string get_name(int i) const{

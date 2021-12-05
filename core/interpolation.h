@@ -33,13 +33,13 @@ namespace co{
 				}
 				substract=1; //war vorher: substract=cols
 			}
-			if (sourcetimes[0]>targettimes[0]){
+			if ((double)sourcetimes[0]>(double)targettimes[0]){
 				sourcetimes[0]=targettimes[0];
 			}
 			else{
 				targettimes[0]=sourcetimes[0];
 			}
-			if(targettimes[nt-1]>sourcetimes[ns-1]){
+			if((double)targettimes[nt-1]>(double)sourcetimes[ns-1]){
 				std::cerr<<"Error: The target vector's last time value is higher than the source vectors last time value. This error is often caused by UG4 not finishing the computation. Check the most recent console_output.log in the respective evaluation folders.";
 				//std::cin.get();
 				return ErrorCode::ParseError;
@@ -49,12 +49,14 @@ namespace co{
 			while((saved_rows*cols)<(nt-substract)*cols){
 				//	std::cout<<"sourcetime[j]: "<< sourcetimes[j]<<"sourcetime[j+1]"<<sourcetimes[j+1]<<"  targettimes[i]"<<targettimes[i]<<"\n";
 				//	std::cout<<"nt-substract:"<<nt-substract<<"\n";
+				if (j<(sourcetimes.size()-1)){
 					if (sourcetimes[j]>sourcetimes[j+1]){
 						std::cout<<"Error: The sourcetimes vector is not monotonically increasing.\n";
 						return ErrorCode::ParseError;
 					}
-				
-					if ((sourcetimes[j]<=targettimes[i])&&(sourcetimes[j+1]>=targettimes[i])){
+				}
+			
+					if (((double)sourcetimes[j]<=(double)targettimes[i])&&((double)sourcetimes[j+1]>=(double)targettimes[i])){
 						T t1=sourcetimes[j];
 						T t2=sourcetimes[j+1];
 						T tc=targettimes[i];
@@ -64,6 +66,8 @@ namespace co{
 				//		std::cout<<"Bis hier: j: "<<j<<" saved_rows: "<<saved_rows<<" k:"<<k<<"t: "<<t<<"\n";
 				//		std::cout<<"n:"<<saved_rows*cols+k<<" value: "<<source[j*cols+k]*(T(1.0)-t)+source[(j+1)*cols+k]*t<<"\n";
 						storage[saved_rows*cols+k]=source[j*cols+k]*(T(1.0)-t)+source[(j+1)*cols+k]*t;
+					//	std::cout<<targettimes[i]<<"   "<<cols<<"   "<<saved_rows*cols+k<<"\n";
+					//	std::cin.get();
 						}
 		
 					saved_rows++;

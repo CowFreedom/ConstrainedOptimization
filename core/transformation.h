@@ -24,6 +24,7 @@ namespace co {
 	multiplication. Only these constants are within
 	their own namespace, as the other functions shall be easily
 	accessible*/
+	
 	namespace mul {
 		/*
 		constexpr size_t MC = 8; //
@@ -477,7 +478,8 @@ namespace co {
 	namespace dc{
 
 		//n: height of matrix, m: width of matrix, A: matrix itself,
-		
+
+		using std::sqrt;
 		template<class T,class F>
 		void qr(T A, int n, int m, T q, T r){
 			int t=0;
@@ -517,7 +519,7 @@ namespace co {
 				}	
 
 				//Set sign of alpha
-				alpha=alpha.sqrt();
+				alpha=sqrt(alpha);
 				if (u[0]>0){
 					alpha*=F(-1.0);
 				}

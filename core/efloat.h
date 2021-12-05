@@ -297,5 +297,9 @@ namespace co{
 	
 		
 	};
+	
+	EFloat64 sqrt(EFloat64 v) {
+			return v.sqrt();
+	}
 
 }

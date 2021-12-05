@@ -475,10 +475,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		std::string folder_path=evaluation_path+"/iteration_"+std::to_string(_iter)+"/"+folder_name;
 		std::string shell_command="ugshell -ex \""+table_directory+"/evaluate.lua\" ";
 		std::cout<<"Shell command: "<<shell_command<<"\n";
-		//std::cout<<"n ist:"<<n;
-		#if(DEBUG)
-			std::cout << "schedule_and_eval_file debug print1, post Shell command:, pre if" << std::endl;
-		#endif
+
 		if (n<=thread_count){
 			t.resize(n);
 			for (auto& x: input){
@@ -509,18 +506,13 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 			}
 			
 		}
-		#if(DEBUG)
-			std::cout << "schedule_and_eval_file debug print2, post if" << std::endl;
-		#endif
 		//	std::cout<<"bis hier\n";
 		//Wait for all threads to finish
 		//std::cout<<"Waiting on join\n";
 		for (auto& x:t){
 			x.join(); // ERROR cause?
 		}
-		#if(DEBUG)
-			std::cout << "schedule_and_eval_file debug print3, post for, pre for" << std::endl;
-		#endif
+
 
 		//Parse results;
 		std::vector<std::vector<T>> result(n);
@@ -530,26 +522,14 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		int ids=0;
 		bool error_in_parsing=false;
 		for (int i=0;i<id;i++){
-			#if(DEBUG)
-				std::cout << "schedule_and_eval_file debug print3.1, in for i = " << i << std::endl;
-			#endif
 			if (error_codes[ids]!=ErrorCode::NoError && error_in_parsing==false){
 				std::cerr<<"Error computing at least one evaluation (id"<<i<<")\n";
 				e=error_codes[ids];
 				break;
 			}
 				for (int j=0;j<evals_per_thread[i];j++){
-					#if(DEBUG)
-						std::cout << "schedule_and_eval_file debug print3.2, in for2 j = " << j << std::endl;
-					#endif
 					std::string data_path=folder_path+"id_"+std::to_string(i)+"/eval_"+std::to_string(j)+"/";
-					#if(DEBUG)
-						std::cout << "schedule_and_eval_file debug print3.3, pre dref evalutaion_class" << j << std::endl;
-					#endif
 					e=(*evaluation_class).parse(data_path,result[ids]);	
-					#if(DEBUG)
-						std::cout << "schedule_and_eval_file debug print3.4, pre dref evalutaion_class" << j << std::endl;
-					#endif
 					if (e!=ErrorCode::NoError){
 						std::cerr<<"Error parsing at least one computed evaluation (id "<<i<<")\n";
 						error_in_parsing=true;
@@ -559,16 +539,10 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 					ids++;
 				}
 		}	
-		#if(DEBUG)
-			std::cout << "schedule_and_eval_file debug print4, post for, pre if" << std::endl;
-		#endif
 
 		if(increase_iter==true){
 			iter++;
 		}
-		#if(DEBUG)
-			std::cout << "schedule_and_eval_file debug print4, post if, pre return" << std::endl;
-		#endif
 		
 		return result;
 		
@@ -583,12 +557,12 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 	const int thread_count;
 	E* evaluation_class; //Pointer back to the evaluationclass (e.g. BiogasEvaluation)
 	size_t iter=0; //current iteration of the evaluations
-	std::vector<T> (&eval_function)(EVarManager<T>&,std::vector<T>&, ErrorCode& e);
-	
 
+	void (&eval_function)(double t0, double tend, const EVarManager<T>& v, std::vector<T>& times, std::vector<T>& result,ErrorCode& err);
+	
 	public:
 	
-	ComputationMode(E* e,std::vector<T> (&_eval_function)(std::vector<T>&), int _thread_count):evaluation_class(e),config_computation(ConfigComputation::Local), eval_function(_eval_function),thread_count(_thread_count){
+	ComputationMode(E* e,void (&_eval_function)(double,double,const EVarManager<T>&, std::vector<T>&,std::vector<T>&,ErrorCode&), int _thread_count):evaluation_class(e),eval_function(_eval_function),config_computation(ConfigComputation::Local), thread_count(_thread_count){
 		//std::cout<<"Pointer address inside at creation:"<<evaluation_class<<"\n";
 		if (thread_count<=0){
 			std::cerr<<"ComputationMode error: Threadcount less than zero"; //TODO Assert statement
@@ -606,34 +580,43 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 	}
 	
 		//Evaluate the problem with the given input
-	std::vector<std::vector<T>> eval(const std::vector<EVarManager<T>>& input,ErrorCode& e){
+	std::vector<std::vector<T>> eval(double t0, double tend, const std::vector<EVarManager<T>>& input,ErrorCode& e){
 		std::vector<std::vector<T>> res;
-		res= schedule_and_eval_direct(input,e);
+		res= schedule_and_eval_direct(t0,tend,input,e);
 		//std::cout<<"done evaluation\n";
 		return res;
 	}
+	//, double t0, double tend, const std::vector<EVarManager<T>>& v, std::vector<std::vector<T>>& times, std::vector<std::vector<T>>& result,ErrorCode& err,int id, int evals
+	void eval_multiple(void (*f)(double,double,const EVarManager<T>&, std::vector<T>&,std::vector<T>&,ErrorCode&), double t0, double tend, const std::vector<EVarManager<T>>& v, std::vector<std::vector<T>>& times, std::vector<std::vector<T>>& result,ErrorCode& err,int pos, int evals){
 	
-		std::vector<std::vector<T>> schedule_and_eval_direct(const std::vector<EVarManager<T>>& input,ErrorCode& e){
+		for (int i=0;i<evals;i++){
+			f(t0,tend,v[pos+i],times[pos+i],result[pos+i],err);
+			if (err!=ErrorCode::NoError){
+				return;
+			}
+		}
+		
+	}
+	
+	std::vector<std::vector<T>> schedule_and_eval_direct(double t0, double tend, const std::vector<EVarManager<T>>& input,ErrorCode& e){
 	
 		//Scheduling the processes
 		size_t n=input.size(); //number of needed evaluations
-		auto start=input.begin();
-		auto end=input.end();
+
 		size_t id=0;
 		
-	//	OSEvaluator os(thread_count,evaluation_path);//Create Processes
 		std::vector<ErrorCode> error_codes(n,ErrorCode::NoError);
 		e=ErrorCode::NoError; //In the beginning, there are no errors
 		std::vector<std::thread> t;//Create the threads
 		std::vector<size_t> evals_per_thread(n);
-		std::vector<std::vector<T>> result(n);
+		std::vector<std::vector<T>> result_times_temp(n); //TODO: Change
+		std::vector<std::vector<T>> result_data_temp(n);		
 		//std::cout<<"n ist:"<<n;
 		if (n<=thread_count){
 			t.resize(n);
 			for (int i=0; i<input.size(); i++){
-				t[id]=std::thread(eval_function,std::ref[input[i]],std::ref(result[i]),std::ref(error_codes[id]));
+				t[id]=std::thread(eval_function,t0,tend,std::ref(input[i]),std::ref(result_times_temp[i]),std::ref(result_data_temp[i]),std::ref(error_codes[id]));
 				evals_per_thread[id]=1;
-				//os.eval<T>(folder_path+std::to_string(id),start+id,1,id,iter);
 				id++;
 			}
 
@@ -646,28 +629,43 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 			int pos=0;
 			for (size_t i=0;i<thread_count;i++){
 					evals_per_thread[i]=(i<rem)?m+1:m;
-					
+					t[i]=std::thread(&ComputationMode<ConfigComputation::Local,ConfigOutput::Direct,E,T>::eval_multiple,this,eval_function,t0,tend,std::ref(input),std::ref(result_times_temp),std::ref(result_data_temp),std::ref(error_codes[i]),pos,evals_per_thread[i]);
+					//TODO Multiple evals per thread
 					pos+=evals_per_thread[i]; //TODO WEITERMACHEN
-				
-			}
-			
+			}			
 		}
-		//	std::cout<<"bis hier\n";
+
 		//Wait for all threads to finish
-		//std::cout<<"Waiting on join\n";
 		for (auto& x:t){
 			x.join();
 		}
-
-		for (auto& x: error_codes){
-			if (e!=ErrorCode::NoError){
+		
+		std::vector<std::vector<T>> result(n);
+		int ids=0;
+		bool error_in_parsing=false;		
+		for (int i=0; i<error_codes.size();i++){
+			
+			if (error_codes[i]!=ErrorCode::NoError && 	error_in_parsing==false){
 						std::cerr<<"Error computing at least one evaluation (id "<<id<<")\n";
-						break;
-					}
+						return result;
+			}
+			
+			for (int j=0;j<evals_per_thread[i];j++){
+		
+				if (result_data_temp[ids].size() % result_times_temp[ids].size() != 0){
+					 std::cerr<<"The number of timepoints does not match the the data output. Check if each data entry in your simulation has one corresponding time value\n";
+				}
+				auto e=(*evaluation_class).tailor_array(result_times_temp[ids],result_data_temp[ids],result[ids]);	
+				if (e!=ErrorCode::NoError){
+					std::cerr<<"Error tailoring the data of at least one computed evaluation (id "<<i<<")\n";
+					error_in_parsing=true;
+					return result;
+				}				
+				ids++;
+			}
 		}	
-		
-		return result;
-		
+	
+		return result;	
 	}
 	
 

@@ -58,7 +58,7 @@ namespace co{
 				personal_best_position=initial_position;
 				
 				personal_best_fitness=evaluator.s(target_data,initial_value);
-				std::cout<<"initial eval TEST "<<personal_best_fitness<<"\n";
+				
 				/*
 				
 				std::cout<<"\n";
@@ -114,7 +114,7 @@ namespace co{
 				if (schranke){
 					divisor=T(1.0)/T(4.0);
 				}
-				
+		
 				for (int i=0;i<n;i++){
 					/*
 					std::cout<<"Playbooy\n";
@@ -131,7 +131,7 @@ namespace co{
 			//	for (int i=0;i<n;i++){
 			//		std::cout<<"g["<<i<<"]:"<<g[i]<<"\n";
 			//	}
-				radius=sqrt(radius);
+				radius=std::sqrt(radius);
 			//	std::cin.get();
 				//std::cout<<"loop ende\n";
 				std::random_device rd;  //Will be used to obtain a seed for the random number engine
@@ -309,27 +309,16 @@ namespace co{
 				std::cout << "initialize_positions debug print3.1" << std::endl;
 			#endif
 			ErrorCode e;
-			#if(DEBUG)
-				std::cout << "initialize_positions debug print3.2" << std::endl;
-			#endif
+	
 			std::vector<Particle<T>> _particles;
-			#if(DEBUG)
-				std::cout << "initialize_positions debug print3.3" << std::endl;
-			#endif
+
 			std::vector<std::vector<T>> evals=evaluator.eval(evaluations, target_times, e,"Initializing Particles");
-			#if(DEBUG)
-				std::cout << "initialize_positions debug print3.4" << std::endl;
-			#endif
 			
 			evaluator.send_matrix(evals[n_particles-1],evals[n_particles-1].size(),1, "loaded_data");
-						
-			#if(DEBUG)
-				std::cout << "initialize_positions debug print4 pre if" << std::endl;
-			#endif
 
 			if (e==ErrorCode::NoError){
 				for (int i=0; i<n_particles;i++){
-					
+
 					Particle<T> p(evaluator, target_data,initial_position[i] ,evals[i],i);
 					//e=p.update_position(evals[i]);
 					_particles.push_back(p);
@@ -370,6 +359,7 @@ namespace co{
 				T current_fitness=_particles[i].get_personal_best_fitness();
 				if (current_fitness<=p_min[group_id]){
 					p_min[group_id]=current_fitness;
+					
 					min_id[group_id]=i;
 					lp_pos[group_id]=_particles[i].get_position();
 				}
@@ -381,6 +371,7 @@ namespace co{
 
 			local_best_fitness=p_min;
 			local_best_position=lp_pos;
+						
 			particles=_particles;
 			return e;
 		//	std::vector<std::vector<F>> evals=evaluator.eval(evaluations, target_times, e,"Evaluating derivative");
@@ -541,6 +532,7 @@ namespace co{
 					int group_id=particles[i].get_group_id();
 				//	std::cout<<"vor update direction\n";
 					particles[i].update_direction(target_data,bounds,evaluations[i],param_names,local_best_position[group_id]);
+						
 					
 				}
 				}

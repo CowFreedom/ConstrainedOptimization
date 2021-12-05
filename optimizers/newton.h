@@ -63,7 +63,7 @@ namespace co{
 			
 			//Calculate variances for each parameter
 			for (int i=0;i<m;i++){
-				std_devs_inv[i]=1.0/sqrt(J_T_J_inv_scaled[i+i*m].get_v());
+				std_devs_inv[i]=1.0/std::sqrt(J_T_J_inv_scaled[i+i*m].get_v());
 			}
 			
 			res<<std::setw(30)<<std::left<<"Newton iteration: "<<iteration<<"\n";
