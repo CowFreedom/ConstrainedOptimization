@@ -1,0 +1,8 @@
+alpha1:4.73226e-07
+alpha2:5.00169e-07
+kappa:0.903178
+qq:3.01401
+pp:6.0785
+
+Leads to minimum error of 118193594.147
+33447779.5103

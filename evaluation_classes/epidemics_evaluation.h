@@ -207,8 +207,11 @@ namespace co{
 			T sum=T(0.0);			
 
 			for (size_t i=0;i<x.size();i++){
+			//	std::cout<<y[i]<<"\n";
+			//	std::cin.get();
 				sum+=(y[i]-x[i])*(y[i]-x[i]);
 			}	
+			//std::cout<<"sum: "<<sum<<"\n";
 			return sum;
 		}		
 

@@ -83,6 +83,7 @@ namespace co{
 					*/
 					
 				//	std::cout<<"Current personal fitness:"<<current_personal_fitness<<"  Personal best fitness:"<<personal_best_fitness<<"\n";
+
 					if (current_personal_fitness<=personal_best_fitness){
 						
 						personal_best_fitness=current_personal_fitness;
@@ -248,8 +249,9 @@ namespace co{
 			res<<std::setw(30)<<std::left<<"Particle Swarm Optimization iteration: "<<iteration<<"\n";
 			T minimum_error=T(std::numeric_limits<double>::max());
 			int minimum_group=-1;
-			
+
 			for (int i=0;i<n_groups;i++){
+	
 				if(best_id[i]!=-1){			
 					res<<std::setw(30)<<std::left<<"Particle group "<<i<<"\n";
 					res<<std::setw(30)<<std::left<<"Local fitness: "<<local_fitness[i].get_v()<<"\n";
@@ -275,22 +277,16 @@ namespace co{
 		
 		template<class T>
 		ErrorCode initialize_positions(const std::vector<std::string> param_names, const std::vector<T>& bounds, const std::vector<T>& target_times, const std::vector<T>& target_data, std::vector<Particle<T>>& particles
-		,std::vector<std::vector<int>>& groups, std::vector<T>& local_best_fitness, std::vector<std::vector<T>>& local_best_position){
-			#if(DEBUG)
-				std::cout << "initialize_positions debug print1" << std::endl;
-			#endif
+		,std::vector<std::vector<int>>& groups, std::vector<T>& local_best_fitness, std::vector<std::vector<T>>& local_best_position,std::vector<int>& best_id){
+			
 			int n=param_names.size();
-			#if(DEBUG)
-				std::cout << "initialize_positions debug print2" << std::endl;
-			#endif
+			
 			std::vector<EVarManager<T>> evaluations(n_particles);
 			std::random_device rd;  //Will be used to obtain a seed for the random number engine
 			std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
 			std::vector<std::vector<T>> initial_position(n_particles);
 			//std::cout<<"n:"<<n<<"\n";
-			#if(DEBUG)
-				std::cout << "initialize_positions debug print3 pre for" << std::endl;
-			#endif
+		
 			for (int i=0;i<n_particles;i++){
 				for (int j=0;j<n;j++){
 		
@@ -359,7 +355,7 @@ namespace co{
 				T current_fitness=_particles[i].get_personal_best_fitness();
 				if (current_fitness<=p_min[group_id]){
 					p_min[group_id]=current_fitness;
-					
+					best_id[group_id]=_particles[i].get_id();
 					min_id[group_id]=i;
 					lp_pos[group_id]=_particles[i].get_position();
 				}
@@ -396,7 +392,7 @@ namespace co{
 				return true;
 			}
 			else{
-				std::cout<<"Minimum error in this run is :"<<f_min<<"\n";
+				std::cout<<"Minimum error in this iteration is :"<<f_min<<"\n";
 				return false;
 			}
 			
@@ -423,9 +419,7 @@ namespace co{
 		*/
 		template<class T>
 		ErrorCode run(EVarManager<T>& estimated_params, const std::vector<std::string>& param_names, const std::vector<T>& bounds){
-			#if(DEBUG)
-				std::cout << "PSO run debug print1" << std::endl;
-			#endif
+			
 			int max_iterations=options.get_max_iterations();
 			size_t n=param_names.size();
 			std::vector<Particle<T>> particles;
@@ -435,54 +429,27 @@ namespace co{
 			std::vector<T> target_times;
 			ErrorCode load_code=evaluator.load_target(target_times,target_data); //load target vector
 
-			#if(DEBUG)
-				std::cout << "PSO run debug print2 pre if" << std::endl;
-			#endif
 			
 			if (load_code!=ErrorCode::NoError){
 				std::cerr<<"Error loading target data!\n";
 				return load_code;
 			}
 
-			#if(DEBUG)
-				std::cout << "PSO run debug print2 post if" << std::endl;
-			#endif
 
 			std::vector<T> local_fitness(n_groups,T(std::numeric_limits<double>::max()));
-			#if(DEBUG)
-				std::cout << "PSO run debug print2.1" << std::endl;
-			#endif
 			std::vector<int> best_id(n_groups,-1); //ids of the most successful particle in each group
-			#if(DEBUG)
-				std::cout << "PSO run debug print2.2" << std::endl;
-			#endif
 			std::vector<std::vector<T>> local_best_position(n_groups);
-			#if(DEBUG)
-				std::cout << "PSO run debug print2.3" << std::endl;
-			#endif
 			std::vector<std::vector<int>> groups; //groups with respective group ids
-			#if(DEBUG)
-				std::cout << "PSO run debug print2.4" << std::endl;
-			#endif
-			initialize_positions(param_names,bounds,target_times,target_data, particles,groups,local_fitness,local_best_position);
-			#if(DEBUG)
-				std::cout << "PSO run debug print2.5" << std::endl;
-			#endif
+			
+			initialize_positions(param_names,bounds,target_times,target_data, particles,groups,local_fitness,local_best_position,best_id);
+			
 
 			int iter=0;
 			std::vector<int> indices(n_particles);
-
-			#if(DEBUG)
-				std::cout << "PSO run debug print3 pre for" << std::endl;
-			#endif
 			
 			for (int i=0;i<n_particles;i++){
 				indices[i]=particles[i].get_group_id();
 			}
-
-			#if(DEBUG)
-				std::cout << "PSO run debug print3 post for" << std::endl;
-			#endif
 
 			auto rng = std::default_random_engine{};
 			std::vector<T> global_minimum_position(n); //best position of all groups
