@@ -423,7 +423,7 @@ namespace co{
 					//update_parameters_stepsize_wolfe_condition(target_data,target_times,J,res,parameters,s_n);
 					std::string stepsize_infos;
 					bool success=update_parameters_stepsize_smaller_var(target_data,target_times,J,res,parameters,s_n,e_g2,stepsize_infos);
-					estimated_parameters.last_squared_error=(double) s_n;					
+					estimated_parameters.last_mean_error=((double) s_n )/target_times.size();					
 					if (success!=true){
 						break;
 					}

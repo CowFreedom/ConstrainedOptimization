@@ -646,7 +646,7 @@ namespace co{
 			#endif
 
 			estimated_params=parameters;
-			estimated_params.last_squared_error=me;
+			estimated_params.last_mean_error=me/target_times.size();
 			
 			#if(DEBUG)
 				std::cout << "PSO run debug print6 pre if" << std::endl;
