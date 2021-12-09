@@ -103,7 +103,7 @@ namespace co{
 			return ret;
 			
 		}
-		
+		 
 		/*Writes the Jacobi matrix to file. Jacobi is an NxM matrix*/
 		bool send_matrix(std::vector<T>& jacobi, size_t n,size_t m,std::string description="") const{			
 			std::string path=computer.get_current_evaluation_path();
@@ -208,11 +208,9 @@ namespace co{
 			T sum=T(0.0);			
 
 			for (size_t i=0;i<x.size();i++){
-			//	std::cout<<y[i]<<"\n";
-			//	std::cin.get();
 				sum+=(y[i]-x[i])*(y[i]-x[i]);
 			}	
-			//std::cout<<"sum: "<<sum<<"\n";
+
 			return sum;
 		}		
 
