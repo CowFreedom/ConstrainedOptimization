@@ -241,6 +241,7 @@ namespace co{
 					stepsize_infos+=output.str();
 					std::cout<<output.str();
 					if (f_alpha<=c*s_n){
+						//me=f_alpha;
 						s_n=f_alpha;
 						saved_losses_in_past_iteration.push_back((double)s_n);
 						std::vector<EVarManager<T>> res;
@@ -422,6 +423,7 @@ namespace co{
 					//update_parameters_stepsize_wolfe_condition(target_data,target_times,J,res,parameters,s_n);
 					std::string stepsize_infos;
 					bool success=update_parameters_stepsize_smaller_var(target_data,target_times,J,res,parameters,s_n,e_g2,stepsize_infos);
+					estimated_parameters.last_squared_error=(double) s_n;					
 					if (success!=true){
 						break;
 					}

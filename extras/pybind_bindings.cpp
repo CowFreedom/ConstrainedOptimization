@@ -25,7 +25,7 @@ PYBIND11_MODULE(constrained_optimization, m) {
         [](const co::EFloat64 &v) {
             return "EFloat64{ val:" + std::to_string(v.get_v())+",low:" + std::to_string(v.lower_bound())+"high:" + std::to_string(v.upper_bound())  + "}";
         }); 
-        
+       
      py::class_<co::EVar64>(m, "EVar64")
         .def(py::init<const co::EFloat64,const co::EFloat64,const co::EFloat64>())                
         .def("__repr__",

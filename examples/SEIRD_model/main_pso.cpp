@@ -75,7 +75,7 @@ void print_run(std::string path, double t_start, double t_end, const co::EVarMan
 	std::vector<std::string> output_names={"Cumulative Infected"};
 	std::vector<double> timepoints_temp=std::get<0>(result);
 	std::vector<double> data_unfiltered=std::get<1>(result);	
-	ug::epi::write_data("", "_original_sim.txt", timepoints_temp, data_unfiltered,seird_model.names,"#");
+	ug::epi::write_data("", "original_sim.txt", timepoints_temp, data_unfiltered,seird_model.names,"#");
 	ug::epi::write_data("", "sim_transformed.txt", timepoints_temp, cumulated_infected,output_names,"#");
 
 	std::vector<double> targettimes;

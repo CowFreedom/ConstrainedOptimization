@@ -238,7 +238,7 @@ namespace co{
 			
 		};
 		
-	
+		double me;
 			
 		template<class T>
 		std::string print_info(const std::vector<Particle<T>>& particles, const std::vector<std::string>& param_names, int iteration,const std::vector<int>& best_id, const std::vector<T>& local_fitness, const std::vector<std::vector<T>>& local_best_position){
@@ -270,8 +270,8 @@ namespace co{
 			
 			res<<std::setw(30)<<std::left<<"Best group: "<<minimum_group<<"\n";
 			res<<std::setw(30)<<std::left<<"Best particle id: "<<best_id[minimum_group]<<"\n";
-			res<<std::setw(30)<<std::left<<"Minimum Error: "<<minimum_error.get_v()<<"\n";
-				
+			res<<std::setw(30)<<std::left<<"Minimum Error: "<<minimum_error.get_v()<<"\n";		
+			me=(double) minimum_error.get_v();		
 			return res.str();
 		}	
 		
@@ -646,6 +646,7 @@ namespace co{
 			#endif
 
 			estimated_params=parameters;
+			estimated_params.last_squared_error=me;
 			
 			#if(DEBUG)
 				std::cout << "PSO run debug print6 pre if" << std::endl;

@@ -157,6 +157,7 @@ namespace co{
 			EVarManager(){
 				
 			}
+			double last_squared_error=-1;
 			
 			EVarManager(std::vector<EVar<T>> _params, std::vector<std::string> _names){
 				if (_params.size()!=_names.size()){
