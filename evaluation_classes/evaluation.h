@@ -27,7 +27,7 @@ namespace co{
 		Evaluation(){}
 		
 		/*Evaluators ought to not be copied (which disqualifies pass by value), as they sometimes contain resources (e.g. pointers) to themselves*/
-		Evaluation(const Evaluation& rhs)=delete;
+		//Evaluation(const Evaluation& rhs)=delete;
 		
 		const ConfigComputation computation_mode=M;
 		

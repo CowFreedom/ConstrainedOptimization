@@ -3,11 +3,13 @@
 #include "../../core/parameters.h"
 #include "../../../Epidemics/models/seird_variable_alpha.h"
 #include <string>
-#include<filesystem>
+#include <filesystem>
+#include <functional>
+
 
 //This is the model function to be evaluated
-void evaluate_model(double t_start, double t_end, const co::EVarManager<co::EFloat64>& v, std::vector<co::EFloat64>& timepoints, std::vector<co::EFloat64>& data,co::ErrorCode& err){
-
+void model_evaluation(double t_start, double t_end, const co::EVarManager<co::EFloat64>& v, std::vector<co::EFloat64>& timepoints, std::vector<co::EFloat64>& data,co::ErrorCode& err){
+std::cout<<"drin";
 	//Set up parameters
 	std::vector<double> alpha={4.74716e-07,(double)v.get_param(0).val };
 	std::vector<double> alpha_limits={50};
@@ -40,6 +42,8 @@ void evaluate_model(double t_start, double t_end, const co::EVarManager<co::EFlo
 
 	err= co::ErrorCode::NoError;
 }
+
+
 
 //This is the model function to be evaluated
 void print_run(std::string path, double t_start, double t_end, const co::EVarManager<co::EFloat64>& v){
@@ -99,7 +103,7 @@ int main(){
 
 	std::vector<co::EFloat64> bounds={co::EFloat64(0),co::EFloat64(0.1)};
 
-
+	std::function evaluate_model(model_evaluation);
 	co::PSOOptions options;
 	options.set_max_iterations(10);
 	options.set_n_particles(200);

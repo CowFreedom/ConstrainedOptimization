@@ -186,7 +186,8 @@ namespace co{
 		
 		int target_data_size;
 		
-		void (&f)(double t0, double tend, const EVarManager<T>& v, std::vector<T>& times, std::vector<T>& result,ErrorCode& err);
+		//void (*f)(double t0, double tend, const EVarManager<T>& v, std::vector<T>& times, std::vector<T>& result,ErrorCode& err);
+		std::function<void(double, double, const EVarManager<T>&, std::vector<T>&, std::vector<T>&,ErrorCode&)> f;
 		ComputationMode<ConfigComputation::Local,ConfigOutput::Direct,EpidemicsEvaluation<T,ConfigComputation::Local, ConfigOutput::Direct>,T> computer; //evaluates inputs according to the model formulation TODO: Change threadcount (last argument)
 		
 		public:
@@ -215,7 +216,7 @@ namespace co{
 			return sum;
 		}		
 
-		EpidemicsEvaluation(std::string _table_dir, std::string _infile_name,void (&_f)(double,double,const EVarManager<T>&, std::vector<T>&,std::vector<T>&,ErrorCode&)):table_dir(_table_dir),infile_name(_infile_name),f(_f),computer(ComputationMode<ConfigComputation::Local,ConfigOutput::Direct,EpidemicsEvaluation<T,ConfigComputation::Local, ConfigOutput::Direct>,T>(this,f,NTHREADS_SUPPORTED)){
+		EpidemicsEvaluation(std::string _table_dir, std::string _infile_name,std::function<void(double, double, const EVarManager<T>&, std::vector<T>&, std::vector<T>&,ErrorCode&)> _f):table_dir(_table_dir),infile_name(_infile_name),f(_f),computer(ComputationMode<ConfigComputation::Local,ConfigOutput::Direct,EpidemicsEvaluation<T,ConfigComputation::Local, ConfigOutput::Direct>,T>(this,f,NTHREADS_SUPPORTED)){
 		}
 	
 		//This means the computation is optimized for a local machine and no PC cluster for example.

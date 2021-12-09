@@ -404,7 +404,7 @@ namespace co{
 		/*! Creates the class.
 			@param[in] _options Configures the Newton Gauss optimizer internally, such as choosing the derivative evaluation type (e.g. Finite Differences) and line search method.
 			@param[in] _evaluator Steers how data is loaded and evaluated (e.g. parsed from file, given from within UG4) */
-		ParticleSwarmOptimizer(const PSOOptions& _options, E& _evaluator):options(_options), evaluator(_evaluator){
+		ParticleSwarmOptimizer(const PSOOptions& _options,E& _evaluator):options(_options), evaluator(_evaluator){
 				if(options.get_n_particles() <=0 || options.get_n_groups() <= 0 || options.get_max_iterations() <= 0){
 					throw std::invalid_argument( "Number of Particles or Number of Groups or Max. Iterations is invalid");
 
@@ -429,7 +429,6 @@ namespace co{
 			std::vector<T> target_times;
 			ErrorCode load_code=evaluator.load_target(target_times,target_data); //load target vector
 
-			
 			if (load_code!=ErrorCode::NoError){
 				std::cerr<<"Error loading target data!\n";
 				return load_code;

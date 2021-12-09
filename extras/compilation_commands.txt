@@ -1,0 +1,1 @@
+g++ -O3 -shared -std=c++11 -pthread -static-libgcc -static-libstdc++ -fPIC $(python3 -m pybind11 --includes) pybind_bindings.cpp -o constrained_optimization$(python3-config --extension-suffix)

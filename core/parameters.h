@@ -259,6 +259,7 @@ namespace co{
 						return true;
 					}
 				}
+				return false;
 			}
 
 			const EVar<EFloat64>& get_param(int i) const{

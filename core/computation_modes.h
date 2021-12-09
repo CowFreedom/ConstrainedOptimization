@@ -47,6 +47,7 @@
 #include "../evaluation_classes/evaluation.h"
 #include "filewriter.h"
 #include <thread>
+#include <functional>
 //#include <filesystem>
 
 #ifndef DEBUG
@@ -548,7 +549,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		
 	}
 	};
-	
+
 	template<class E, class T>
 	class ComputationMode<ConfigComputation::Local,ConfigOutput::Direct,E,T>{
 		
@@ -558,25 +559,17 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 	E* evaluation_class; //Pointer back to the evaluationclass (e.g. BiogasEvaluation)
 	size_t iter=0; //current iteration of the evaluations
 
-	void (&eval_function)(double t0, double tend, const EVarManager<T>& v, std::vector<T>& times, std::vector<T>& result,ErrorCode& err);
+	std::function<void(double, double, const EVarManager<T>&, std::vector<T>&, std::vector<T>&,ErrorCode&)> eval_function;
 	
 	public:
 	
-	ComputationMode(E* e,void (&_eval_function)(double,double,const EVarManager<T>&, std::vector<T>&,std::vector<T>&,ErrorCode&), int _thread_count):evaluation_class(e),eval_function(_eval_function),config_computation(ConfigComputation::Local), thread_count(_thread_count){
+	ComputationMode(E* e,std::function<void(double, double, const EVarManager<T>&, std::vector<T>&, std::vector<T>&,ErrorCode&)> _eval_function, int _thread_count):evaluation_class(e),eval_function(_eval_function),config_computation(ConfigComputation::Local), thread_count(_thread_count){
 		//std::cout<<"Pointer address inside at creation:"<<evaluation_class<<"\n";
 		if (thread_count<=0){
 			std::cerr<<"ComputationMode error: Threadcount less than zero"; //TODO Assert statement
 			std::cin.get();
 		}
 		
-		//Create timestring consisting of the current time
-
-		auto t = std::time(nullptr);
-		auto tm = *std::localtime(&t);
-
-		std::ostringstream oss;
-		oss << std::put_time(&tm, "%d-%m-%Y_%Hh-%Mm-%Ss");
-
 	}
 	
 		//Evaluate the problem with the given input
@@ -587,7 +580,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		return res;
 	}
 	//, double t0, double tend, const std::vector<EVarManager<T>>& v, std::vector<std::vector<T>>& times, std::vector<std::vector<T>>& result,ErrorCode& err,int id, int evals
-	void eval_multiple(void (*f)(double,double,const EVarManager<T>&, std::vector<T>&,std::vector<T>&,ErrorCode&), double t0, double tend, const std::vector<EVarManager<T>>& v, std::vector<std::vector<T>>& times, std::vector<std::vector<T>>& result,ErrorCode& err,int pos, int evals){
+	void eval_multiple(std::function<void(double, double, const EVarManager<T>&, std::vector<T>&, std::vector<T>&,ErrorCode&)> f, double t0, double tend, const std::vector<EVarManager<T>>& v, std::vector<std::vector<T>>& times, std::vector<std::vector<T>>& result,ErrorCode& err,int pos, int evals){
 	
 		for (int i=0;i<evals;i++){
 			f(t0,tend,v[pos+i],times[pos+i],result[pos+i],err);
@@ -604,7 +597,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		size_t n=input.size(); //number of needed evaluations
 
 		size_t id=0;
-		
+				
 		std::vector<ErrorCode> error_codes(n,ErrorCode::NoError);
 		e=ErrorCode::NoError; //In the beginning, there are no errors
 		std::vector<std::thread> t;//Create the threads
@@ -612,9 +605,10 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 		std::vector<std::vector<T>> result_times_temp(n); //TODO: Change
 		std::vector<std::vector<T>> result_data_temp(n);		
 		//std::cout<<"n ist:"<<n;
+
 		if (n<=thread_count){
 			t.resize(n);
-			for (int i=0; i<input.size(); i++){
+			for (int i=0; i<input.size(); i++){	
 				t[id]=std::thread(eval_function,t0,tend,std::ref(input[i]),std::ref(result_times_temp[i]),std::ref(result_data_temp[i]),std::ref(error_codes[id]));
 				evals_per_thread[id]=1;
 				id++;
@@ -634,12 +628,10 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 					pos+=evals_per_thread[i]; //TODO WEITERMACHEN
 			}			
 		}
-
 		//Wait for all threads to finish
 		for (auto& x:t){
 			x.join();
 		}
-		
 		std::vector<std::vector<T>> result(n);
 		int ids=0;
 		bool error_in_parsing=false;		
