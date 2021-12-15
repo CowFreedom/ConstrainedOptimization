@@ -364,7 +364,7 @@ namespace co{
 			return ErrorCode::NoError;
 		}
 		
-				/*Parses contents specified a table and saves them in data and times. As opposed to 
+		/*Parses contents specified a table and saves them in data and times. As opposed to 
 		parse_csv_table, this time the first entry of the first datafile will be considered as the time vector.
 		Data will accordingly only consist of datapoints (e.g. Methane production) and the time vector only of the times.
 		The reason this is not in the parse.h file, is that other differential problems might have multiple variables (

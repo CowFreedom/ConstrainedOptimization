@@ -9,7 +9,7 @@
 
 //This is the model function to be evaluated
 void model_evaluation(double t_start, double t_end, const co::EVarManager<co::EFloat64>& v, std::vector<co::EFloat64>& timepoints, std::vector<co::EFloat64>& data,co::ErrorCode& err){
-std::cout<<"drin";
+
 	//Set up parameters
 	std::vector<double> alpha={4.74716e-07,(double)v.get_param(0).val };
 	std::vector<double> alpha_limits={50};

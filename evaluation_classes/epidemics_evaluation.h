@@ -215,6 +215,7 @@ namespace co{
 		}		
 
 		EpidemicsEvaluation(std::string _table_dir, std::string _infile_name,std::function<void(double, double, const EVarManager<T>&, std::vector<T>&, std::vector<T>&,ErrorCode&)> _f):table_dir(_table_dir),infile_name(_infile_name),f(_f),computer(ComputationMode<ConfigComputation::Local,ConfigOutput::Direct,EpidemicsEvaluation<T,ConfigComputation::Local, ConfigOutput::Direct>,T>(this,f,NTHREADS_SUPPORTED)){
+
 		}
 	
 		//This means the computation is optimized for a local machine and no PC cluster for example.

@@ -76,7 +76,7 @@ PYBIND11_MODULE(constrained_optimization, m) {
  
     py::class_<co::ParticleSwarmOptimizer<co::EpidemicsEvaluation<co::EFloat64,co::ConfigComputation::Local, co::ConfigOutput::Direct>>> (m, "ParticleSwarmOptimizerEpidemics")
         .def(py::init<const co::PSOOptions&,co::EpidemicsEvaluation<co::EFloat64,co::ConfigComputation::Local, co::ConfigOutput::Direct>&>())
-        .def("run",&co::ParticleSwarmOptimizer<co::EpidemicsEvaluation<co::EFloat64,co::ConfigComputation::Local, co::ConfigOutput::Direct>>::run<co::EFloat64>)
+        .def("run",&co::ParticleSwarmOptimizer<co::EpidemicsEvaluation<co::EFloat64,co::ConfigComputation::Local, co::ConfigOutput::Direct>>::run<co::EFloat64>,py::call_guard<py::gil_scoped_release>())
         ;	
 }
 

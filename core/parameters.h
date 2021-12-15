@@ -254,7 +254,7 @@ namespace co{
 				return params;
 			}
 			
-			bool contains(std::string name){
+			bool contains(std::string name) const{
 				for (auto& x: names){
 					if (x==name){
 						return true;
@@ -262,7 +262,15 @@ namespace co{
 				}
 				return false;
 			}
-
+			
+			int contains_position(std::string name) const{
+				for (int i=0;i<names.size();i++){
+					if (names[i]==name){
+						return i;
+					}
+				}
+				return -1;
+			}
 			const EVar<EFloat64>& get_param(int i) const{
 				return params[i];
 			}	
