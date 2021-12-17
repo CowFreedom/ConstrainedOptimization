@@ -3,10 +3,10 @@
 #if defined(__clang__)
 	#include <x86intrin.h> //SIMD for gcc/clang
 #elif defined(__GNUC__) || defined(__GNUG__)
-	#if  defined(__x86_64__)
+	#if  defined(AVX2)
 		#include <x86intrin.h> //SIMD for gcc/clang
-	#elif !defined(__x86_64_)
-		#define NON_X86
+	#else
+		#define NON_AVX2
 	#endif
 #elif defined(_MSC_VER)
 	#include<immintrin.h> //AVX, AVX2, FMA for VS
@@ -154,7 +154,7 @@ namespace co {
 			}
 		}
 		
-#ifndef NON_X86
+#ifndef NON_AVX2
 		//A is in column major form and B is in row major form (i.e. A was packed by the function pack_A and B by pack_B)
 		template<class T>
 		void dgemm_micro_kernel(size_t kc, double alpha, const double* A, const double* B, double beta, T C, size_t stride_row_c, int stride_col_c) {
