@@ -61,6 +61,7 @@ namespace co{
 						T t2=sourcetimes[j+1];
 						T tc=targettimes[i];
 						T t=(tc-t1)/(-t1+t2);
+						
 						//std::cout<<"-t1:"<<-t1<<"  t2:"<<t2<<"    -t1+t2:"<<-t1+t2<<"    tc"<<tc<<"tc-t1:"<<tc-t1<<"\n";
 						for (int k=0;k<cols;k++){
 				//		std::cout<<"Bis hier: j: "<<j<<" saved_rows: "<<saved_rows<<" k:"<<k<<"t: "<<t<<"\n";

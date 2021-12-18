@@ -291,16 +291,20 @@ namespace co{
 		ErrorCode tailor_array(std::vector<T>& source_times, const std::vector<T>& source_data, std::vector<T>& storage){	
 
 			int cols=source_data.size()/source_times.size();
-			
 			//linearly interpolate data to target times
 			ErrorCode output=co::utility::tailor_array_linearly(target_times, source_times, source_data,storage,cols);
 			if (storage.size()!=target_data_size){
 				std::cerr<<"The dimension of the output of the target function is different than the dimension of the experimental data\n";
 				output=ErrorCode::ComputationError;
 			}
-		
 			return output;
 		}		
+	
+			
+		const std::vector<T>& get_target_times() const{
+			return target_times;
+		}
+
 
 	};	
 

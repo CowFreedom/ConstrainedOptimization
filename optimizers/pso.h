@@ -74,15 +74,6 @@ namespace co{
 			void update_personal_best_fitness(E& evaluator,const std::vector<T>& target_data, const std::vector<T>& f_value, std::vector<T>& local_fitness,std::vector<std::vector<T>>& local_best_position,std::vector<int>& best_id){
 				
 					T current_personal_fitness=evaluator.s(target_data,f_value);
-				//	std::cout<<"personal best position for id " <<id<<"\n";
-				/*
-					for (auto& x: personal_best_position){
-						std::cout<<(double) x.get_v()<<"  ";
-					}
-					std::cout<<"\n";
-					*/
-					
-				//	std::cout<<"Current personal fitness:"<<current_personal_fitness<<"  Personal best fitness:"<<personal_best_fitness<<"\n";
 
 					if (current_personal_fitness<=personal_best_fitness){
 						
@@ -525,8 +516,9 @@ namespace co{
 				
 				//Evaluate the new positions
 				ErrorCode e;
+			
 				std::vector<std::vector<T>> evals=evaluator.eval(evaluations, target_times, e,"Evaluating Particles");
-				
+		
 				for (int i=0;i<n_particles;i++){
 					particles[i].update_personal_best_fitness(evaluator,target_data,evals[i],local_fitness,local_best_position, best_id);
 				}

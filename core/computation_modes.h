@@ -628,6 +628,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 					pos+=evals_per_thread[i]; //TODO WEITERMACHEN
 			}			
 		}
+		
 		//Wait for all threads to finish
 		for (auto& x:t){
 			x.join();
@@ -656,7 +657,7 @@ void evaluate_os(const std::string& folder_path, const std::string& command, typ
 				ids++;
 			}
 		}	
-	
+
 		return result;	
 	}
 	
