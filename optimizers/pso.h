@@ -35,8 +35,12 @@ namespace co{
 		private:
 		int n_particles;
 		int n_groups;
+		int max_iterations;
 		PSOOptions options;
 		E& evaluator;
+
+		double particle_w=0.3;
+		double particle_c=1;
 		
 		template<class T>
 		class Particle{
@@ -52,8 +56,10 @@ namespace co{
 			
 			std::vector<T> personal_best_position;
 			T personal_best_fitness;
+
+			Particle() =delete;
 			
-			Particle(E& evaluator, const std::vector<T>& target_data, std::vector<T> initial_position, const std::vector<T>& initial_value, int _id):id(_id){
+			Particle(E& evaluator, const std::vector<T>& target_data, std::vector<T> initial_position, const std::vector<T>& initial_value, int _id, double _c, double _w):id(_id), c(_c), w(_w){
 				position=initial_position;
 				personal_best_position=initial_position;
 				
@@ -245,7 +251,7 @@ namespace co{
 	
 				if(best_id[i]!=-1){			
 					res<<std::setw(30)<<std::left<<"Particle group "<<i<<"\n";
-					res<<std::setw(30)<<std::left<<"Local fitness: "<<local_fitness[i].get_v()<<"\n";
+					res<<std::setw(30)<<std::left<<"Local fitness: "<<std::pow(local_fitness[i].get_v(),0.5)<<"\n";
 					res<<std::setw(30)<<std::left<<"Parameter"<<"|"<<std::setw(25)<<"Estimate"<<"\n";
 					std::vector<T> pos=local_best_position[i];
 					for (int j=0;j<param_names.size();j++){
@@ -261,7 +267,7 @@ namespace co{
 			
 			res<<std::setw(30)<<std::left<<"Best group: "<<minimum_group<<"\n";
 			res<<std::setw(30)<<std::left<<"Best particle id: "<<best_id[minimum_group]<<"\n";
-			res<<std::setw(30)<<std::left<<"Minimum Error: "<<minimum_error.get_v()<<"\n";		
+			res<<std::setw(30)<<std::left<<"Minimum Error: "<<std::pow(minimum_error.get_v(),0.5)<<"\n";		
 			me=(double) minimum_error.get_v();		
 			return res.str();
 		}	
@@ -306,7 +312,7 @@ namespace co{
 			if (e==ErrorCode::NoError){
 				for (int i=0; i<n_particles;i++){
 
-					Particle<T> p(evaluator, target_data,initial_position[i] ,evals[i],i);
+					Particle<T> p(evaluator, target_data,initial_position[i] ,evals[i],i,particle_w, particle_c);
 					//e=p.update_position(evals[i]);
 					_particles.push_back(p);
 					//std::cout<<particles[i].get_id()<<"\n";
@@ -323,8 +329,6 @@ namespace co{
 			std::uniform_int_distribution<int> dist(0,n_groups-1);
 			for (int i=0;i<n_particles;i++){
 				int id=dist(rd);
-		
-				_particles[i].set_group_id(id);
 			}
 			
 			#if(DEBUG)
@@ -396,12 +400,16 @@ namespace co{
 			@param[in] _options Configures the Newton Gauss optimizer internally, such as choosing the derivative evaluation type (e.g. Finite Differences) and line search method.
 			@param[in] _evaluator Steers how data is loaded and evaluated (e.g. parsed from file, given from within UG4) */
 		ParticleSwarmOptimizer(const PSOOptions& _options,E& _evaluator):options(_options), evaluator(_evaluator){
-				if(options.get_n_particles() <=0 || options.get_n_groups() <= 0 || options.get_max_iterations() <= 0){
+				n_particles=options.get_n_particles();
+				n_groups=options.get_n_groups();
+				max_iterations=options.get_max_iterations();
+				particle_w = options.get_particle_w();
+				particle_c = options.get_particle_c();
+				if(n_particles <=0 || n_groups <= 0 || options.get_max_iterations() <= 0){
 					throw std::invalid_argument( "Number of Particles or Number of Groups or Max. Iterations is invalid");
 
 				}
-				n_particles=options.get_n_particles();
-				n_groups=options.get_n_groups();
+
 		}
 		
 		/*! Runs the Particle Swarm Optimization algorithm. Only this function has to be called to run the complete procedure.
@@ -410,8 +418,7 @@ namespace co{
 		*/
 		template<class T>
 		ErrorCode run(EVarManager<T>& estimated_params, const std::vector<std::string>& param_names, const std::vector<T>& bounds){
-			
-			int max_iterations=options.get_max_iterations();
+
 			size_t n=param_names.size();
 			std::vector<Particle<T>> particles;
 			
@@ -424,7 +431,6 @@ namespace co{
 				std::cerr<<"Error loading target data!\n";
 				return load_code;
 			}
-
 
 			std::vector<T> local_fitness(n_groups,T(std::numeric_limits<double>::max()));
 			std::vector<int> best_id(n_groups,-1); //ids of the most successful particle in each group
@@ -451,7 +457,7 @@ namespace co{
 			#if(DEBUG)
 				std::cout << "PSO run debug print4 pre while" << std::endl;
 			#endif
-			
+		
 			while (iter<max_iterations && schranke==false){
 				std::cout<<"Starting Particle Swarm Optimization iteration "<<iter<<"\n";
 				std::vector<EVarManager<T>> evaluations(n_particles);
@@ -588,6 +594,9 @@ namespace co{
 				iter++;
 					
 				std::string infos=print_info(particles,param_names,iter,best_id,local_fitness, local_best_position);
+				std::string RMSE = "RMSE: " + std::to_string(std::sqrt(me / target_times.size())) + "\n";
+				evaluator.send_info(RMSE,"summary_of_estimation");
+
 				evaluator.send_info(infos,"summary_of_estimation");
 				std::cout<<infos<<"\n";
 				
@@ -639,7 +648,7 @@ namespace co{
 
 			estimated_params=parameters;
 			estimated_params.last_mean_error=me/target_times.size();
-			
+
 			#if(DEBUG)
 				std::cout << "PSO run debug print6 pre if" << std::endl;
 			#endif
@@ -659,6 +668,7 @@ namespace co{
 			std::vector<double> get_saved_losses_in_past_iteration_as_double() const{
 				return saved_losses_in_past_iteration;
 			}
+
 		
 	};
 	

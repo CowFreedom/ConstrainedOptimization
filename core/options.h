@@ -128,32 +128,58 @@ namespace co{
 		int max_iterations=200;
 		int n_groups; //number of groups
 		int n_particles; //number of particles
-		
+		double particle_c = 1;
+		double particle_w = 0.3;
 		public:
-		int get_max_iterations() const{
+		int get_max_iterations() const
+		{
 			return max_iterations;
 		}
 		
-		int get_n_particles() const{
+		int get_n_particles() const
+		{
 			return n_particles;
 		}
 		
-		void set_n_particles(int _n_particles){
+		void set_n_particles(int _n_particles)
+		{
 			n_particles=_n_particles;
 		}
 		
-		int get_n_groups() const{
+		int get_n_groups() const
+		{
 			return n_groups;
 		}
 		
-		void set_n_groups(int _n_groups){
+		void set_n_groups(int _n_groups)
+		{
 			n_groups=_n_groups;
 		}
 		
-		void set_max_iterations(int _max_iterations){
+		void set_max_iterations(int _max_iterations)
+		{
 			max_iterations=_max_iterations;
 		}
-		
+
+		void set_particle_w(double _w )
+		{
+			particle_w=_w;
+		}
+
+		void set_particle_c(double _c)
+		{
+			particle_c=_c;
+		}
+
+		double get_particle_w() const
+		{
+			return particle_w;
+		}
+
+		double get_particle_c() const
+		{
+			return particle_c;
+		}
 	};	
 	
 }

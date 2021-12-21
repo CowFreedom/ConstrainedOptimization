@@ -270,6 +270,9 @@ namespace co{
 			Writer<T> w;
 			w.write_info(path,description+".txt",info);
 			*/
+			
+			std::cout << info << "\n";
+
 			return true;
 		}
 		
