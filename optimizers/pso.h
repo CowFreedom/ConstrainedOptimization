@@ -47,8 +47,8 @@ namespace co{
 			private:
 			int id;
 			int group_id;
-			T c=T(1); //displacement scaling factor
-			T w=T(0.3);//velocity scaling factor
+			T c=T(1); // displacement scaling factor
+			T w=T(0.3);// velocity scaling factor
 	
 			public:
 			std::vector<T> position;
