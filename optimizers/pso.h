@@ -251,7 +251,7 @@ namespace co{
     
                 if(best_id[i]!=-1){            
                     res<<std::setw(30)<<std::left<<"Particle group "<<i<<"\n";
-                    res<<std::setw(30)<<std::left<<"Local fitness: "<<std::pow(local_fitness[i].get_v(),0.5)<<"\n";
+                    res<<std::setw(30)<<std::left<<"Local fitness: "<<local_fitness[i].get_v()<<"\n";
                     res<<std::setw(30)<<std::left<<"Parameter"<<"|"<<std::setw(25)<<"Estimate"<<"\n";
                     std::vector<T> pos=local_best_position[i];
                     for (int j=0;j<param_names.size();j++){
@@ -267,7 +267,7 @@ namespace co{
             
             res<<std::setw(30)<<std::left<<"Best group: "<<minimum_group<<"\n";
             res<<std::setw(30)<<std::left<<"Best particle id: "<<best_id[minimum_group]<<"\n";
-            res<<std::setw(30)<<std::left<<"Minimum Error: "<<std::pow(minimum_error.get_v(),0.5)<<"\n";        
+            res<<std::setw(30)<<std::left<<"Minimum Error: "<<minimum_error.get_v()<<"\n";        
             me=(double) minimum_error.get_v();        
             return res.str();
         }    
