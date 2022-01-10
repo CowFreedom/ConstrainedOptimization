@@ -59,7 +59,7 @@ namespace co{
 
             Particle() =delete;
             
-            Particle(E& evaluator, const std::vector<T>& target_data, std::vector<T> initial_position, const std::vector<T>& initial_value, int _id, double _c, double _w):id(_id), c(_c), w(_w){
+            Particle(E& evaluator, const std::vector<T>& target_data, std::vector<T> initial_position, const std::vector<T>& initial_value, int _id, double _w, double _c):id(_id), c(_c), w(_w){
                 position=initial_position;
                 personal_best_position=initial_position;
                 
