@@ -121,32 +121,34 @@ namespace co{
                     std::cout<<personal_best_position[i]<<"\n";
                     std::cout<<local_best_position[i]<<"\n";
                     */
+				
                     g[i]=position[i]+c*(personal_best_position[i]+local_best_position[i]-T(2.0)*position[i])*divisor;
                     //std::cout<<"pb: "<<personal_best_position[i].get_v()<<" lp: "<<local_best_position[i].get_v()<<"\n";
-                    radius+=(double)((position[i]-g[i])*(position[i]-g[i]));
                 }
 
             //    for (int i=0;i<n;i++){
             //        std::cout<<"g["<<i<<"]:"<<g[i]<<"\n";
             //    }
-                radius=std::sqrt(radius);
+ 
             //    std::cin.get();
                 //std::cout<<"loop ende\n";
                 std::random_device rd;  //Will be used to obtain a seed for the random number engine
                 std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
                 std::vector<T> position_new(n);
         //    std::cout<<"Id:"<<id<<" with radius: "<<sqrt(radius)<<"\n";
-                std::uniform_real_distribution<> dis(-radius, radius); //suboptimal, n dimensional normal distribution generated
-                for (int i=0;i<n;i++){    
+
+                for (int i=0;i<n;i++){  
+					radius=(double)((position[i]-g[i])*(position[i]-g[i]));	
+					radius=std::sqrt(radius);					
+					std::uniform_real_distribution<> dis(-radius, radius); //suboptimal, n dimensional normal distribution generated					
                     position_new[i]=g[i]+T(dis(gen)); //b
                     //std::cout<<radius<<"\n";
-                
+                	
                     velocity[i]=w*velocity[i]+position_new[i]-position[i]; //c
                     position[i]=position[i]+velocity[i]; //d
                     //std::cout<<position[i]<< " bounds l "<<bounds[2*i]<<" bounds h "<<bounds[2*i+1]<<"\n";
                     //e
                     
-                
                     if ((double) position[i]<=(double) bounds[2*i]){
                         position[i]=bounds[2*i];
                         velocity[i]*=T(-1.0);
