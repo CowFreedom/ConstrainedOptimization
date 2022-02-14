@@ -3,7 +3,7 @@
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>
-#include<iostream>
+#include <iostream>
 #include "../core/parameter_estimation.h"
 #include "../core/parameters.h"
 #include <string>
@@ -71,7 +71,7 @@ PYBIND11_MODULE(constrained_optimization, m) {
  
        
     py::class_<co::EpidemicsEvaluation<co::EFloat64,co::ConfigComputation::Local, co::ConfigOutput::Direct>> (m, "EpidemicsEvaluation")
-        .def(py::init<std::string, std::string,std::function<void(double, double, const co::EVarManager<co::EFloat64>&, std::vector<co::EFloat64>&, std::vector<co::EFloat64>&,co::ErrorCode&)>>())            
+        .def(py::init<std::string, std::string,std::function<void(double, double, const co::EVarManager<co::EFloat64>&)>>())            
         ;
  
     py::class_<co::ParticleSwarmOptimizer<co::EpidemicsEvaluation<co::EFloat64,co::ConfigComputation::Local, co::ConfigOutput::Direct>>> (m, "ParticleSwarmOptimizerEpidemics")
