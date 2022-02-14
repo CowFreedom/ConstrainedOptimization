@@ -184,10 +184,12 @@ namespace co{
 		double t0;
 		double tend;
 		
+		std::function<void(double, double, const EVarManager<T>&, std::vector<T>&, std::vector<T>&,ErrorCode&)> f_temp; //must be declared before computer variable, because of a dependence in one of the constructor initializations, see https://stackoverflow.com/questions/1242830/constructor-initialization-list-evaluation-order
 		int target_data_size;
+
 		
 		//void (*f)(double t0, double tend, const EVarManager<T>& v, std::vector<T>& times, std::vector<T>& result,ErrorCode& err);
-		std::function<void(double, double, const EVarManager<T>&, std::vector<T>&, std::vector<T>&,ErrorCode&)> f;
+
 		ComputationMode<ConfigComputation::Local,ConfigOutput::Direct,EpidemicsEvaluation<T,ConfigComputation::Local, ConfigOutput::Direct>,T> computer; //evaluates inputs according to the model formulation TODO: Change threadcount (last argument)
 		
 		public:
@@ -214,7 +216,20 @@ namespace co{
 			return sum;
 		}		
 
-		EpidemicsEvaluation(std::string _table_dir, std::string _infile_name,std::function<void(double, double, const EVarManager<T>&, std::vector<T>&, std::vector<T>&,ErrorCode&)> _f):table_dir(_table_dir),infile_name(_infile_name),f(_f),computer(ComputationMode<ConfigComputation::Local,ConfigOutput::Direct,EpidemicsEvaluation<T,ConfigComputation::Local, ConfigOutput::Direct>,T>(this,f,NTHREADS_SUPPORTED)){
+		EpidemicsEvaluation(std::string _table_dir, std::string _infile_name,std::function<void(double, double, const EVarManager<T>&, std::vector<T>&, std::vector<T>&,ErrorCode&)> _f):table_dir(_table_dir),infile_name(_infile_name),computer(ComputationMode<ConfigComputation::Local,ConfigOutput::Direct,EpidemicsEvaluation<T,ConfigComputation::Local, ConfigOutput::Direct>,T>(this,_f,NTHREADS_SUPPORTED)){
+
+		}
+		
+		
+		
+		void f_forward(std::function<std::pair<std::vector<EFloat64>,std::vector<EFloat64>>(double,double,EVarManager<T>)> function_noref, double t_start, double t_end, EVarManager<EFloat64> v, std::vector<EFloat64>& timepoints, std::vector<EFloat64>& data, ErrorCode& err){
+			auto res=function_noref(t_start,t_end,v);
+			timepoints=res.first;
+			data=res.second;
+		}
+		
+		//std::bind(&EpidemicsEvaluation<T,ConfigComputation::Local, ConfigOutput::Direct>,T>::f_forward, this,_function_noref,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4,std::placeholders::_5,std::placeholders::_6);		
+		EpidemicsEvaluation(std::string _table_dir, std::string _infile_name,std::function<std::pair<std::vector<EFloat64>,std::vector<EFloat64>>(double, double,EVarManager<T>)> _function_noref):table_dir(_table_dir),infile_name(_infile_name),f_temp(std::bind(&EpidemicsEvaluation::f_forward, this,_function_noref,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4,std::placeholders::_5,std::placeholders::_6)),computer(ComputationMode<ConfigComputation::Local,ConfigOutput::Direct,EpidemicsEvaluation<T,ConfigComputation::Local, ConfigOutput::Direct>,T>(this,f_temp,NTHREADS_SUPPORTED)){
 
 		}
 	
