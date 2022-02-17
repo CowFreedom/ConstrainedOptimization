@@ -540,17 +540,17 @@ namespace co {
 					}
 				}
 				
-							std::copy(A,A+n*m,rs.begin());
+			
 				//Update rs
 				
 				co::mul::dgemm_nn(n,m,n,F(1.0),qs.begin(),1,n,rs.begin(),1,m,F(0.0),copy_buf.begin(),1,m);
-				std::copy(rs.begin(),rs.begin()+n*m,copy_buf.begin());
+					std::copy(copy_buf.begin(),copy_buf.begin()+n*m,rs.begin());
 				
 				//Update qs
 				
 				if(i>0){
 					co::mul::dgemm_nn(n,n,n,F(1.0),qs.begin(),1,n,qs_prev.begin(),1,n,F(0.0),copy_buf.begin(),1,n);
-					std::copy(qs_prev.begin(),qs_prev.begin()+n*n,copy_buf.begin());
+					std::copy(copy_buf.begin(),copy_buf.begin()+n*n,qs_prev.begin());
 				}
 				else{
 					
