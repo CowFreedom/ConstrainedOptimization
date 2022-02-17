@@ -496,13 +496,12 @@ namespace co {
 			//initialize matrices
 			int _n=n;
 			int _m=m;
-			
-			
 
+			std::vector<F> copy_buf(n*(n+m));
+			
 			std::vector<F> qs_prev(n*n);
 			for (int i=0;i<t;i++){
-				std::vector<F> u(n);
-				
+				std::vector<F> u(n);	
 
 				//Initialize Qs
 				std::vector<F> qs(n*n);
@@ -531,8 +530,7 @@ namespace co {
 					norm+=u[j]*u[j];
 				}
 				//std::cout<<"norm:"<<norm<<"\n";
-				
-			
+									
 				//std::cout<<"\n";
 			
 				for (int j=0;j<_n;j++){
@@ -541,17 +539,18 @@ namespace co {
 						qs[i*n+i+j*n+k]-=(F(2.0)*u[j]*u[k])/norm;	
 					}
 				}
-			
 				
-				
-				
+							std::copy(A,A+n*m,rs.begin());
 				//Update rs
-				co::mul::dgemm_nn(n,m,n,F(1.0),qs.begin(),1,n,rs.begin(),1,m,F(0.0),rs.begin(),1,m);
+				
+				co::mul::dgemm_nn(n,m,n,F(1.0),qs.begin(),1,n,rs.begin(),1,m,F(0.0),copy_buf.begin(),1,m);
+				std::copy(rs.begin(),rs.begin()+n*m,copy_buf.begin());
 				
 				//Update qs
 				
 				if(i>0){
-					co::mul::dgemm_nn(n,n,n,F(1.0),qs.begin(),1,n,qs_prev.begin(),1,n,F(0.0),qs_prev.begin(),1,n);
+					co::mul::dgemm_nn(n,n,n,F(1.0),qs.begin(),1,n,qs_prev.begin(),1,n,F(0.0),copy_buf.begin(),1,n);
+					std::copy(qs_prev.begin(),qs_prev.begin()+n*n,copy_buf.begin());
 				}
 				else{
 					
